@@ -21,8 +21,9 @@ export async function POST(req: Request) {
 
   const photo = await storePhoto(file, pet.id, slot.id);
   const b64 = await photoBase64(photo.file);
-  // reading the photo and painting the art don't depend on each other
-  const [reading, art] = await Promise.all([readQuestPhoto(b64, slot, pet.name || "me"), paintCard(b64, slot.style, pet.breed ?? pet.species)]);
+  // the reading tells the painter which moment to paint; the painting itself is a new picture in the slot's style
+  const reading = await readQuestPhoto(b64, slot, pet.name || "me");
+  const art = await paintCard(b64, pet, slot.style, reading.observation);
 
   const traces: Trace[] = reading.traces.map((t) => ({
     id: newId("tr"),

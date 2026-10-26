@@ -3,7 +3,7 @@ import path from "node:path";
 import sharp from "sharp";
 import type { QuestSlot } from "./species";
 import { UPLOADS, newId } from "./store";
-import type { Species, TraceKind } from "./types";
+import type { Pet, Species, TraceKind } from "./types";
 
 // The only place that talks to the Meta Model API.
 // MOCK mode is the default until the hackathon credits arrive: no request leaves the machine and nothing is billed.
@@ -144,15 +144,21 @@ export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName:
   return { ...r, rarity: ([1, 2, 3] as const).includes(r.rarity) ? r.rarity : 1 };
 }
 
-// Card art: Muse Image repaints the photo in the slot's style, keeping the pet recognisable.
+// Card art: Muse Image paints a new picture of the pet. The photo only teaches it what the pet looks like;
+// pose, scene and framing are new, so the card is an artwork, not a filtered photo.
 // Returns the stored file name, or null in practice mode (the card then shows the photo itself).
-export async function paintCard(imageB64: string, style: string, species: string): Promise<string | null> {
+export async function paintCard(imageB64: string, pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">, style: string, scene: string): Promise<string | null> {
   if (!LIVE) return null;
   const t0 = Date.now();
   const j = await post("/images/edits", {
     model: IMAGE,
     n: 1,
-    prompt: `Repaint this exact ${species} as a collectible trading-card illustration in ${style}. Keep its exact face, ear shape, eye colour, coat colour and markings, and body proportions. Simple background in the same style. Leave out any people. No text, no frame, no border.`,
+    prompt: [
+      `Create a completely new artwork of this specific animal: ${describePet(pet)}.`,
+      "Use the photo only to learn what it looks like; do not copy the photo's pose, background or framing.",
+      `Scene: ${scene}. Style: ${style}.`,
+      "Keep it recognisable: same coat, colours, markings, eye colour, ear shape and face. No people, no text, no border.",
+    ].join(" "),
     images: [{ image_url: `data:image/jpeg;base64,${await forModel(imageB64)}` }],
   });
   await logUsage("card-art", IMAGE, Date.now() - t0, j.usage);
@@ -163,6 +169,45 @@ export async function paintCard(imageB64: string, style: string, species: string
   await fs.mkdir(UPLOADS, { recursive: true });
   await fs.writeFile(path.join(UPLOADS, name), await sharp(raw).resize({ width: 900, height: 900, fit: "inside" }).jpeg({ quality: 88 }).toBuffer());
   return name;
+}
+
+function describePet(pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">) {
+  const { coat, marks, size } = pet.appearance;
+  return [pet.sex, pet.breed ?? pet.species].filter(Boolean).join(" ") + [coat && `coat: ${coat}`, marks && `marks: ${marks}`, size && `size: ${size}`].filter(Boolean).map((x) => `; ${x}`).join("");
+}
+
+// SAM 3.1: cut the pet out of a photo by a short noun phrase ("dog", "black cat").
+// Returns a transparent PNG cropped to the pet, or null when nothing was found or in practice mode.
+// Used for avatars and daily cards; only the animal is kept, so people in the photo never leave this step.
+export async function cutout(imageB64: string, phrase: string): Promise<Buffer | null> {
+  if (!LIVE) return null;
+  const { parseImageStream, recordsOfKind, decodeMaskToRaster } = await import("@meta-sam/parser");
+  const small = await forModel(imageB64);
+  const t0 = Date.now();
+  const j = await post("/responses", {
+    model: "sam-3.1",
+    stream: false,
+    input: [{ type: "message", role: "user", content: [{ type: "input_text", text: phrase }, { type: "input_image", image_url: `data:image/jpeg;base64,${small}` }] }],
+  });
+  await logUsage("cutout", "sam-3.1", Date.now() - t0, j.usage);
+  const text: string = j.output?.[0]?.content?.[0]?.text ?? "";
+  async function* events() {
+    yield { type: "response.output_text.delta" as const, item_id: "m", output_index: 0, content_index: 0, delta: text };
+    yield { type: "response.output_text.done" as const, item_id: "m", output_index: 0, content_index: 0, text };
+    yield { type: "response.completed" as const };
+  }
+  const parsed = parseImageStream(events());
+  for await (const _ of parsed);
+  const masks = recordsOfKind((await parsed.finalResult).records, "mask");
+  if (!masks.length) return null;
+  // the largest object is the pet in the photo; smaller hits are usually toys or reflections
+  const m = [...masks].sort((a, b) => b.mask.width * b.mask.height - a.mask.width * a.mask.height)[0];
+  const raster = decodeMaskToRaster(m.mask);
+  const { left, top } = m.bounds;
+  const { width: w, height: h } = m.mask;
+  const rgb = await sharp(Buffer.from(small, "base64")).extract({ left, top, width: w, height: h }).removeAlpha().raw().toBuffer();
+  const alpha = Buffer.from(raster.map((v) => (v ? 255 : 0)));
+  return sharp(rgb, { raw: { width: w, height: h, channels: 3 } }).joinChannel(alpha, { raw: { width: w, height: h, channels: 1 } }).png().toBuffer();
 }
 
 const MOCK: Record<string, Omit<PhotoReading, "rarity">> = {
