@@ -142,7 +142,8 @@ export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName:
       },
     },
   );
-  return { ...r, rarity: ([1, 2, 3] as const).includes(r.rarity) ? r.rarity : 1 };
+  const rated = ([1, 2, 3] as const).includes(r.rarity) ? r.rarity : 1;
+  return { ...r, rarity: Math.max(rated, slot.minRarity) as 1 | 2 | 3 };
 }
 
 // Card art: Muse Image paints a new picture of the pet. The photo only teaches it what the pet looks like;
@@ -264,5 +265,5 @@ const MOCK: Record<string, Omit<PhotoReading, "rarity">> = {
 
 function mockReading(slot: QuestSlot, petName: string): PhotoReading {
   const m = MOCK[slot.pattern] ?? MOCK.mystery;
-  return { ...m, line: m.line.replace("{name}", petName), rarity: slot.pattern === "mystery" ? 3 : slot.pattern === "hearts" ? 2 : 1 };
+  return { ...m, line: m.line.replace("{name}", petName), rarity: slot.minRarity };
 }

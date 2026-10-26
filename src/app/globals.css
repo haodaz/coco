@@ -84,7 +84,7 @@ body {
 
 /* ── holo: rainbow bands that slide as the card turns ── */
 .hc[data-finish="holo"] { --edge: #dfe6ff; }
-.hc[data-finish="holo"] .hc-texture { mix-blend-mode: color-dodge; opacity: calc(.2 + var(--hyp) * .5 * var(--on) + .15 * var(--on));
+.hc[data-finish="holo"] .hc-texture { mix-blend-mode: color-dodge; opacity: calc(.1 + var(--hyp) * .3 * var(--on) + .08 * var(--on));
   background-image:
     repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 1px, transparent 1px 4px),
     repeating-linear-gradient(110deg, #ff5f8f 0%, #ffcf5c 7%, #7dff9b 14%, #5fd7ff 21%, #a879ff 28%, #ff5f8f 35%);
