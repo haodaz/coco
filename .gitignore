@@ -1,0 +1,10 @@
+# secrets and local data
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
+/data/
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
