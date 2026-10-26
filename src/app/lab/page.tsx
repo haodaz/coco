@@ -1,4 +1,5 @@
-import HoloCard, { type Finish } from "@/components/HoloCard";
+import HoloCard from "@/components/HoloCard";
+import type { Finish } from "@/lib/finish";
 
 // Card finish lab: the same pet in every finish, so we can feel which ones are worth keeping.
 // Move the pointer over a card; left alone, each card sways on its own.

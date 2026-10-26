@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import CardBack from "@/components/CardBack";
-import CardFront from "@/components/CardFront";
+import HoloCard from "@/components/HoloCard";
+import { finishFor } from "@/lib/finish";
 import { PACKS, packFor, type QuestSlot } from "@/lib/species";
 import type { Card, Credential, Pet, Species, State } from "@/lib/types";
 
@@ -144,10 +145,12 @@ function QuestCard({ slot, index, pet, card, onChange }: { slot: QuestSlot; inde
       <button onClick={() => input.current?.click()} disabled={busy} className={`flip block aspect-[63/88] w-full ${card ? "flipped" : ""} ${busy ? "animate-pulse" : ""}`} title={card ? "Replace photo" : slot.why}>
         <div className="flip-inner">
           <div className="flip-face"><CardBack pattern={slot.pattern} title={slot.title} index={index} /></div>
-          <div className="flip-face front">{card && <CardFront card={card} imageUrl={`/api/photos/${card.photoId}`} petName={pet.name} />}</div>
+          <div className="flip-face front">
+            {card && <HoloCard art={card.art ?? `/api/photos/${card.photoId}`} fg={card.fg} finish={finishFor(card)} name={card.name} line={card.line} stars={card.rarity} label={`${pet.name} · No. ${String(index + 1).padStart(2, "0")}`} />}
+          </div>
         </div>
       </button>
-      <div className="mt-1.5 px-1 text-[11.5px] leading-snug text-[var(--sub)]">{busy ? "Reading the photo…" : card ? slot.title : slot.why}</div>
+      <div className="mt-1.5 px-1 text-[11.5px] leading-snug text-[var(--sub)]">{busy ? "Reading the photo and painting…" : card ? card.observation : slot.why}</div>
       <input ref={input} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
     </div>
   );

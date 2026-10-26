@@ -63,6 +63,7 @@ export type Card = {
   rarity: 1 | 2 | 3;
   style: string; // art style used for this card
   art: string | null; // generated art file, null until generated
+  fg?: string | null; // the pet alone on a transparent layer the size of the art, for depth (rare cards and up)
   line: string; // in the pet's voice
   observation: string; // what this photo told us
   photoId: string;

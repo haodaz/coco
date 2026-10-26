@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { Finish } from "@/lib/finish";
 
 // A collectible card that reacts to the pointer: it tilts toward it, light follows it,
 // and each finish lays a different texture over the art. With a foreground layer (the pet cut out by SAM),
 // the pet and the background move apart for depth, and on "popout" the pet steps out of the frame.
 // When nobody is touching it, the card sways a little on its own so it never looks dead.
-
-export type Finish = "matte" | "foil" | "holo" | "cosmos" | "gold" | "popout";
 
 type Props = {
   art: string;

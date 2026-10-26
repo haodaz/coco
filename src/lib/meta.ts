@@ -106,14 +106,15 @@ export async function identify(imageB64: string): Promise<Identification> {
 }
 
 // One quest photo → traces + a card. The pet's line may only describe what the photo shows.
-export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName: string): Promise<PhotoReading> {
+export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName: string, sex: Pet["sex"] = null): Promise<PhotoReading> {
+  const pronoun = sex === "female" ? "she/her" : sex === "male" ? "he/him" : "they/them";
   if (!LIVE) return mockReading(slot, petName);
   const r = await sparkJson<PhotoReading>(
     "quest-photo",
     [
       `You read one photo of a pet called ${petName} for a collectible card. The card slot is "${slot.title}": ${slot.why}`,
       "Traces: only things visible in the photo (place, activity, companion, object, time of day). Never guess what is not shown. Do not describe people's faces or identities; a person is just 'owner' or 'a person'.",
-      `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only. observation: one plain sentence in third person of what the photo shows.`,
+      `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
       "rarity: 1 ordinary moment, 2 a moment with real character, 3 something truly unusual. Most photos are 1.",
       "Never mention health, weight, food amounts, medicine or training advice. No exclamation marks.",
     ].join("\n"),
@@ -167,7 +168,7 @@ export async function paintCard(imageB64: string, pet: Pick<Pet, "species" | "br
   if (!raw) throw new Error("Meta API card-art: no image returned");
   const name = `${newId("art")}.jpg`;
   await fs.mkdir(UPLOADS, { recursive: true });
-  await fs.writeFile(path.join(UPLOADS, name), await sharp(raw).resize({ width: 900, height: 900, fit: "inside" }).jpeg({ quality: 88 }).toBuffer());
+  await fs.writeFile(path.join(UPLOADS, name), await sharp(raw).resize({ width: 1024, height: 1024, fit: "inside" }).jpeg({ quality: 88 }).toBuffer());
   return name;
 }
 
@@ -176,20 +177,17 @@ function describePet(pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">)
   return [pet.sex, pet.breed ?? pet.species].filter(Boolean).join(" ") + [coat && `coat: ${coat}`, marks && `marks: ${marks}`, size && `size: ${size}`].filter(Boolean).map((x) => `; ${x}`).join("");
 }
 
-// SAM 3.1: cut the pet out of a photo by a short noun phrase ("dog", "black cat").
-// Returns a transparent PNG cropped to the pet, or null when nothing was found or in practice mode.
-// Used for avatars and daily cards; only the animal is kept, so people in the photo never leave this step.
-export async function cutout(imageB64: string, phrase: string): Promise<Buffer | null> {
-  if (!LIVE) return null;
-  const { parseImageStream, recordsOfKind, decodeMaskToRaster } = await import("@meta-sam/parser");
-  const small = await forModel(imageB64);
+// SAM 3.1: find the pet in an image by a short noun phrase ("dog", "black cat") and return its masks.
+// The image must be at most 1024 px on its long side; mask coordinates are in that image's pixels.
+async function samMasks(jpeg: Buffer, phrase: string, feature: string) {
+  const { parseImageStream, recordsOfKind } = await import("@meta-sam/parser");
   const t0 = Date.now();
   const j = await post("/responses", {
     model: "sam-3.1",
     stream: false,
-    input: [{ type: "message", role: "user", content: [{ type: "input_text", text: phrase }, { type: "input_image", image_url: `data:image/jpeg;base64,${small}` }] }],
+    input: [{ type: "message", role: "user", content: [{ type: "input_text", text: phrase }, { type: "input_image", image_url: `data:image/jpeg;base64,${jpeg.toString("base64")}` }] }],
   });
-  await logUsage("cutout", "sam-3.1", Date.now() - t0, j.usage);
+  await logUsage(feature, "sam-3.1", Date.now() - t0, j.usage);
   const text: string = j.output?.[0]?.content?.[0]?.text ?? "";
   async function* events() {
     yield { type: "response.output_text.delta" as const, item_id: "m", output_index: 0, content_index: 0, delta: text };
@@ -198,16 +196,59 @@ export async function cutout(imageB64: string, phrase: string): Promise<Buffer |
   }
   const parsed = parseImageStream(events());
   for await (const _ of parsed);
-  const masks = recordsOfKind((await parsed.finalResult).records, "mask");
+  return recordsOfKind((await parsed.finalResult).records, "mask");
+}
+
+// Paint each mask into one full-size alpha channel (0 or 255).
+async function maskAlpha(masks: Awaited<ReturnType<typeof samMasks>>, width: number, height: number) {
+  const { decodeMaskToRaster } = await import("@meta-sam/parser");
+  const alpha = Buffer.alloc(width * height);
+  for (const m of masks) {
+    const raster = decodeMaskToRaster(m.mask); // row-major, mask.width × mask.height, placed at bounds.left/top
+    const { width: mw, height: mh } = m.mask;
+    for (let y = 0; y < mh; y++) {
+      const py = m.bounds.top + y;
+      if (py >= height) break;
+      for (let x = 0; x < mw; x++) {
+        const px = m.bounds.left + x;
+        if (px < width && raster[y * mw + x]) alpha[py * width + px] = 255;
+      }
+    }
+  }
+  return alpha;
+}
+
+// Cut the pet out of a photo: a transparent PNG cropped to the pet, or null when nothing was found or in practice mode.
+// Used for avatars; only the animal is kept, so people in the photo never leave this step.
+export async function cutout(imageB64: string, phrase: string): Promise<Buffer | null> {
+  if (!LIVE) return null;
+  const small = Buffer.from(await forModel(imageB64), "base64");
+  const masks = await samMasks(small, phrase, "cutout");
   if (!masks.length) return null;
   // the largest object is the pet in the photo; smaller hits are usually toys or reflections
   const m = [...masks].sort((a, b) => b.mask.width * b.mask.height - a.mask.width * a.mask.height)[0];
-  const raster = decodeMaskToRaster(m.mask);
-  const { left, top } = m.bounds;
   const { width: w, height: h } = m.mask;
-  const rgb = await sharp(Buffer.from(small, "base64")).extract({ left, top, width: w, height: h }).removeAlpha().raw().toBuffer();
-  const alpha = Buffer.from(raster.map((v) => (v ? 255 : 0)));
+  const alpha = await maskAlpha([{ ...m, bounds: { ...m.bounds, left: 0, top: 0 } }], w, h);
+  const rgb = await sharp(small).extract({ left: m.bounds.left, top: m.bounds.top, width: w, height: h }).removeAlpha().raw().toBuffer();
   return sharp(rgb, { raw: { width: w, height: h, channels: 3 } }).joinChannel(alpha, { raw: { width: w, height: h, channels: 1 } }).png().toBuffer();
+}
+
+// Depth layer for a card: the pet alone on a transparent PNG the same size as the art,
+// so the card can move pet and background apart. Returns the stored file name, or null.
+export async function depthLayer(artFile: string, phrase: string): Promise<string | null> {
+  if (!LIVE) return null;
+  const art = await fs.readFile(path.join(UPLOADS, path.basename(artFile)));
+  const { width, height } = await sharp(art).metadata();
+  if (!width || !height) return null;
+  const masks = await samMasks(art, phrase, "depth-layer");
+  if (!masks.length) return null;
+  const hard = await maskAlpha(masks, width, height);
+  // a slightly soft edge so the pet doesn't look cut with scissors
+  const soft = await sharp(hard, { raw: { width, height, channels: 1 } }).blur(0.8).extractChannel(0).raw().toBuffer();
+  const rgb = await sharp(art).removeAlpha().raw().toBuffer();
+  const name = artFile.replace(/\.jpg$/, "-fg.png");
+  await fs.writeFile(path.join(UPLOADS, name), await sharp(rgb, { raw: { width, height, channels: 3 } }).joinChannel(soft, { raw: { width, height, channels: 1 } }).png().toBuffer());
+  return name;
 }
 
 const MOCK: Record<string, Omit<PhotoReading, "rarity">> = {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { paintCard, readQuestPhoto } from "@/lib/meta";
+import { samPhrase } from "@/lib/finish";
+import { depthLayer, paintCard, readQuestPhoto } from "@/lib/meta";
 import { photoBase64, storePhoto } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
@@ -22,8 +23,10 @@ export async function POST(req: Request) {
   const photo = await storePhoto(file, pet.id, slot.id);
   const b64 = await photoBase64(photo.file);
   // the reading tells the painter which moment to paint; the painting itself is a new picture in the slot's style
-  const reading = await readQuestPhoto(b64, slot, pet.name || "me");
+  const reading = await readQuestPhoto(b64, slot, pet.name || "me", pet.sex);
   const art = await paintCard(b64, pet, slot.style, reading.observation);
+  // rare cards and up get a depth layer; a failed cutout just leaves the card flat
+  const fg = art && reading.rarity >= 2 ? await depthLayer(art, samPhrase(pet.species)).catch(() => null) : null;
 
   const traces: Trace[] = reading.traces.map((t) => ({
     id: newId("tr"),
@@ -41,6 +44,7 @@ export async function POST(req: Request) {
     rarity: reading.rarity,
     style: slot.style,
     art: art ? `/api/art/${art}` : null,
+    fg: fg ? `/api/art/${fg}` : null,
     line: reading.line,
     observation: reading.observation,
     photoId: photo.id,
