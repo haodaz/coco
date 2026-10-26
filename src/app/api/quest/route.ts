@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readQuestPhoto } from "@/lib/meta";
+import { paintCard, readQuestPhoto } from "@/lib/meta";
 import { photoBase64, storePhoto } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
@@ -20,7 +20,9 @@ export async function POST(req: Request) {
   if (!slot) return NextResponse.json({ error: "unknown slot" }, { status: 400 });
 
   const photo = await storePhoto(file, pet.id, slot.id);
-  const reading = await readQuestPhoto(await photoBase64(photo.file), slot, pet.name || "me");
+  const b64 = await photoBase64(photo.file);
+  // reading the photo and painting the art don't depend on each other
+  const [reading, art] = await Promise.all([readQuestPhoto(b64, slot, pet.name || "me"), paintCard(b64, slot.style, pet.breed ?? pet.species)]);
 
   const traces: Trace[] = reading.traces.map((t) => ({
     id: newId("tr"),
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
     name: reading.cardName,
     rarity: reading.rarity,
     style: slot.style,
-    art: null,
+    art: art ? `/api/art/${art}` : null,
     line: reading.line,
     observation: reading.observation,
     photoId: photo.id,
