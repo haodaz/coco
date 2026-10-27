@@ -7,7 +7,7 @@ import type { Memory } from "@/components/MemoryPanel";
 import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
 import type { Pet, State } from "@/lib/types";
 
-export type Loaded = State & { live: boolean; signedIn: boolean; memory: Record<string, Memory> };
+export type Loaded = State & { live: boolean; signedIn: boolean; admin: boolean; memory: Record<string, Memory> };
 export type Ctx = { state: Loaded; pet: Pet; memory: Memory | undefined; refresh: () => Promise<void> };
 
 const TABS = [
@@ -55,6 +55,9 @@ export default function Shell({ children }: { children: (ctx: Ctx) => ReactNode 
               </Link>
             );
           })}
+          {state.admin && (
+            <Link href="/app/admin" className={`ml-auto rounded-full px-3 py-1.5 text-[13px] ${path.startsWith("/app/admin") ? "bg-white shadow-sm" : "text-[var(--sub)] hover:text-[var(--ink)]"}`}>Usage</Link>
+          )}
           {state.signedIn && (
             <button
               onClick={async () => {
@@ -62,7 +65,7 @@ export default function Shell({ children }: { children: (ctx: Ctx) => ReactNode 
                 await browserClient().auth.signOut();
                 location.assign("/");
               }}
-              className="ml-auto text-[13px] text-[var(--sub)] hover:text-[var(--ink)]"
+              className={`${state.admin ? "ml-2" : "ml-auto"} text-[13px] text-[var(--sub)] hover:text-[var(--ink)]`}
             >
               Sign out
             </button>

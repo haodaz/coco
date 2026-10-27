@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { currentUserId } from "./session";
+import { currentUserId, isAdmin } from "./session";
 import { adminClient, HOSTED } from "./supabase";
 
 // Fair use, counted from the usage log: a few things per person per day, and a site-wide cap on paintings,
@@ -24,7 +24,7 @@ const startOfDay = () => {
 
 // Returns a response to send instead when over a limit, or null to go ahead.
 export async function overLimit(kind: keyof typeof PER_DAY, paints = false): Promise<Response | null> {
-  if (!HOSTED) return null;
+  if (!HOSTED || isAdmin()) return null; // admins test freely
   const db = adminClient();
   const rule = PER_DAY[kind];
   const mine = await db.from("usage_log").select("id", { count: "exact", head: true }).eq("user_id", currentUserId()).in("feature", rule.features).gte("at", startOfDay());

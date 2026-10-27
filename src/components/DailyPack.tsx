@@ -13,7 +13,7 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("en-CA");
 
 // Today's booster pack: pick up to 3 photos, the pack seals while the cards are painted,
 // then the cards come out face down and turn over one at a time.
-export default function DailyPack({ pet, state, onChange }: { pet: Pet; state: State; onChange: () => Promise<void> }) {
+export default function DailyPack({ pet, state, onChange, admin = false }: { pet: Pet; state: State; onChange: () => Promise<void>; admin?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<"idle" | "sealed" | "reveal">("idle");
   const [fresh, setFresh] = useState<Card[]>([]);
@@ -22,7 +22,7 @@ export default function DailyPack({ pet, state, onChange }: { pet: Pet; state: S
 
   const daily = state.cards.filter((c) => c.petId === pet.id && c.kind === "daily").sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const today = new Date().toLocaleDateString("en-CA");
-  const left = PER_DAY - daily.filter((c) => day(c.createdAt) === today).length;
+  const left = admin ? PER_DAY : PER_DAY - daily.filter((c) => day(c.createdAt) === today).length;
 
   async function open(files: FileList) {
     const fd = new FormData();

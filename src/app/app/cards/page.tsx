@@ -12,7 +12,7 @@ export default function Cards() {
       {({ pet, state, refresh }) => (
         <div className="space-y-14">
           <Legend pet={pet} state={state} onChange={refresh} />
-          <DailyPack pet={pet} state={state} onChange={refresh} />
+          <DailyPack pet={pet} state={state} onChange={refresh} admin={state.admin} />
           <StarterPack pet={pet} state={state} onChange={refresh} />
         </div>
       )}

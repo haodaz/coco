@@ -10,7 +10,7 @@ import { load, newId, save } from "@/lib/store";
 import { drawStyle } from "@/lib/styles";
 import type { Card, Trace } from "@/lib/types";
 import { overLimit } from "@/lib/limits";
-import { withUser } from "@/lib/session";
+import { isAdmin, withUser } from "@/lib/session";
 
 export const maxDuration = 300; // seconds; model calls and painting take a while
 
@@ -21,7 +21,7 @@ export const POST = withUser(async (req: Request) => {
   const s = await load();
   const pet = s.pets.find((p) => p.id === String(form.get("petId") ?? ""));
   if (!pet) return NextResponse.json({ error: "pet not found" }, { status: 404 });
-  const left = PER_DAY - openedToday(s, pet.id);
+  const left = isAdmin() ? PER_DAY : PER_DAY - openedToday(s, pet.id); // admins can open as many packs as they test
   const limited = await overLimit("quest", true); // the site-wide painting cap applies to packs too
   if (limited && limited.status === 503) return limited;
   const files = form.getAll("photos").filter((f): f is File => f instanceof File).slice(0, Math.max(0, left));
@@ -68,5 +68,5 @@ export const POST = withUser(async (req: Request) => {
   }
   await refreshLikeness(s, pet).catch(() => false);
   await save(s);
-  return NextResponse.json({ cards: made.map((m) => m.card), levelBefore: before.level, levelAfter: clarityOf(s, pet).level, left: PER_DAY - openedToday(s, pet.id) });
+  return NextResponse.json({ cards: made.map((m) => m.card), levelBefore: before.level, levelAfter: clarityOf(s, pet).level, left: isAdmin() ? PER_DAY : PER_DAY - openedToday(s, pet.id) });
 });
