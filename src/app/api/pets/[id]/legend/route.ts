@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+import { petContext } from "@/lib/ask";
+import { samPhrase } from "@/lib/finish";
+import { depthLayer, LIVE, paintSoul, readSoul } from "@/lib/meta";
+import { photoBase64 } from "@/lib/photos";
+import { packFor } from "@/lib/species";
+import { load, newId, save } from "@/lib/store";
+import type { Card } from "@/lib/types";
+
+// The soul portrait: unlocked when the starter set is full. The pet says who it is from all its imprints,
+// and its legendary card is painted so the pet can step out of the frame.
+export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  if (!LIVE) return NextResponse.json({ error: "the soul portrait needs live mode" }, { status: 400 });
+  const s = await load();
+  const pet = s.pets.find((p) => p.id === id);
+  if (!pet) return NextResponse.json({ error: "pet not found" }, { status: 404 });
+  const slots = packFor(pet.species).quest;
+  const quest = s.cards.filter((c) => c.petId === pet.id && c.kind === "quest");
+  if (slots.some((sl) => !quest.some((c) => c.slotId === sl.id))) return NextResponse.json({ error: "finish the starter set first" }, { status: 400 });
+
+  const { cards, imprints, profile } = petContext(s, pet);
+  const soul = await readSoul(profile, imprints);
+  const basis = soul.basis.filter((b) => cards.some((c) => c.id === b)); // only real cards count as evidence
+
+  // its clearest moments as reference: the avatar, then the rarest cards
+  const photoIds = [...new Set([pet.avatarPhotoId, ...[...quest].sort((a, b) => b.rarity - a.rarity).map((c) => c.photoId)].filter(Boolean) as string[])].slice(0, 4);
+  const refs = await Promise.all(photoIds.map((pid) => photoBase64(s.photos.find((p) => p.id === pid)!.file)));
+  const art = await paintSoul(pet, refs, soul.scene);
+  const fg = await depthLayer(art, samPhrase(pet.species)).catch(() => null);
+
+  const card: Card = {
+    id: newId("card"),
+    petId: pet.id,
+    kind: "legendary",
+    slotId: null,
+    pattern: null,
+    name: soul.name,
+    rarity: 3,
+    style: "Legend",
+    art: `/api/art/${art}`,
+    fg: fg ? `/api/art/${fg}` : null,
+    line: soul.line,
+    observation: soul.essence.join(" · "),
+    basis,
+    photoId: pet.avatarPhotoId ?? quest[0].photoId,
+    createdAt: new Date().toISOString(),
+  };
+  // the minute of painting may have changed the state; write onto a fresh copy, one legend per pet
+  const fresh = await load();
+  fresh.cards = fresh.cards.filter((c) => !(c.petId === pet.id && c.kind === "legendary"));
+  fresh.cards.push(card);
+  await save(fresh);
+  return NextResponse.json({ card });
+}

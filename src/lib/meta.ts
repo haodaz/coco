@@ -476,3 +476,59 @@ export async function editImage(feature: string, prompt: string, imagesB64: stri
   if (!b64) throw new Error(`Meta API ${feature}: no image returned`);
   return Buffer.from(b64, "base64");
 }
+
+export type Soul = {
+  name: string; // the legend's title, e.g. "Keeper of the Bedside"
+  line: string; // who I am, in the pet's own voice, resting on the imprints
+  essence: string[]; // three short things that make this pet itself
+  basis: string[]; // ids of the imprints it rests on
+  scene: string; // one epic but true scene for the portrait, built from the imprints
+};
+
+// The soul portrait: once the starter set is full, the pet says who it is, from everything it has shown.
+export async function readSoul(profile: object, imprints: object[]): Promise<Soul> {
+  return sparkJson<Soul>(
+    "soul",
+    [
+      "You are the voice of one particular pet. Its owner has just finished its first set of cards. Say who you are.",
+      "Judge by deeds, not by guessing the heart: everything must rest on the imprints below. List the imprint ids you drew on in basis.",
+      "name: a legendary card title in natural English with articles, 2-5 words, warm, specific to this pet (not generic fantasy), without the pet's name, e.g. 'Keeper of the Bedside'. line: two or three short first-person sentences, plain everyday words, no exclamation marks, about who you are and who you are to the owner. essence: three short phrases (2-5 words each) that make you yourself. scene: one sentence describing a single heroic but true-to-life scene for your portrait, built from your real places and habits, with no people.",
+      "No health, food amounts or training advice. Answer in English.",
+      `Profile: ${JSON.stringify(profile)}`,
+      `Imprints: ${JSON.stringify(imprints)}`,
+    ].join("\n"),
+    "Who are you?",
+    null,
+    "soul",
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["name", "line", "essence", "basis", "scene"],
+      properties: {
+        name: { type: "string" },
+        line: { type: "string" },
+        essence: { type: "array", items: { type: "string" } },
+        basis: { type: "array", items: { type: "string" } },
+        scene: { type: "string" },
+      },
+    },
+  );
+}
+
+// The legend's painting: the pet large in the frame, head high, so it can step out of the card's window.
+export async function paintSoul(pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">, refsB64: string[], scene: string): Promise<string> {
+  const img = await editImage(
+    "soul-art",
+    [
+      `All photos show the same animal: ${describePet(pet)}. Paint its legendary portrait as an epic fantasy trading card illustration, dramatic rim light, glowing magical details, painterly.`,
+      `Scene: ${scene}.`,
+      "Composition: tall portrait format; the animal sits or stands upright and proud, facing the viewer, large in the frame and seen from slightly below; its head and shoulders fill the upper third of the picture, its chest and front legs the middle; the scene opens up behind it. Weave the scene's details (places, toys) around it rather than changing its pose.",
+      "Keep its exact face, coat, markings, eye colour and ear shape. No people, no text, no border.",
+    ].join(" "),
+    refsB64,
+  );
+  const name = `${newId("art")}.jpg`;
+  await fs.mkdir(UPLOADS, { recursive: true });
+  await fs.writeFile(path.join(UPLOADS, name), await sharp(img).resize(768, 1024, { fit: "cover", position: "top" }).jpeg({ quality: 90 }).toBuffer());
+  return name;
+}

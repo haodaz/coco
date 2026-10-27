@@ -71,7 +71,8 @@ export type Card = {
   style: string; // art style used for this card
   art: string | null; // generated art file, null until generated
   note?: { text: string; via: "voice" | "text"; at: string } | null; // the owner's words about this moment
-  fg?: string | null; // the pet alone on a transparent layer the size of the art, for depth (rare cards and up)
+  fg?: string | null;
+  basis?: string[]; // for the legendary card: the imprints its soul line rests on // the pet alone on a transparent layer the size of the art, for depth (rare cards and up)
   line: string; // in the pet's voice
   observation: string; // what this photo told us
   photoId: string;

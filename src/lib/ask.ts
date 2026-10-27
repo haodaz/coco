@@ -1,4 +1,4 @@
-import { clarityOf } from "./memory";
+import { clarityOf, SENSES } from "./memory";
 import { LIVE, askPet, type Answer } from "./meta";
 import { packFor } from "./species";
 import type { Pet, State } from "./types";
@@ -15,16 +15,18 @@ function age(born: string | null) {
   return months >= 24 ? `${Math.floor(months / 12)} years` : `${months} months`;
 }
 
-export async function ask(state: State, pet: Pet, question: string): Promise<AskResult> {
+// What the pet knows: its profile and every imprint (what the photo showed, what the owner said, its traces).
+// The legendary card is drawn from the imprints, so it is not an imprint itself.
+export function petContext(state: State, pet: Pet) {
   const slots = packFor(pet.species).quest;
   const clarity = clarityOf(state, pet);
-  const cards = state.cards.filter((c) => c.petId === pet.id);
+  const cards = state.cards.filter((c) => c.petId === pet.id && c.kind !== "legendary");
   const imprints = cards.map((c) => {
     const photo = state.photos.find((p) => p.id === c.photoId);
     const traces = state.traces.filter((t) => (t.source.type === "photo" && t.source.photoId === c.photoId) || (t.source.type === "note" && t.source.noteId === c.id));
     return {
       id: c.id,
-      kind: slots.find((s) => s.id === c.slotId)?.title ?? c.kind,
+      kind: slots.find((s) => s.id === c.slotId)?.title ?? (c.pattern ? SENSES[c.pattern] : c.kind),
       date: photo?.takenAt?.slice(0, 10) ?? null,
       seen: c.observation,
       ownerSaid: c.note?.text ?? null,
@@ -42,6 +44,11 @@ export async function ask(state: State, pet: Pet, question: string): Promise<Ask
     workingStatus: pet.credential === "unknown" ? null : pet.credential,
   };
   const senses = clarity.senses.map((s) => `${s.label}: ${s.imprints ? `${s.imprints} imprint(s)` : "no imprints yet"}`);
+  return { slots, cards, imprints, profile, senses };
+}
+
+export async function ask(state: State, pet: Pet, question: string): Promise<AskResult> {
+  const { slots, cards, imprints, profile, senses } = petContext(state, pet);
 
   const answer = LIVE
     ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title))

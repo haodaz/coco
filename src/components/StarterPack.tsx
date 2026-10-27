@@ -29,7 +29,6 @@ export default function StarterPack({ pet, state, onChange }: { pet: Pet; state:
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {slots.map((s, i) => <QuestCard key={s.id} slot={s} index={i} pet={pet} card={cards.find((c) => c.slotId === s.id)} onChange={onChange} />)}
       </div>
-      {done === slots.length && <div className="mt-8 rounded-2xl bg-white p-6 text-center shadow-sm"><div className="text-[18px] font-bold">Set complete</div><div className="mt-1 text-[14px] text-[var(--sub)]">{pet.name}&apos;s first soul portrait is ready to unlock.</div></div>}
     </section>
   );
 }

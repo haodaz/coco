@@ -53,7 +53,7 @@ export type Clarity = {
 };
 
 export function clarityOf(state: State, pet: Pet): Clarity {
-  const cards = state.cards.filter((c) => c.petId === pet.id);
+  const cards = state.cards.filter((c) => c.petId === pet.id && c.kind !== "legendary"); // the legend is drawn from imprints, not one itself
   const slots = packFor(pet.species).quest;
   const patternOf = (c: Card) => c.pattern ?? slots.find((s) => s.id === c.slotId)?.pattern ?? null;
   const kinds = new Set(cards.map(patternOf).filter(Boolean));
