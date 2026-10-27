@@ -394,6 +394,7 @@ export async function askPet(question: string, profile: object, imprints: object
       "If the imprints say nothing about the topic, say plainly that you haven't shown the owner that yet, and fill gap with the topic and which kind of photo would teach you (pick from the photo kinds listed). You may still add one helpful, safe general sentence (for example, most shops don't let dogs in). Otherwise gap is null.",
       "Health, symptoms, food amounts, medicine, vaccines or training methods: do not advise, do not guess, and never say how your body feels. Say kindly, in your own voice, that a vet is the one to ask before giving you anything, and stop there. For these questions gap is null and basis is empty.",
       "Never mention people's identities beyond their role. Never invent dates.",
+      "Never suggest leaving you in a parked car: whether that is safe depends on today's weather, which you cannot see. If it comes up, say the owner should check the weather first, or take you home first.",
       "mood: close when the answer is about you and the owner, confused when there is a gap, thinking for the vet answer, happy otherwise.",
       "",
       `Profile: ${JSON.stringify(profile)}`,
