@@ -10,8 +10,9 @@ import { call } from "@/lib/api";
 import { useRecorder } from "@/lib/useRecorder";
 import type { Card, ChatTurn, Pet, PetAction, State } from "@/lib/types";
 import type { Fact } from "@/lib/rules";
+import { useT } from "@/lib/ui";
 
-const STARTERS = (name: string) => ["What do you love most?", "Where do you like to sleep?", "I'm going to the store this afternoon. Want to come?", `What don't you know about yourself yet, ${name}?`];
+const STARTERS = ["What do you love most?", "Where do you like to sleep?", "I'm going to the store this afternoon. Want to come?", "What don't you know about yourself yet, {name}?"];
 
 // Talking with the pet. Its character stands on the left and its face follows the conversation; the conversation is
 // kept (the sidebar's Recent), every answer names the cards it rests on, and it says when it doesn't know yet.
@@ -38,6 +39,7 @@ export default function AskPanel({
   admin?: boolean;
   refresh: () => void;
 }) {
+  const { t: tr } = useT();
   const [panel, setPanelAction] = useState<PetAction | null>(null);
   const [panelFacts, setPanelFacts] = useState<Fact[]>([]);
   const setPanel = (a: PetAction | null, facts: Fact[] = []) => {
@@ -117,7 +119,7 @@ export default function AskPanel({
   const mood: Mood = pending ? waiting : recording ? "close" : ((last?.mood as Mood) ?? "idle");
   const cardOf = (id: string) => state.cards.find((c) => c.id === id);
 
-  const LABEL: Record<PetAction["type"], string> = { show_cards: "the cards", open_card: "the card", open_pack: "today's pack", add_photo: "a place to add a photo", show_memory: "how well I know myself", make_link: "a link", show_place: "what I checked" };
+  const LABEL: Record<PetAction["type"], string> = { show_cards: tr("the cards"), open_card: tr("the card"), open_pack: tr("today's tasks"), add_photo: tr("a place to add a photo"), show_memory: tr("how well I know myself"), make_link: tr("a link"), show_place: tr("what I checked") };
   const character = (cls: string) =>
     pet.character ? (
       <Character moods={pet.character.moods} mood={mood} version={pet.character.at} className={cls} interactive />
@@ -136,15 +138,15 @@ export default function AskPanel({
               <div className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${typing && pet.character ? "max-h-0 opacity-0" : "max-h-[280px]"}`}>
                 <div className="relative aspect-[3/4] w-[200px]">{character("h-full w-full")}</div>
               </div>
-              <div className="serif mt-2 text-[30px] font-bold">Hi, it&apos;s me, {pet.name}.</div>
-              <p className="mt-1 max-w-md text-[14.5px] text-[var(--ink2)]">Ask me anything about us. If I haven&apos;t seen something yet, I&apos;ll say so and open a way to show me.</p>
+              <div className="serif mt-2 text-[30px] font-bold">{tr("Hi, it's me, {name}.", { name: pet.name })}</div>
+              <p className="mt-1 max-w-md text-[14.5px] text-[var(--ink2)]">{tr("Ask me anything about us. If I haven't seen something yet, I'll say so and open a way to show me.")}</p>
               {!pet.character && (
                 <button disabled={making} onClick={async () => { setMaking(true); await onBringToLife(); setMaking(false); }} className="mt-4 rounded-xl bg-[var(--ink)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-60">
-                  {making ? `Drawing ${pet.name}… about two minutes` : `Bring ${pet.name} to life`}
+                  {making ? tr("Drawing {name}… about two minutes", { name: pet.name }) : tr("Bring {name} to life", { name: pet.name })}
                 </button>
               )}
               <div className="mt-5 flex max-w-xl flex-wrap justify-center gap-2">
-                {STARTERS(pet.name).map((q) => <button key={q} onClick={() => ask(q)} className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-[13px] text-[var(--ink2)] hover:border-[var(--gold)]">{q}</button>)}
+                {STARTERS.map((x) => tr(x, { name: pet.name })).map((q) => <button key={q} onClick={() => ask(q)} className="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-[13px] text-[var(--ink2)] hover:border-[var(--gold)]">{q}</button>)}
               </div>
             </div>
           ) : (
@@ -156,7 +158,7 @@ export default function AskPanel({
                     {t.answer}
                     {t.basis.length > 0 && (
                       <div className="mt-3 border-t border-[var(--line)] pt-2.5">
-                        <div className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">I remember this from</div>
+                        <div className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">{tr("I remember this from")}</div>
                         <div className="mt-1.5 flex flex-wrap gap-2">
                           {t.basis.map((b) => {
                             const c = cardOf(b.cardId);
@@ -173,7 +175,7 @@ export default function AskPanel({
                     )}
                     {!!t.facts?.length && (
                       <div className="mt-3 border-t border-[var(--line)] pt-2.5">
-                        <div className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">I checked</div>
+                        <div className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">{tr("I checked")}</div>
                         <div className="mt-1.5 flex flex-wrap gap-2">
                           {t.facts.map((f) => (
                             <button key={f.id} onClick={() => setPanel({ type: "show_place", cardIds: [], topic: null, slotId: null, kind: null }, t.facts)} className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--paper)] px-2.5 py-1 text-[12px] hover:border-[var(--gold)]">
@@ -184,11 +186,11 @@ export default function AskPanel({
                         </div>
                       </div>
                     )}
-                    {t.general.length > 0 && <div className="mt-2 text-[12px] text-[var(--ink3)]"><b>General knowledge, not a memory:</b> {t.general.join(" ")}</div>}
-                    {t.gap && <div className="mt-3 rounded-xl border border-dashed border-[var(--line)] px-3 py-2 text-[12.5px] text-[var(--ink2)]">I haven&apos;t shown you <b>{t.gap.topic}</b> yet. A photo for <b>{t.gap.suggest}</b> would teach me.</div>}
+                    {t.general.length > 0 && <div className="mt-2 text-[12px] text-[var(--ink3)]"><b>{tr("General knowledge, not a memory:")}</b> {t.general.join(" ")}</div>}
+                    {t.gap && <div className="mt-3 rounded-xl border border-dashed border-[var(--line)] px-3 py-2 text-[12.5px] text-[var(--ink2)]">{tr("You haven't shown me {topic} yet. A photo for {suggest} would teach me.", { topic: t.gap.topic, suggest: t.gap.suggest })}</div>}
                     {t.action && (
                       <button onClick={() => setPanel(t.action!, t.facts ?? [])} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#efe9ff] px-3 py-1 text-[12.5px] font-medium text-[#5b3fb0] hover:bg-[#e2d8ff]">
-                        <PanelRightOpen size={14} /> I opened {LABEL[t.action.type]}
+                        <PanelRightOpen size={14} /> {tr("I opened {what}", { what: LABEL[t.action.type] })}
                       </button>
                     )}
                   </div>
@@ -197,7 +199,7 @@ export default function AskPanel({
               {pending && (
                 <div>
                   <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#ebe5fb] px-4 py-2 text-[14.5px]">{pending}</span></div>
-                  <div className="mt-2 inline-block animate-pulse rounded-2xl rounded-bl-md border border-[var(--line)] bg-white px-4 py-3 text-[15px] text-[var(--ink3)]">{waiting === "busy" ? "Looking through our moments…" : "Thinking…"}</div>
+                  <div className="mt-2 inline-block animate-pulse rounded-2xl rounded-bl-md border border-[var(--line)] bg-white px-4 py-3 text-[15px] text-[var(--ink3)]">{tr(waiting === "busy" ? "Looking through our moments…" : "Thinking…")}</div>
                 </div>
               )}
               <div ref={end} />
@@ -208,13 +210,13 @@ export default function AskPanel({
         {/* the composer, with the pet resting on its top edge once you're talking */}
         <div className="relative mx-auto w-full max-w-3xl pt-2">
           <form data-coco-spot="composer" data-coco-x="0.03" onSubmit={(e) => { e.preventDefault(); ask(q); }} className="relative flex items-center gap-2 rounded-2xl border border-[var(--line)] bg-white px-2 py-1.5 shadow-[0_10px_30px_-12px_rgba(35,32,27,.25)] focus-within:border-[var(--gold)]">
-            <input value={q} onFocus={() => { setTyping(true); spotCoco("composer"); }} onBlur={() => { setTyping(!!q.trim()); spotCoco(null); }} onChange={(e) => { setQ(e.target.value); spotCoco("composer"); }} placeholder={recording ? "Listening… tap the square to stop" : `Say something to ${pet.name}`} className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] outline-none" />
+            <input value={q} onFocus={() => { setTyping(true); spotCoco("composer"); }} onBlur={() => { setTyping(!!q.trim()); spotCoco(null); }} onChange={(e) => { setQ(e.target.value); spotCoco("composer"); }} placeholder={recording ? tr("Listening… tap the square to stop") : tr("Say something to {name}", { name: pet.name })} className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] outline-none" />
             <button type="button" onClick={toggle} disabled={!!pending} title={recording ? "Stop" : "Say it"} className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${recording ? "animate-pulse bg-[#ff4d4f] text-white" : "bg-[#eeebf8] text-[var(--ink2)]"}`}>
               {recording ? <Square size={14} /> : <Mic size={16} />}
             </button>
-            <button disabled={!!pending || !q.trim()} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40">Send</button>
+            <button disabled={!!pending || !q.trim()} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40">{tr("Send")}</button>
           </form>
-          <p className="mt-1.5 text-center text-[11.5px] text-[var(--ink3)]">{pet.name} answers only from the moments you&apos;ve shared.</p>
+          <p className="mt-1.5 text-center text-[11.5px] text-[var(--ink3)]">{tr("{name} answers only from the moments you've shared.", { name: pet.name })}</p>
         </div>
       </section>
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { petContext } from "@/lib/ask";
 import { samPhrase } from "@/lib/finish";
-import { depthLayer, LIVE, paintSoul, readSoul } from "@/lib/meta";
+import { depthLayer, LIVE, paintSoul, readSoul, writeIn } from "@/lib/meta";
 import { photoBase64 } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, update } from "@/lib/store";
@@ -26,6 +26,7 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: 
   if (slots.some((sl) => !quest.some((c) => c.slotId === sl.id))) return NextResponse.json({ error: "finish the starter set first" }, { status: 400 });
 
   const { cards, imprints, profile } = petContext(s, pet);
+  writeIn(s.settings?.lang);
   const soul = await readSoul(profile, imprints);
   const basis = soul.basis.filter((b) => cards.some((c) => c.id === b)); // only real cards count as evidence
 

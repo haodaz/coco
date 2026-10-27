@@ -23,6 +23,7 @@ co- means together, as in *companion*: from Latin *com* (with) + *panis* (bread)
 - **Nothing invented.** Every claim the pet makes about itself points to the cards behind it; the code rejects evidence that doesn't exist. No memory of something: it says so, and opens a way to show it.
 - **Trade information for joy.** The AI needs photos and words; the owner gets cards worth keeping, a portrait that grows, a companion that talks back.
 - **One pet, any species.** Species are data packs, not apps. Dogs and cats have full packs; birds, reptiles, small animals and fish share a general one.
+- **Any language, any culture.** Names, memories and conversations come in the owner's own language. The app's words follow it (English and Simplified Chinese so far), everything the AI writes for people is written in it, and the AI's own notes stay in English so series and tasks work the same everywhere.
 - **Some memories are true for now.** Favourites change; prints with a time span fade and the pet asks again.
 - **Safety and privacy first.** Faces are blurred on the owner's device before any photo leaves it. No vet, diet, medicine or training advice. No suggestion that depends on what the AI can't see (a parked car in unknown weather).
 

@@ -2,7 +2,7 @@ import { after, NextResponse } from "next/server";
 import { unlockMoves } from "@/lib/character";
 import { refreshLikeness } from "@/lib/likeness";
 import { clarityOf, SENSES } from "@/lib/memory";
-import { readMomentPhoto } from "@/lib/meta";
+import { readMomentPhoto, writeIn } from "@/lib/meta";
 import { photoBase64, storePhoto, uploadMeta } from "@/lib/photos";
 import { FREE_PER_DAY, SHARE_POINTS, sharesToday, TASK_POINTS, tasksFor } from "@/lib/points";
 import { cardTags } from "@/lib/series";
@@ -37,6 +37,7 @@ export const POST = withUser(async (req: Request) => {
   const ref = avatar ? await photoBase64(avatar.file) : null;
   const before = clarityOf(s, pet).level;
   const photo = await storePhoto(file, pet.id, null, uploadMeta(form.get("photoMeta")));
+  writeIn(s.settings?.lang); // the card's words are in the owner's language
   const reading = await readMomentPhoto(await photoBase64(photo.file), kinds, pet.name || "me", pet.sex, ref);
   const now = new Date().toISOString();
   const traces: Trace[] = reading.traces.map((t) => ({ id: newId("tr"), petId: pet.id, ...t, source: { type: "photo", photoId: photo.id }, at: photo.takenAt }));
@@ -52,6 +53,7 @@ export const POST = withUser(async (req: Request) => {
     art: null,
     line: reading.line,
     observation: reading.observation,
+    scene: reading.scene,
     note: words ? { text: words, via: "text", at: now } : null,
     photoId: photo.id,
     createdAt: now,

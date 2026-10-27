@@ -1,6 +1,6 @@
 import { after, NextResponse } from "next/server";
 import { refreshLikeness } from "@/lib/likeness";
-import { readOwnerNote, transcribe } from "@/lib/meta";
+import { readOwnerNote, transcribe, writeIn } from "@/lib/meta";
 import { photoBase64 } from "@/lib/photos";
 import { load, newId, save } from "@/lib/store";
 import type { Trace } from "@/lib/types";
@@ -28,6 +28,7 @@ export const POST = withUser(async (req: Request, ctx: { params: Promise<{ id: s
   const photo = card && s.photos.find((p) => p.id === card.photoId);
   if (!card || !pet || !photo) return NextResponse.json({ error: "card not found" }, { status: 404 });
 
+  writeIn(s.settings?.lang);
   const reading = await readOwnerNote(await photoBase64(photo.file), card, text, pet.name, pet.sex);
   // a new note replaces the old one, and the traces that came from it
   s.traces = s.traces.filter((t) => !(t.source.type === "note" && t.source.noteId === card.id));

@@ -83,19 +83,20 @@ export function clarityOf(state: State, pet: Pet): Clarity {
 }
 
 // How the AI would describe what it sees at this level, in plain words.
-export function levelName(level: number, pet: Pet) {
-  const kind = pet.species === "small_mammal" ? "small animal" : pet.species === "other" ? "animal" : pet.species;
+// the name of each clarity level; t puts it in the owner's language (templates keep the pet's name as is)
+export function levelName(level: number, pet: Pet, t: (s: string, v?: Record<string, string | number>) => string = (s, v) => (v ? s.replace(/\{(\w+)\}/g, (_, k) => String(v[k])) : s)) {
+  const kind = t(pet.species === "small_mammal" ? "small animal" : pet.species === "other" ? "animal" : pet.species);
   const breed = pet.breed ?? kind;
-  const name = pet.name || "your pet";
+  const name = pet.name || t("your pet");
   return [
-    "Just a shape",
-    `Some kind of ${kind}`,
-    `A ${breed}`,
-    `Starting to look like ${name}`,
-    `${name}, roughly`,
+    t("Just a shape"),
+    t("Some kind of {kind}", { kind }),
+    t("A {breed}", { breed }),
+    t("Starting to look like {name}", { name }),
+    t("{name}, roughly", { name }),
     name,
-    `${name}, clearly`,
-    `${name}, in detail`,
-    `${name}, as you know ${pet.sex === "male" ? "him" : pet.sex === "female" ? "her" : "them"}`,
+    t("{name}, clearly", { name }),
+    t("{name}, in detail", { name }),
+    t(pet.sex === "male" ? "{name}, as you know him" : pet.sex === "female" ? "{name}, as you know her" : "{name}, as you know them", { name }),
   ][level];
 }

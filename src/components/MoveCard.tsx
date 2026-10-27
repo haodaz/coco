@@ -5,13 +5,15 @@ import { CocoMark } from "@/components/Brand";
 import Character, { type Mood } from "@/components/Character";
 import { moveOf, STARTER_MOVE, type MoveCard as Owned } from "@/lib/moves";
 import type { Pet } from "@/lib/types";
+import { useT } from "@/lib/ui";
 
 // A move card: a Special card that holds one of the pet's moves, playing. Midnight frame with a holographic edge,
 // the same family as the Special pack it comes out of. A move not learned yet shows how to get it.
 export default function MoveCard({ pet, mood, owned, waiting = false, className = "" }: { pet: Pet; mood: string; owned?: Owned | null; waiting?: boolean; className?: string }) {
   const m = moveOf(mood);
+  const { t } = useT();
   const drawn = !!pet.character?.moods[mood]?.length;
-  const how = mood === STARTER_MOVE ? "Drops when you finish the Starter Kit" : waiting ? `${pet.name} learned this. It drops from one of your next packs` : `Teach ${pet.name} more (clarity ${m?.level}), then it can drop from a pack`;
+  const how = mood === STARTER_MOVE ? t("Drops when you finish the Starter Kit") : waiting ? t("{name} learned this. It drops from one of your next packs", { name: pet.name }) : t("Teach {name} more (clarity {n}), then it can drop from a pack", { name: pet.name, n: m?.level ?? 0 });
   return (
     <div className={`move-card relative aspect-[63/88] [container-type:inline-size] ${owned ? "" : "opacity-80"} ${className}`}>
       <div className="absolute inset-0 overflow-hidden rounded-[6cqw] p-[3.2cqw]" style={{ background: "linear-gradient(165deg, #14112a, #2a1f55 55%, #3d2470)" }}>
@@ -27,15 +29,15 @@ export default function MoveCard({ pet, mood, owned, waiting = false, className 
               <div className="absolute inset-[4%]"><Character moods={pet.character.moods} mood={mood as Mood} version={pet.character.at} className="h-full w-full" interactive /></div>
             ) : (
               <div className="absolute inset-0 grid place-items-center text-[#9a8fd0]">
-                {owned ? <span style={{ fontSize: "5cqw" }}>Drawing…</span> : <Lock style={{ width: "14cqw", height: "14cqw" }} strokeWidth={1.6} />}
+                {owned ? <span style={{ fontSize: "5cqw" }}>{t("Drawing…")}</span> : <Lock style={{ width: "14cqw", height: "14cqw" }} strokeWidth={1.6} />}
               </div>
             )}
           </div>
           <div className="px-[4cqw] pb-[4cqw] pt-[3cqw]">
-            <div className="font-bold leading-tight text-[#1f1d33]" style={{ fontSize: "7.4cqw", fontFamily: "Fraunces, Georgia, serif" }}>{m?.name ?? mood}</div>
-            <div className="mt-[1.2cqw] leading-snug text-[#5c5a75]" style={{ fontSize: "4.3cqw" }}>{owned ? m?.when : how}</div>
+            <div className="font-bold leading-tight text-[#1f1d33]" style={{ fontSize: "7.4cqw", fontFamily: "Fraunces, Georgia, serif" }}>{t(m?.name ?? mood)}</div>
+            <div className="mt-[1.2cqw] leading-snug text-[#5c5a75]" style={{ fontSize: "4.3cqw" }}>{owned ? t(m?.when ?? "") : how}</div>
             <div className="mt-[2cqw] font-semibold uppercase text-[#9a97b3]" style={{ fontSize: "3.3cqw", letterSpacing: ".12em" }}>
-              {pet.name} · {owned ? (owned.from === "starter" ? "Starter Kit bonus" : "Pack bonus") : waiting ? "Learned" : "Locked"}
+              {pet.name} · {t(owned ? (owned.from === "starter" ? "Starter Kit bonus" : "Pack bonus") : waiting ? "Learned" : "Locked")}
             </div>
           </div>
         </div>

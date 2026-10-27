@@ -6,6 +6,7 @@ import HoloCard from "@/components/HoloCard";
 import { call } from "@/lib/api";
 import { finishFor } from "@/lib/finish";
 import type { Card, Pet } from "@/lib/types";
+import { useT } from "@/lib/ui";
 
 type Sort = "mine" | "newest" | "rarity" | "starred";
 const SORTS: { id: Sort; label: string }[] = [
@@ -19,6 +20,7 @@ const SORTS: { id: Sort; label: string }[] = [
 // and in "Arrange" tap a card, then tap where it should go.
 export default function MyCards({ pet, cards, openCard, onChange }: { pet: Pet; cards: Card[]; openCard: (c: Card) => void; onChange: () => void }) {
   const [sort, setSort] = useState<Sort>("mine");
+  const { t } = useT();
   const [arranging, setArranging] = useState(false);
   const [picked, setPicked] = useState<string | null>(null);
   const [local, setLocal] = useState<string[] | null>(null); // order while arranging
@@ -64,7 +66,7 @@ export default function MyCards({ pet, cards, openCard, onChange }: { pet: Pet; 
     setPicked(null);
   }
 
-  if (!cards.length) return <p className="text-[14px] text-[var(--ink2)]">Your cards will gather here.</p>;
+  if (!cards.length) return <p className="text-[14px] text-[var(--ink2)]">{t("Your cards will gather here.")}</p>;
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2">
@@ -72,19 +74,19 @@ export default function MyCards({ pet, cards, openCard, onChange }: { pet: Pet; 
           SORTS.map((s) => (
             <button key={s.id} onClick={() => setSort(s.id)} className={`rounded-full border px-3 py-1.5 text-[13px] ${sort === s.id ? "border-[var(--gold)] bg-[#efe9ff] font-semibold text-[#5b3fb0]" : "border-[var(--line)] bg-white text-[var(--ink2)]"}`}>
               {s.id === "starred" && <Star size={12} className="-mt-0.5 mr-1 inline" />}
-              {s.label}
+              {t(s.label)}
             </button>
           ))}
         {arranging ? (
           <>
-            <span className="text-[13.5px] text-[var(--ink2)]">{picked ? "Now tap where it should go." : "Tap a card to move it."}</span>
-            <button onClick={doneArrange} className="ml-auto rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white">Done</button>
+            <span className="text-[13.5px] text-[var(--ink2)]">{t(picked ? "Now tap where it should go." : "Tap a card to move it.")}</span>
+            <button onClick={doneArrange} className="ml-auto rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white">{t("Done")}</button>
           </>
         ) : (
-          <button onClick={startArrange} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-[13px] text-[var(--ink2)]"><ArrowLeftRight size={13} /> Arrange</button>
+          <button onClick={startArrange} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-[13px] text-[var(--ink2)]"><ArrowLeftRight size={13} /> {t("Arrange")}</button>
         )}
       </div>
-      {sort === "starred" && !list.length && <p className="mt-4 text-[14px] text-[var(--ink2)]">Tap the star on any card to keep your favourites here.</p>}
+      {sort === "starred" && !list.length && <p className="mt-4 text-[14px] text-[var(--ink2)]">{t("Tap the star on any card to keep your favourites here.")}</p>}
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {list.map((c) => (
           <div key={c.id} className={`relative transition ${arranging ? "cursor-pointer" : ""} ${picked === c.id ? "-translate-y-1.5 rounded-2xl ring-4 ring-[var(--gold)]" : ""} ${arranging && picked && picked !== c.id ? "opacity-80" : ""}`}>

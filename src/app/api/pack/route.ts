@@ -38,7 +38,7 @@ export const POST = withUser(async (req: Request) => {
       if (!photo) return;
       const style = drawStyle();
       const rarity = Math.max(card.rarity, style.tier) as 1 | 2 | 3;
-      const art = await paintCard(await photoBase64(photo.file), pet, style.prompt, card.observation, ref);
+      const art = await paintCard(await photoBase64(photo.file), pet, style.prompt, card.scene || card.observation, ref);
       const fg = art && rarity >= 2 ? await depthLayer(art, samPhrase(pet.species)).catch(() => null) : null;
       Object.assign(card, { style: style.label, rarity, art: art ? `/api/art/${art}` : null, fg: fg ? `/api/art/${fg}` : null, sealed: false, openedAt: now });
     }),

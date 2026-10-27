@@ -15,6 +15,7 @@ import { packFor } from "@/lib/species";
 import { balance, FREE_PER_DAY, PACK_COST, sealedPrints, sharesToday, TASK_POINTS, tasksFor, type Task } from "@/lib/points";
 import { appendPhoto } from "@/lib/prepare";
 import type { Card, Pet, State } from "@/lib/types";
+import { useT } from "@/lib/ui";
 
 type Result = { url: string; text: string; earned: number };
 
@@ -31,6 +32,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   const [words, setWords] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const forTask = useRef<Task | null>(null);
+  const { t } = useT();
   useEffect(() => {
     spotCoco("pack");
     moodCoco(phase === "sealed" || busy ? "busy" : phase === "reveal" ? "happy" : null);
@@ -61,11 +63,12 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
     const r = await call<{ card: Card; earned: number; matched: boolean; task: string | null }>("/api/share", { method: "POST", body: fd });
     setBusy(null);
     if (!r) return URL.revokeObjectURL(url);
+    const learned = t("{name} learned: {what}", { name: pet.name, what: r.card.observation });
     const text = r.matched
-      ? `Task done: ${r.task}. ${pet.name} learned: ${r.card.observation}`
+      ? `${t("Task done: {task}.", { task: t(r.task ?? "") })} ${learned}`
       : task
-        ? `This one doesn't look like “${task.label}” to ${pet.name}. ${r.earned ? "Kept as a free share." : "Kept as a memory."} ${pet.name} learned: ${r.card.observation}`
-        : `${pet.name} learned: ${r.card.observation}`;
+        ? `${t("This one doesn't look like “{task}” to {name}.", { task: t(task.label), name: pet.name })} ${t(r.earned ? "Kept as a free share." : "Kept as a memory.")} ${learned}`
+        : learned;
     setResults((x) => [{ url, text, earned: r.earned }, ...x]);
     if (!task) setWords("");
     await onChange();
@@ -104,7 +107,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
           ))}
           {bonus && (
             <div className="relative">
-              <span className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#f5d27a] px-2.5 py-0.5 text-[10.5px] font-black uppercase tracking-[.14em] text-[#1f1d33] shadow">Bonus</span>
+              <span className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#f5d27a] px-2.5 py-0.5 text-[10.5px] font-black uppercase tracking-[.14em] text-[#1f1d33] shadow">{t("Bonus")}</span>
               <button onClick={() => shown === fresh.length && setShown(shown + 1)} className={`flip block aspect-[63/88] w-full ${shown > fresh.length ? "flipped" : ""} ${shown === fresh.length ? "rounded-2xl ring-4 ring-[#f5d27a]/70 animate-pulse" : ""}`}>
                 <div className="flip-inner">
                   <div className="flip-face"><div className="h-full w-full overflow-hidden rounded-2xl" style={{ background: "linear-gradient(165deg, #14112a, #2a1f55 55%, #3d2470)" }}><div className="pack-holo h-full w-full" /></div></div>
@@ -115,9 +118,9 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
           )}
         </div>
         <div className="mt-4 text-[14px] text-[var(--ink2)]">
-          {shown < fresh.length ? "Tap the glowing card to turn it over." : bonus && shown === fresh.length ? <b className="text-[var(--ink)]">Something extra fell out of the pack. Tap it.</b> : bonus ? <b className="text-[var(--ink)]">A move card: {moveOf(bonus)?.name}. {pet.name} can do this now.</b> : levelUp ? <b className="text-[var(--ink)]">{pet.name}&apos;s picture just got sharper: clarity {levelUp[0]} → {levelUp[1]}.</b> : "All turned over."}
+          {shown < fresh.length ? t("Tap the glowing card to turn it over.") : bonus && shown === fresh.length ? <b className="text-[var(--ink)]">{t("Something extra fell out of the pack. Tap it.")}</b> : bonus ? <b className="text-[var(--ink)]">{t("A move card: {move}. {name} can do this now.", { move: t(moveOf(bonus)?.name ?? bonus), name: pet.name })}</b> : levelUp ? <b className="text-[var(--ink)]">{t("{name}'s picture just got sharper: clarity {a} → {b}.", { name: pet.name, a: levelUp[0], b: levelUp[1] })}</b> : t("All turned over.")}
         </div>
-        {shown >= total && <button onClick={done} className="mt-3 rounded-xl bg-[var(--ink)] px-4 py-2 text-[14px] font-semibold text-white">Add to my collection</button>}
+        {shown >= total && <button onClick={done} className="mt-3 rounded-xl bg-[var(--ink)] px-4 py-2 text-[14px] font-semibold text-white">{t("Add to my collection")}</button>}
       </section>
     );
 
@@ -129,9 +132,9 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
         <Link href="/app/cards#starter" className="flex items-center gap-4 rounded-[20px] p-4 text-white" style={{ background: "linear-gradient(165deg, #0d4f57, #137a74 48%, #3fb59a)" }}>
           <PackArt kind="starter" art={petArt(pet)} className="w-14 shrink-0 -rotate-6" />
           <span className="min-w-0 flex-1">
-            <span className="block text-[10.5px] font-bold uppercase tracking-[.2em] text-[#ffd27a]">Start here · free</span>
-            <span className="serif block text-[19px] font-bold leading-tight">Your Starter Kit: {starterLeft} card{starterLeft > 1 ? "s" : ""} to go</span>
-            <span className="block text-[13px] opacity-90">Each photo becomes a card right away, no M pt needed. Finish it for the first move card.</span>
+            <span className="block text-[10.5px] font-bold uppercase tracking-[.2em] text-[#ffd27a]">{t("Start here · free")}</span>
+            <span className="serif block text-[19px] font-bold leading-tight">{t(starterLeft > 1 ? "Your Starter Kit: {n} cards to go" : "Your Starter Kit: {n} card to go", { n: starterLeft })}</span>
+            <span className="block text-[13px] opacity-90">{t("Each photo becomes a card right away, no M pt needed. Finish it for the first move card.")}</span>
           </span>
         </Link>
       )}
@@ -139,39 +142,39 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       {/* points and the pack */}
       <div className="ws-card flex flex-col items-center gap-5 p-5 sm:flex-row sm:items-center">
         <div data-coco-spot="pack" data-coco-side="left" className="w-[min(170px,44vw)] shrink-0">
-          <PackArt kind="booster" art={petArt(pet)} title={phase === "sealed" ? "Painting…" : waiting ? `${Math.min(waiting, 3)} memor${Math.min(waiting, 3) === 1 ? "y" : "ies"}` : "Empty for now"} sub={phase === "sealed" ? "about half a minute" : undefined} badge={`${PACK_COST} M pt`} sealed={phase === "sealed"} />
+          <PackArt kind="booster" art={petArt(pet)} title={phase === "sealed" ? t("Painting…") : waiting ? t(Math.min(waiting, 3) === 1 ? "{n} memory" : "{n} memories", { n: Math.min(waiting, 3) }) : t("Empty for now")} sub={phase === "sealed" ? t("about half a minute") : undefined} badge={`${PACK_COST} M pt`} sealed={phase === "sealed"} />
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-left">
-          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">M pt · Memory points</div>
+          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{t("M pt · Memory points")}</div>
           <div className="serif text-[52px] font-bold leading-none">{points}</div>
           <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink2)]">
-            {waiting ? `${waiting} shared memor${waiting === 1 ? "y is" : "ies are"} waiting to become M Prints.` : `Share a memory below; a pack paints your shared memories into M Prints.`} A Daily Booster costs {PACK_COST} M pt and paints up to three, each in a style you won&apos;t know until it turns over.
+            {waiting ? t(waiting === 1 ? "{n} shared memory is waiting to become an M Print." : "{n} shared memories are waiting to become M Prints.", { n: waiting }) : t("Share a memory below; a pack paints your shared memories into M Prints.")} {t("A Daily Booster costs {n} M pt and paints up to three, each in a style you won't know until it turns over.", { n: PACK_COST })}
           </p>
           <button disabled={!canOpen || phase === "sealed"} onClick={open} className="pack mt-3 rounded-xl px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-40">
-            {phase === "sealed" ? "Painting your cards…" : `Open a pack · ${PACK_COST} M pt`}
+            {phase === "sealed" ? t("Painting your cards…") : t("Open a pack · {n} M pt", { n: PACK_COST })}
           </button>
-          {!canOpen && phase !== "sealed" && <div className="mt-1.5 text-[12.5px] text-[var(--ink3)]">{!waiting ? "Nothing to paint yet." : `${PACK_COST - points} more M pt to go.`}</div>}
+          {!canOpen && phase !== "sealed" && <div className="mt-1.5 text-[12.5px] text-[var(--ink3)]">{!waiting ? t("Nothing to paint yet.") : t("{n} more M pt to go.", { n: PACK_COST - points })}</div>}
         </div>
       </div>
 
       {/* today's tasks */}
       <div>
         <div className="flex items-baseline gap-2">
-          <h3 className="serif text-[20px] font-bold">Today&apos;s tasks</h3>
-          <span className="text-[13px] text-[var(--ink2)]">+{TASK_POINTS} M pt each · moments {pet.name} doesn&apos;t know yet</span>
+          <h3 className="serif text-[20px] font-bold">{t("Today's tasks")}</h3>
+          <span className="text-[13px] text-[var(--ink2)]">{t("+{n} M pt each · moments {name} doesn't know yet", { n: TASK_POINTS, name: pet.name })}</span>
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          {tasks.map((t) => (
-            <div key={t.id} className="ws-card relative overflow-hidden p-4">
-              <span className="absolute inset-y-0 left-0 w-1" style={{ background: t.colour }} />
-              <div className="text-[10.5px] font-bold uppercase tracking-[.16em]" style={{ color: t.colour }}>{t.series}</div>
-              <div className="serif mt-1 text-[18px] font-bold leading-tight">{t.label}</div>
-              <div className="mt-0.5 text-[13px] text-[var(--ink2)]">Find a photo: {t.hint.toLowerCase()}.</div>
-              {t.done ? (
-                <div className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-[#1f7a46]"><Check size={15} /> Done · +{TASK_POINTS} M pt</div>
+          {tasks.map((k) => (
+            <div key={k.id} className="ws-card relative overflow-hidden p-4">
+              <span className="absolute inset-y-0 left-0 w-1" style={{ background: k.colour }} />
+              <div className="text-[10.5px] font-bold uppercase tracking-[.16em]" style={{ color: k.colour }}>{t(k.series)}</div>
+              <div className="serif mt-1 text-[18px] font-bold leading-tight">{t(k.label)}</div>
+              <div className="mt-0.5 text-[13px] text-[var(--ink2)]">{t("Find a photo: {hint}.", { hint: t(k.hint) })}</div>
+              {k.done ? (
+                <div className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-[#1f7a46]"><Check size={15} /> {t("Done · +{n} M pt", { n: TASK_POINTS })}</div>
               ) : (
-                <button disabled={!!busy} onClick={() => choose(t)} className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[13.5px] font-semibold disabled:opacity-50">
-                  <ImagePlus size={15} /> {busy === t.id ? "Reading…" : `Find a photo · +${TASK_POINTS} M pt`}
+                <button disabled={!!busy} onClick={() => choose(k)} className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[13.5px] font-semibold disabled:opacity-50">
+                  <ImagePlus size={15} /> {busy === k.id ? t("Reading…") : t("Find a photo · +{n} M pt", { n: TASK_POINTS })}
                 </button>
               )}
             </div>
@@ -182,15 +185,15 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       {/* free shares */}
       <div className="ws-card p-4">
         <div className="flex flex-wrap items-baseline gap-2">
-          <h3 className="serif text-[20px] font-bold">Share any moment</h3>
-          <span className="text-[13px] text-[var(--ink2)]">+1 M pt each · {freeLeft} of {FREE_PER_DAY} left today</span>
+          <h3 className="serif text-[20px] font-bold">{t("Share any moment")}</h3>
+          <span className="text-[13px] text-[var(--ink2)]">{t("+1 M pt each · {a} of {b} left today", { a: freeLeft, b: FREE_PER_DAY })}</span>
         </div>
-        <p className="mt-1 text-[13.5px] text-[var(--ink2)]">Any day of your life together. Add a few words if you like; your words teach {pet.name} what no photo shows.</p>
-        <textarea value={words} onChange={(e) => setWords(e.target.value)} rows={2} maxLength={500} placeholder={`Anything to tell ${pet.name} about it? (optional)`} className="mt-3 w-full resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]" />
+        <p className="mt-1 text-[13.5px] text-[var(--ink2)]">{t("Any day of your life together. Add a few words if you like; your words teach {name} what no photo shows.", { name: pet.name })}</p>
+        <textarea value={words} onChange={(e) => setWords(e.target.value)} rows={2} maxLength={500} placeholder={t("Anything to tell {name} about it? (optional)", { name: pet.name })} className="mt-3 w-full resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]" />
         <button disabled={!!busy || freeLeft <= 0} onClick={() => choose(null)} className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-[var(--ink)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-40">
-          <ImagePlus size={15} /> {busy === "free" ? "Reading…" : freeLeft > 0 ? "Choose a photo · +1 M pt" : "Come back tomorrow"}
+          <ImagePlus size={15} /> {busy === "free" ? t("Reading…") : freeLeft > 0 ? t("Choose a photo · +1 M pt") : t("Come back tomorrow")}
         </button>
-        <p className="mt-2 text-[12px] text-[var(--ink3)]">People&apos;s faces are blurred on your device before anything is uploaded.</p>
+        <p className="mt-2 text-[12px] text-[var(--ink3)]">{t("People's faces are blurred on your device before anything is uploaded.")}</p>
       </div>
 
       {/* what just happened */}

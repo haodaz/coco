@@ -84,6 +84,7 @@ export type Card = {
   sealed?: boolean; // a Memory Print shared but not yet painted into a card: the AI already knows it; a pack opens it
   task?: string; // the daily task this memory answered, if any
   openedAt?: string; // when a pack turned it into a card
+  scene?: string; // what the photo shows, in plain English, for painting (observation is in the owner's language)
   starred?: boolean; // the owner's favourites
   order?: number; // the owner's own arrangement of the collection
 };
@@ -142,7 +143,8 @@ export type State = {
   shares?: Share[];
   playdates?: Playdate[];
   place?: Place | null; // where the owner and the pet live, area-level
-  points?: PointEntry[]; // Memory Points: earned by sharing memories and doing daily tasks, spent on packs
+  points?: PointEntry[];
+  settings?: { lang?: string }; // the owner's language: app words and everything the AI writes for them // Memory Points: earned by sharing memories and doing daily tasks, spent on packs
 };
 
 export type PointEntry = { petId: string; at: string; delta: number; why: "share" | "task" | "pack"; ref?: string };

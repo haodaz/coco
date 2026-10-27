@@ -25,14 +25,14 @@ export default function Home() {
   const [say, setSay] = useState("");
   return (
     <Shell>
-      {({ pet, state, memory, openCard }) => {
+      {({ pet, state, memory, openCard, t: tr }) => {
         const cards = state.cards.filter((c) => c.petId === pet.id);
         const r = rhythm(cards);
         const recent = cards.filter((c) => c.kind !== "legendary" && !c.sealed).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
         const threads = (state.threads ?? []).filter((t) => t.petId === pet.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 3);
         const latest = cards.filter((c) => c.kind === "daily" && !c.sealed).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
         const t = { tasksLeft: tasksFor(state, pet).filter((x) => !x.done).length, points: balance(state, pet.id), canOpen: sealedPrints(state, pet.id).length > 0 && (state.admin || balance(state, pet.id) >= PACK_COST) };
-        const line = t.tasksLeft ? `There's a moment of ours I'd love to see today. Will you find it?` : latest ? latest.line : `Ask me anything about us.`;
+        const line = t.tasksLeft ? tr("There's a moment of ours I'd love to see today. Will you find it?") : latest ? latest.line : tr("Ask me anything about us.");
         const legends = cards.filter((c) => c.rarity === 3).length;
         const lit = memory?.senses.filter((s) => s.imprints).length ?? 0;
         const week = Array.from({ length: 7 }, (_, i) => {
@@ -46,10 +46,10 @@ export default function Home() {
           <>
             {/* phones get their own Home, one thing per row */}
             <div className="home-m">
-              <HomeMobile pet={pet} greeting={greeting()} line={line} r={r} today={t} memory={memory} cardCount={cards.filter((c) => !c.sealed).length} recent={recent} threads={threads} openCard={openCard} ask={go} />
+              <HomeMobile pet={pet} greeting={tr(greeting())} line={line} r={r} today={t} memory={memory} cardCount={cards.filter((c) => !c.sealed).length} recent={recent} threads={threads} openCard={openCard} ask={go} />
             </div>
             <div className="home-d">
-            <PageHead eyebrow="Home" art="home" title={greeting()} sub={`Your co-world with ${pet.name}`} />
+            <PageHead eyebrow={tr("Home")} art="home" title={tr(greeting())} sub={tr("Your co-world with {name}", { name: pet.name })} />
 
             <div className="grid gap-5 sm:mt-16 lg:grid-cols-3">
               {/* the pet, ready to talk */}
@@ -69,11 +69,11 @@ export default function Home() {
                     <div className="mt-1 text-[12px] text-[var(--ink3)]">— {pet.name}</div>
                   </div>
                   <form onSubmit={(e) => { e.preventDefault(); if (say.trim()) go(say.trim()); }} className="mt-3 flex items-center gap-2 rounded-2xl border border-[var(--line)] bg-white px-2 py-1.5 focus-within:border-[var(--gold)]">
-                    <input value={say} onChange={(e) => setSay(e.target.value)} placeholder={`Say something to ${pet.name}`} className="min-w-0 flex-1 bg-transparent px-2 py-1.5 text-[15px] outline-none" />
-                    <button disabled={!say.trim()} className="rounded-xl bg-[var(--ink)] px-3.5 py-2 text-[13.5px] font-semibold text-white disabled:opacity-40">Talk</button>
+                    <input value={say} onChange={(e) => setSay(e.target.value)} placeholder={tr("Say something to {name}", { name: pet.name })} className="min-w-0 flex-1 bg-transparent px-2 py-1.5 text-[15px] outline-none" />
+                    <button disabled={!say.trim()} className="rounded-xl bg-[var(--ink)] px-3.5 py-2 text-[13.5px] font-semibold text-white disabled:opacity-40">{tr("Talk")}</button>
                   </form>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {["What do you love most?", "What did we do this week?"].map((q) => (
+                    {["What do you love most?", "What did we do this week?"].map((x) => tr(x)).map((q) => (
                       <button key={q} onClick={() => go(q)} className="rounded-full border border-[var(--line)] bg-white px-3 py-1 text-[12.5px] text-[var(--ink2)] hover:border-[var(--gold)]">{q}</button>
                     ))}
                   </div>
@@ -84,17 +84,17 @@ export default function Home() {
               <Link href="/app/pack" className="pack group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[22px] p-5 text-white">
                 <PackArt kind="booster" art={petArt(pet)} className="float-card absolute -right-2 -top-6 w-[46%] rotate-[10deg]" />
                 <div className="relative">
-                  <div className="text-[11px] font-bold uppercase tracking-[.2em] opacity-85">Today</div>
-                  <div className="serif mt-1 text-[28px] font-bold leading-tight">{t.tasksLeft ? `${t.tasksLeft} task${t.tasksLeft > 1 ? "s" : ""} waiting` : "Tasks done for today"}</div>
-                  <div className="mt-1 text-[13.5px] opacity-90">{t.points} M pt{t.canOpen ? " · enough for a pack" : ""}</div>
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[13.5px] font-semibold text-[#3b2a8f] transition group-hover:gap-2.5">{t.canOpen ? "Open a pack" : "See today's tasks"} <ArrowRight size={15} /></div>
+                  <div className="text-[11px] font-bold uppercase tracking-[.2em] opacity-85">{tr("Today")}</div>
+                  <div className="serif mt-1 text-[28px] font-bold leading-tight">{t.tasksLeft ? tr(t.tasksLeft > 1 ? "{n} tasks waiting" : "{n} task waiting", { n: t.tasksLeft }) : tr("Tasks done for today")}</div>
+                  <div className="mt-1 text-[13.5px] opacity-90">{t.points} M pt{t.canOpen ? ` · ${tr("enough for a pack")}` : ""}</div>
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[13.5px] font-semibold text-[#3b2a8f] transition group-hover:gap-2.5">{t.canOpen ? tr("Open a pack") : tr("See today's tasks")} <ArrowRight size={15} /></div>
                 </div>
               </Link>
             </div>
 
             <div className="mt-5 grid gap-5 sm:grid-cols-3">
               <section className="ws-card p-5">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]"><Flame size={13} /> Streak</div>
+                <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]"><Flame size={13} /> {tr("Streak")}</div>
                 <div className="serif mt-1 text-[40px] font-bold leading-none">{r.streak}<span className="ml-1 text-[16px] font-medium text-[var(--ink2)]">day{r.streak === 1 ? "" : "s"}</span></div>
                 <div className="mt-3 flex gap-1.5">
                   {week.map((d) => (
@@ -109,24 +109,24 @@ export default function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`/api/likeness/${pet.id}?p=${memory?.points ?? 0}`} alt="" className="aspect-[3/4] w-20 shrink-0 rounded-lg object-cover [image-rendering:pixelated]" />
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]"><Sparkles size={13} /> Clarity {memory?.level}/{memory?.maxLevel}</div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]"><Sparkles size={13} /> {tr("Clarity")} {memory?.level}/{memory?.maxLevel}</div>
                   <div className="serif mt-1 text-[18px] font-bold leading-tight">{memory?.name}</div>
                   {memory && (
                     <>
                       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--line)]"><div className="h-full rounded-full bg-[var(--gold)]" style={{ width: `${memory.next ? Math.round(((memory.points - memory.floor) / (memory.next - memory.floor)) * 100) : 100}%` }} /></div>
-                      <div className="mt-1 text-[12px] text-[var(--ink2)]">{memory.next ? `${memory.next - memory.points} more to sharpen` : "fully clear"}</div>
+                      <div className="mt-1 text-[12px] text-[var(--ink2)]">{memory.next ? tr("{n} more to sharpen", { n: memory.next - memory.points }) : tr("fully clear")}</div>
                     </>
                   )}
                 </div>
               </Link>
               <Link href="/app/cards" className="ws-card p-5 transition hover:border-[var(--gold)]">
-                <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Collection</div>
-                <div className="serif mt-1 text-[40px] font-bold leading-none">{cards.filter((c) => !c.sealed).length}<span className="ml-1 text-[16px] font-medium text-[var(--ink2)]">cards</span></div>
-                <div className="mt-3 text-[13px] text-[var(--ink2)]">{legends} legend{legends === 1 ? "" : "s"} · {lit}/{memory?.senses.length ?? 0} kinds of moment</div>
+                <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{tr("Collection")}</div>
+                <div className="serif mt-1 text-[40px] font-bold leading-none">{cards.filter((c) => !c.sealed).length}<span className="ml-1 text-[16px] font-medium text-[var(--ink2)]">{tr("cards")}</span></div>
+                <div className="mt-3 text-[13px] text-[var(--ink2)]">{tr(legends === 1 ? "{n} legend" : "{n} legends", { n: legends })} · {tr("{a}/{b} kinds of moment", { a: lit, b: memory?.senses.length ?? 0 })}</div>
               </Link>
             </div>
 
-            <Rule label="Latest memories" />
+            <Rule label={tr("Latest memories")} />
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
               {recent.map((c) => (
                 <button key={c.id} onClick={() => openCard(c)} className="text-left">
@@ -137,7 +137,7 @@ export default function Home() {
 
             {threads.length > 0 && (
               <>
-                <Rule label="Pick up a conversation" />
+                <Rule label={tr("Pick up a conversation")} />
                 <div className="grid gap-4 md:grid-cols-3">
                   {threads.map((t) => (
                     <Link key={t.id} href={`/app/chat?thread=${t.id}`} className="ws-card p-4 transition hover:border-[var(--gold)]">

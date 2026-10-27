@@ -8,12 +8,20 @@ import { currentUserId } from "./session";
 import { newId, UPLOADS } from "./store";
 import { adminClient, HOSTED } from "./supabase";
 import type { Pet, PetAction, PlayReport, Species, TraceKind } from "./types";
+import { languageName } from "./i18n";
 
 // The only place that talks to the Meta Model API.
 // MOCK mode is the default until the hackathon credits arrive: no request leaves the machine and nothing is billed.
 // Set META_LIVE=1 in .env.local to call the real API.
 
 export const LIVE = process.env.META_LIVE === "1";
+
+// The owner's language for this request: routes call writeIn(state.settings?.lang) after loading, and the prompts
+// that write for people say which language to use. The AI's own notes (traces, the painting scene) stay in English.
+const tongue = new AsyncLocalStorage<string>();
+export const writeIn = (lang?: string | null) => tongue.enterWith(lang || "en");
+const lang = () => languageName(tongue.getStore());
+const forPeople = (fields: string) => `Write ${fields} in ${lang()}, natural and plain as a native speaker would say it. Trace labels and details, and scene, stay in short plain English: they are the AI's own notes.`;
 const BASE = process.env.META_API_BASE_URL ?? "https://api.meta.ai/v1";
 const API_KEY = process.env.MODEL_API_KEY ?? process.env.META_API_KEY; // MODEL_API_KEY is the name Meta's docs use
 const SPARK = "muse-spark-1.3";
@@ -124,7 +132,8 @@ export type PhotoReading = {
   traces: { kind: TraceKind; label: string; detail: string | null }[];
   cardName: string;
   line: string; // in the pet's voice, only about what the photo shows
-  observation: string;
+  observation: string; // in the owner's language
+  scene?: string; // the same, in plain English, for painting
   rarity: 1 | 2 | 3;
 };
 
@@ -144,7 +153,7 @@ export async function identify(imageB64: string): Promise<Identification> {
   }
   return sparkJson<Identification>(
     "identify",
-    "You identify a pet from one photo. Describe appearance only: species, up to three breed guesses with confidence 0-1 (together at most 1; say 'mixed' or 'unknown' honestly), coat, distinctive marks, size. Never judge health, weight or condition.",
+    `You identify a pet from one photo. Describe appearance only: species, up to three breed guesses with confidence 0-1 (together at most 1; say 'mixed' or 'unknown' honestly), coat, distinctive marks, size. Never judge health, weight or condition. Write breed names, coat, marks and size in ${lang()}.`,
     "Who is this animal?",
     await forModel(imageB64),
     "identification",
@@ -174,6 +183,8 @@ export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName:
       refLine(petName),
       "Traces: only things visible in the photo (place, activity, companion, object, time of day). Never guess what is not shown. Do not describe people's faces or identities; a person is just 'owner' or 'a person'.",
       `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only; one photo cannot show a habit, so never say always, usually or every time. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
+      "scene: the same as observation, in plain English, for the painter.",
+      forPeople("cardName, line and observation"),
       "rarity: 1 ordinary moment, 2 a moment with real character, 3 something truly unusual. Most photos are 1.",
       "Never mention health, weight, food amounts, medicine or training advice. No exclamation marks.",
     ].join("\n"),
@@ -183,7 +194,7 @@ export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName:
     {
       type: "object",
       additionalProperties: false,
-      required: ["traces", "cardName", "line", "observation", "rarity"],
+      required: ["traces", "cardName", "line", "observation", "scene", "rarity"],
       properties: {
         traces: {
           type: "array",
@@ -197,6 +208,7 @@ export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName:
         cardName: { type: "string" },
         line: { type: "string" },
         observation: { type: "string" },
+        scene: { type: "string" },
         rarity: { type: "integer", enum: [1, 2, 3] },
       },
     },
@@ -367,6 +379,7 @@ export async function readOwnerNote(imageB64: string, card: { name: string; line
       `What the photo reading said: "${card.observation}". The card's line: "${card.line}".`,
       "traces: only facts the owner's note adds (habits, likes, people, places, times, how often, why). Keep the owner's own words where you can. Do not repeat what the photo already showed. Nothing about people's identities beyond their role (owner, a friend, a child).",
       `line: rewrite the card's line in ${petName}'s first-person voice, one or two short plain sentences, using what the owner said. No exclamation marks. Never mention health, food amounts, medicine or training advice.`,
+      forPeople("line"),
     ].join("\n"),
     `Owner's note: "${note}"`,
     await forModel(imageB64),
@@ -523,6 +536,8 @@ export async function readMomentPhoto(imageB64: string, kinds: { pattern: Patter
       `pattern: which kind of moment this is, one of: ${kinds.map((k) => `${k.pattern} (${k.label})`).join(", ")}.`,
       "Traces: only things visible in the photo (place, activity, companion, object, time of day). Never guess what is not shown. Do not describe people's faces or identities; a person is just 'owner' or 'a person'.",
       `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only; one photo cannot show a habit, so never say always, usually or every time. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
+      "scene: the same as observation, in plain English, for the painter.",
+      forPeople("cardName, line and observation"),
       "rarity: 1 ordinary moment, 2 a moment with real character, 3 something truly unusual. Most photos are 1.",
       "Never mention health, weight, food amounts, medicine or training advice. No exclamation marks.",
     ].join("\n"),
@@ -532,7 +547,7 @@ export async function readMomentPhoto(imageB64: string, kinds: { pattern: Patter
     {
       type: "object",
       additionalProperties: false,
-      required: ["pattern", "traces", "cardName", "line", "observation", "rarity"],
+      required: ["pattern", "traces", "cardName", "line", "observation", "scene", "rarity"],
       properties: {
         pattern: { type: "string", enum: kinds.map((k) => k.pattern) },
         traces: {
@@ -547,6 +562,7 @@ export async function readMomentPhoto(imageB64: string, kinds: { pattern: Patter
         cardName: { type: "string" },
         line: { type: "string" },
         observation: { type: "string" },
+        scene: { type: "string" },
         rarity: { type: "integer", enum: [1, 2, 3] },
       },
     },
@@ -578,8 +594,9 @@ export async function readSoul(profile: object, imprints: object[]): Promise<Sou
     [
       "You are the voice of one particular pet. Its owner has just finished its first set of cards. Say who you are.",
       "Judge by deeds, not by guessing the heart: everything must rest on the imprints below. List the imprint ids you drew on in basis.",
-      "name: a legendary card title in natural English with articles, 2-5 words, warm, specific to this pet (not generic fantasy), without the pet's name, e.g. 'Keeper of the Bedside'. line: two or three short first-person sentences, plain everyday words, no exclamation marks, about who you are and who you are to the owner. essence: three short phrases (2-5 words each) that make you yourself. scene: one sentence describing a single heroic but true-to-life scene for your portrait, built from your real places and habits, with no people.",
-      "No health, food amounts or training advice. Answer in English.",
+      "name: a legendary card title, 2-5 words (or the natural length in the language), warm, specific to this pet (not generic fantasy), without the pet's name, e.g. 'Keeper of the Bedside'. line: two or three short first-person sentences, plain everyday words, no exclamation marks, about who you are and who you are to the owner. essence: three short phrases (2-5 words each) that make you yourself. scene: one sentence describing a single heroic but true-to-life scene for your portrait, built from your real places and habits, with no people.",
+      "No health, food amounts or training advice.",
+      forPeople("name, line and essence"),
       `Profile: ${JSON.stringify(profile)}`,
       `Imprints: ${JSON.stringify(imprints)}`,
     ].join("\n"),

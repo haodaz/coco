@@ -5,6 +5,7 @@ import { appendPhoto } from "@/lib/prepare";
 import { PACKS } from "@/lib/species";
 import type { Credential, Pet, Species } from "@/lib/types";
 import { call } from "@/lib/api";
+import { useT } from "@/lib/ui";
 import { CocoLogo } from "@/components/Brand";
 
 // The way in: first what the owner gets, then a few easy questions, then one photo. Each step can be left.
@@ -30,6 +31,7 @@ const KINDS: { v: Species; label: string; emoji: string }[] = [
 ];
 
 function Leave() {
+  const { t } = useT();
   return (
     <button
       onClick={async () => {
@@ -41,7 +43,7 @@ function Leave() {
       }}
       className="text-[13px] font-medium text-[var(--ink2)] hover:text-[var(--ink)]"
     >
-      Leave for now
+      {t("Leave for now")}
     </button>
   );
 }
@@ -66,11 +68,12 @@ export function OnboardingTop({ at }: { at: number }) {
 
 export function StartWithOnePhoto({ onDone }: { onDone: () => void }) {
   const saved = readAnswers();
+  const { t, lang } = useT();
   const [step, setStep] = useState<0 | 1 | 2>(saved.name ? 2 : 0);
   const [a, setA] = useState<Answers>({ name: saved.name ?? "", species: saved.species ?? "dog", born: saved.born ?? "", sex: saved.sex ?? null });
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
-  const name = a.name.trim() || "your pet";
+  const name = a.name.trim() || t("your pet");
   const they = a.sex === "female" ? "her" : a.sex === "male" ? "him" : "them";
 
   function keep(next: Answers) {
@@ -83,6 +86,7 @@ export function StartWithOnePhoto({ onDone }: { onDone: () => void }) {
     setBusy(true);
     const fd = new FormData();
     await appendPhoto(fd, "photo", f);
+    fd.append("lang", lang); // looks are described in the owner's language
     await call("/api/pets", { method: "POST", body: fd });
     setBusy(false);
     onDone();
@@ -96,9 +100,9 @@ export function StartWithOnePhoto({ onDone }: { onDone: () => void }) {
 
       {step === 0 && (
         <div className="mt-8">
-          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Welcome</div>
-          <h1 className="serif mt-2 text-[36px] font-bold leading-[1.08] tracking-tight">Let&apos;s start your co&#8209;world.</h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-[var(--ink2)]">A space for you and your pet, built only from moments that really happened. Here is what you get:</p>
+          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{t("Welcome")}</div>
+          <h1 className="serif mt-2 text-[36px] font-bold leading-[1.08] tracking-tight">{t("Let's start your co‑world.")}</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-[var(--ink2)]">{t("A space for you and your pet, built only from moments that really happened. Here is what you get:")}</p>
           <div className="mt-5 grid gap-3">
             {[
               ["🃏", "Cards from your real moments", "Every photo becomes a collectible card that keeps the moment, the day and your words."],
@@ -107,53 +111,53 @@ export function StartWithOnePhoto({ onDone }: { onDone: () => void }) {
             ].map(([icon, title, text]) => (
               <div key={title} className="ws-card flex gap-3.5 p-4">
                 <span className="text-[26px] leading-none">{icon}</span>
-                <span><b className="block text-[15px]">{title}</b><span className="mt-0.5 block text-[13.5px] leading-snug text-[var(--ink2)]">{text}</span></span>
+                <span><b className="block text-[15px]">{t(title)}</b><span className="mt-0.5 block text-[13.5px] leading-snug text-[var(--ink2)]">{t(text)}</span></span>
               </div>
             ))}
           </div>
-          <button onClick={() => setStep(1)} className="mt-6 w-full rounded-xl bg-[var(--ink)] px-5 py-3.5 text-[15px] font-semibold text-white">Start · about two minutes</button>
-          <p className="mt-3 text-center text-[12px] text-[var(--ink3)]">Your photos stay in your account. People&apos;s faces are blurred on your device first.</p>
+          <button onClick={() => setStep(1)} className="mt-6 w-full rounded-xl bg-[var(--ink)] px-5 py-3.5 text-[15px] font-semibold text-white">{t("Start · about two minutes")}</button>
+          <p className="mt-3 text-center text-[12px] text-[var(--ink3)]">{t("Your photos stay in your account. People's faces are blurred on your device first.")}</p>
         </div>
       )}
 
       {step === 1 && (
         <div className="mt-8">
-          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">A few questions</div>
-          <h1 className="serif mt-2 text-[32px] font-bold leading-[1.1] tracking-tight">Who are we getting to know?</h1>
-          <label className="mt-5 block text-[13px] text-[var(--ink2)]">Their name<input autoFocus className={field} value={a.name} onChange={(e) => keep({ ...a, name: e.target.value })} placeholder="Coco, Mochi, Captain…" /></label>
-          <div className="mt-4 text-[13px] text-[var(--ink2)]">What kind of animal</div>
+          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{t("A few questions")}</div>
+          <h1 className="serif mt-2 text-[32px] font-bold leading-[1.1] tracking-tight">{t("Who are we getting to know?")}</h1>
+          <label className="mt-5 block text-[13px] text-[var(--ink2)]">{t("Their name")}<input autoFocus className={field} value={a.name} onChange={(e) => keep({ ...a, name: e.target.value })} placeholder={t("Coco, Mochi, Captain…")} /></label>
+          <div className="mt-4 text-[13px] text-[var(--ink2)]">{t("What kind of animal")}</div>
           <div className="mt-1.5 flex flex-wrap gap-2">
-            {KINDS.map((k) => <button key={k.v} onClick={() => keep({ ...a, species: k.v })} className={chip(a.species === k.v)}>{k.emoji} {k.label}</button>)}
+            {KINDS.map((k) => <button key={k.v} onClick={() => keep({ ...a, species: k.v })} className={chip(a.species === k.v)}>{k.emoji} {t(k.label)}</button>)}
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <label className="text-[13px] text-[var(--ink2)]">Birthday <span className="text-[var(--ink3)]">(if you know)</span><input type="date" className={field} value={a.born} onChange={(e) => keep({ ...a, born: e.target.value })} /></label>
+            <label className="text-[13px] text-[var(--ink2)]">{t("Birthday")} <span className="text-[var(--ink3)]">{t("(if you know)")}</span><input type="date" className={field} value={a.born} onChange={(e) => keep({ ...a, born: e.target.value })} /></label>
             <div className="text-[13px] text-[var(--ink2)]">
-              Girl or boy
+              {t("Girl or boy")}
               <div className="mt-1 flex gap-2">
-                <button onClick={() => keep({ ...a, sex: a.sex === "female" ? null : "female" })} className={chip(a.sex === "female")}>Girl</button>
-                <button onClick={() => keep({ ...a, sex: a.sex === "male" ? null : "male" })} className={chip(a.sex === "male")}>Boy</button>
+                <button onClick={() => keep({ ...a, sex: a.sex === "female" ? null : "female" })} className={chip(a.sex === "female")}>{t("Girl")}</button>
+                <button onClick={() => keep({ ...a, sex: a.sex === "male" ? null : "male" })} className={chip(a.sex === "male")}>{t("Boy")}</button>
               </div>
             </div>
           </div>
           <div className="mt-7 flex items-center gap-3">
-            <button onClick={() => setStep(0)} className="rounded-xl px-4 py-3 text-[14px] font-medium text-[var(--ink2)]">Back</button>
-            <button disabled={!a.name.trim()} onClick={() => setStep(2)} className="flex-1 rounded-xl bg-[var(--ink)] px-5 py-3.5 text-[15px] font-semibold text-white disabled:opacity-40">Next</button>
+            <button onClick={() => setStep(0)} className="rounded-xl px-4 py-3 text-[14px] font-medium text-[var(--ink2)]">{t("Back")}</button>
+            <button disabled={!a.name.trim()} onClick={() => setStep(2)} className="flex-1 rounded-xl bg-[var(--ink)] px-5 py-3.5 text-[15px] font-semibold text-white disabled:opacity-40">{t("Next")}</button>
           </div>
         </div>
       )}
 
       {step === 2 && (
         <div className="mt-8 text-center">
-          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">One photo</div>
-          <h1 className="serif mt-2 text-[32px] font-bold leading-[1.1] tracking-tight">Show us {name}</h1>
+          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{t("One photo")}</div>
+          <h1 className="serif mt-2 text-[32px] font-bold leading-[1.1] tracking-tight">{t("Show us {name}", { name })}</h1>
           <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-[var(--ink2)]">
-            One clear photo where we can see {they} well. We&apos;ll read {they === "them" ? "their" : they === "her" ? "her" : "his"} looks (coat, marks, breed) and you can correct anything. Later, more photos make {name} more alive.
+            {t("One clear photo where we can see {name} well. We'll read the looks (coat, marks, breed) and you can correct anything. Later, more photos make {name} more alive.", { name })}
           </p>
           <button disabled={busy} onClick={() => input.current?.click()} className="mt-6 w-full rounded-2xl border-2 border-dashed border-[#c9cede] bg-white px-6 py-14 text-[15px] font-medium text-[var(--gold)] transition hover:border-[var(--gold)] disabled:opacity-60">
-            {busy ? `Looking at ${name}…` : "Choose a photo"}
+            {busy ? t("Looking at {name}…", { name }) : t("Choose a photo")}
           </button>
           <input ref={input} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
-          {!busy && <button onClick={() => setStep(1)} className="mt-4 text-[14px] font-medium text-[var(--ink2)]">Back</button>}
+          {!busy && <button onClick={() => setStep(1)} className="mt-4 text-[14px] font-medium text-[var(--ink2)]">{t("Back")}</button>}
         </div>
       )}
     </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MapPin, Menu, MessageCircle, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
+import { BookHeart, Gift, HeartHandshake, House, Layers, Globe, LogOut, MapPin, Menu, MessageCircle, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
@@ -10,14 +10,17 @@ import Scene from "@/components/Scene";
 import UnlockToast from "@/components/UnlockToast";
 import type { Memory } from "@/components/MemoryPanel";
 import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
+import { LANGS } from "@/lib/i18n";
+import { levelName } from "@/lib/memory";
 import { tasksFor } from "@/lib/points";
+import { browserLang, LangProvider, translate } from "@/lib/ui";
 import { rhythm } from "@/lib/rhythm";
 import type { Card, Pet, State } from "@/lib/types";
 import { WorkspaceLoading } from "@/components/Loading";
 import { CocoLogo } from "@/components/Brand";
 
 export type Loaded = State & { live: boolean; signedIn: boolean; admin: boolean; email: string | null; memory: Record<string, Memory> };
-export type Ctx = { state: Loaded; pet: Pet; memory: Memory | undefined; refresh: () => Promise<void>; openCard: (c: Card) => void };
+export type Ctx = { state: Loaded; pet: Pet; memory: Memory | undefined; refresh: () => Promise<void>; openCard: (c: Card) => void; t: (s: string, v?: Record<string, string | number>) => string; lang: string };
 
 // The app as a workspace: a paper sidebar with the pet, a way to start talking, the places to go,
 // recent conversations and the account; the page on the right. Any card anywhere opens in the same card view.
@@ -48,51 +51,66 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const params = useSearchParams();
   const threadParam = params.get("thread");
   useEffect(() => setMenu(false), [path, threadParam]);
+  // the owner's language: saved on the account; the first time, the browser's
+  const lang = state?.settings?.lang ?? browserLang();
+  useEffect(() => {
+    if (state && !state.settings?.lang) fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lang: browserLang() }) }).catch(() => {});
+  }, [state]);
+  const t = (s: string, v?: Record<string, string | number>) => translate(lang, s, v);
+  const setLang = async (l: string) => {
+    await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lang: l }) });
+    await refresh();
+  };
+  const L = { lang, t, setLang };
 
   if (!state) return <WorkspaceLoading />;
   const pet = state.pets[0];
   const banner = !state.live && (
-    <div className="mb-4 rounded-lg bg-[#fff7e6] px-3 py-2 text-[12px] text-[#ad6800]">Practice mode: the AI answers are samples. No request goes to the Meta API until live mode is on.</div>
+    <div className="mb-4 rounded-lg bg-[#fff7e6] px-3 py-2 text-[12px] text-[#ad6800]">{t("Practice mode: the AI answers are samples. No request goes to the Meta API until live mode is on.")}</div>
   );
   if (!pet || !pet.name)
     return (
-      <main className="ws block px-4 pb-24 pt-8">
-        <div className="mx-auto max-w-5xl">
-          {banner}
-          {!pet ? <StartWithOnePhoto onDone={refresh} /> : <ConfirmProfile pet={pet} onDone={refresh} />}
-        </div>
-      </main>
+      <LangProvider value={L}>
+        <main className="ws block px-4 pb-24 pt-8">
+          <div className="mx-auto max-w-5xl">
+            {banner}
+            {!pet ? <StartWithOnePhoto onDone={refresh} /> : <ConfirmProfile pet={pet} onDone={refresh} />}
+          </div>
+        </main>
+      </LangProvider>
     );
 
   const cards = state.cards.filter((c) => c.petId === pet.id && !c.sealed);
   const r = rhythm(cards);
-  const memory = state.memory?.[pet.id];
+  const known = state.memory?.[pet.id];
+  const memory = known ? { ...known, name: levelName(known.level, pet, t) } : undefined; // level names in the owner's language
   const tasksLeft = tasksFor(state, pet).filter((t) => !t.done).length;
   const threads = (state.threads ?? []).filter((t) => t.petId === pet.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const thread = params.get("thread");
   const face = pet.character?.moods.idle?.[0];
   const faceSrc = face ? (face.startsWith("/") ? face : `/api/art/${face}?v=${encodeURIComponent(pet.character?.at ?? "")}`) : "";
   const NAV: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean }[] = [
-    { href: "/app", label: "Home", icon: House, on: path === "/app" },
-    { href: "/app/pack", label: "Today", icon: Gift, badge: tasksLeft ? `${tasksLeft}` : undefined, on: path.startsWith("/app/pack") },
-    { href: "/app/cards", label: "Cards", icon: Layers, badge: `${cards.length}`, on: path.startsWith("/app/cards") },
-    { href: "/app/memory", label: "Memory", icon: BookHeart, badge: memory ? `Lv ${memory.level}` : undefined, on: path.startsWith("/app/memory") },
-    { href: "/app/place", label: "Around us", icon: MapPin, badge: state.place ? undefined : "Set", on: path.startsWith("/app/place") },
-    { href: "/app/friends", label: "Friends", icon: HeartHandshake, badge: (state.playdates ?? []).filter((p) => p.petId === pet.id).length ? `${(state.playdates ?? []).filter((p) => p.petId === pet.id).length}` : undefined, on: path.startsWith("/app/friends") },
+    { href: "/app", label: t("Home"), icon: House, on: path === "/app" },
+    { href: "/app/pack", label: t("Today"), icon: Gift, badge: tasksLeft ? `${tasksLeft}` : undefined, on: path.startsWith("/app/pack") },
+    { href: "/app/cards", label: t("Cards"), icon: Layers, badge: `${cards.length}`, on: path.startsWith("/app/cards") },
+    { href: "/app/memory", label: t("Memory"), icon: BookHeart, badge: memory ? `Lv ${memory.level}` : undefined, on: path.startsWith("/app/memory") },
+    { href: "/app/place", label: t("Around us"), icon: MapPin, badge: state.place ? undefined : t("Set"), on: path.startsWith("/app/place") },
+    { href: "/app/friends", label: t("Friends"), icon: HeartHandshake, badge: (state.playdates ?? []).filter((p) => p.petId === pet.id).length ? `${(state.playdates ?? []).filter((p) => p.petId === pet.id).length}` : undefined, on: path.startsWith("/app/friends") },
   ];
-  if (state.admin) NAV.push({ href: "/app/admin", label: "Admin", icon: Shield, on: path.startsWith("/app/admin") });
+  if (state.admin) NAV.push({ href: "/app/admin", label: t("Admin"), icon: Shield, on: path.startsWith("/app/admin") });
 
   const chat = path.startsWith("/app/chat");
   // phones: five places along the bottom, talking in the middle; the rest is in the drawer
   const TABS: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean; talk?: boolean }[] = [
     NAV[0],
-    { ...NAV[1], label: "Today" },
-    { href: "/app/chat", label: pet.name.length <= 6 ? `Talk to ${pet.name}` : "Talk", icon: MessageCircle, on: chat, talk: true },
+    { ...NAV[1], label: t("Today") },
+    { href: "/app/chat", label: pet.name.length <= 6 ? t("Talk to {name}", { name: pet.name }) : t("Talk"), icon: MessageCircle, on: chat, talk: true },
     NAV[2],
     NAV[3],
   ];
 
   return (
+    <LangProvider value={L}>
     <div className={`ws ${chat ? "ws-chat" : ""}`}>
       <header className="ws-mtop">
         <button onClick={() => setMenu(true)} className="-ml-1.5 rounded-lg p-1.5 text-[var(--ink)]" aria-label="Open menu"><Menu size={21} /></button>
@@ -140,7 +158,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
         <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-3">
           <Link href="/app/chat" className="ws-hide-sm mb-3 flex items-center gap-2.5 rounded-xl border border-[var(--line)] bg-white px-3 py-2.5 text-[14.5px] font-bold hover:border-[var(--gold)]">
             <PetFace pet={pet} className="h-7 w-7 shrink-0" ring="ring-2 ring-[#e2d8ff]" />
-            Talk with {pet.name}
+            {t("Talk with {name}", { name: pet.name })}
           </Link>
           <nav className="ws-nav grid gap-0.5">
             {NAV.map((n) => (
@@ -153,13 +171,13 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
           </nav>
 
           <div className="ws-hide-sm">
-            <div className="ws-group">Recent</div>
+            <div className="ws-group">{t("Recent")}</div>
             {threads.slice(0, 24).map((t) => (
               <Link key={t.id} href={`/app/chat?thread=${t.id}`} className={`ws-item ${path.startsWith("/app/chat") && thread === t.id ? "on" : ""}`} title={t.title}>
                 {t.title}
               </Link>
             ))}
-            {!threads.length && <div className="px-3 text-[13px] text-[var(--ink3)]">No conversations yet</div>}
+            {!threads.length && <div className="px-3 text-[13px] text-[var(--ink3)]">{t("No conversations yet")}</div>}
           </div>
         </div>
 
@@ -167,14 +185,21 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
           {r.streak > 0 && (
             <div className="mb-2 flex items-center gap-2 rounded-xl bg-[#f3eefe] px-3 py-2 text-[12.5px] text-[#5b3fb0]">
               <Sparkles size={14} />
-              <span><b>{r.streak}</b> day{r.streak > 1 ? "s" : ""} in a row with a new memory</span>
+              <span>{t(r.streak > 1 ? "{n} days in a row with a new memory" : "{n} day in a row with a new memory", { n: r.streak })}</span>
             </div>
           )}
           <div className="flex items-center gap-2 px-1 text-[12.5px] text-[var(--ink2)]">
-            <span className="min-w-0 flex-1 truncate">{state.email ?? "Local mode"}</span>
+            <span className="min-w-0 flex-1 truncate">{state.email ?? t("Local mode")}</span>
+            {/* language: the app's words and everything the AI writes */}
+            <label className="relative flex items-center rounded-lg p-1.5 hover:bg-[rgba(35,32,27,.06)]" title={t("Language")}>
+              <Globe size={15} />
+              <select value={lang} onChange={(e) => setLang(e.target.value)} className="absolute inset-0 cursor-pointer opacity-0" aria-label={t("Language")}>
+                {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+              </select>
+            </label>
             {state.signedIn && (
               <button
-                title="Sign out"
+                title={t("Sign out")}
                 onClick={async () => {
                   const { browserClient } = await import("@/lib/supabase-browser");
                   await browserClient().auth.signOut();
@@ -192,7 +217,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
       <main className="ws-main">
         <div className="ws-wrap">
           {banner}
-          {children({ state, pet, memory, refresh, openCard: setCard })}
+          {children({ state, pet, memory, refresh, openCard: setCard, t, lang })}
         </div>
       </main>
       {!chat && (
@@ -211,6 +236,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
       {card && <CardModal card={card} state={state} pet={pet} onClose={() => setCard(null)} onChanged={refresh} />}
       <UnlockToast pet={pet} state={state} />
     </div>
+    </LangProvider>
   );
 }
 

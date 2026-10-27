@@ -67,7 +67,7 @@ export function cardTags(card: Card, state: State, pet: Pet): string[] {
   const pattern = card.pattern ?? packFor(pet.species).quest.find((s) => s.id === card.slotId)?.pattern ?? null;
   const taken = photo?.takenAt ?? null;
   const ctx: Ctx = {
-    text: [card.name, card.observation, card.note?.text ?? "", ...traces.map((t) => `${t.label} ${t.detail ?? ""}`)].join(" · ").toLowerCase(),
+    text: [card.name, card.observation, card.scene ?? "", card.note?.text ?? "", ...traces.map((t) => `${t.label} ${t.detail ?? ""}`)].join(" · ").toLowerCase(),
     pattern,
     month: taken ? Number(taken.slice(5, 7)) || null : null,
     hour: taken && taken.length >= 13 ? Number(taken.slice(11, 13)) : null,

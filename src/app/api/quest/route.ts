@@ -10,6 +10,7 @@ import { currentUserId, runAs, withUser } from "@/lib/session";
 import { overLimit } from "@/lib/limits";
 import { unlockMoves } from "@/lib/character";
 import { STARTER_MOVE, starterDoneAt } from "@/lib/moves";
+import { writeIn } from "@/lib/meta";
 
 export const maxDuration = 300; // seconds; model calls and painting take a while
 
@@ -34,8 +35,9 @@ export const POST = withUser(async (req: Request) => {
   const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);
   const ref = avatar ? await photoBase64(avatar.file) : null; // which animal is the pet, when there are several
   // the reading tells the painter which moment to paint; the painting itself is a new picture in the slot's style
+  writeIn(s.settings?.lang); // cards are written in the owner's language
   const reading = await readQuestPhoto(b64, slot, pet.name || "me", pet.sex, ref);
-  const art = await paintCard(b64, pet, slot.style, reading.observation, ref);
+  const art = await paintCard(b64, pet, slot.style, reading.scene || reading.observation, ref);
   // rare cards and up get a depth layer; a failed cutout just leaves the card flat
   const fg = art && reading.rarity >= 2 ? await depthLayer(art, samPhrase(pet.species)).catch(() => null) : null;
 
@@ -58,6 +60,7 @@ export const POST = withUser(async (req: Request) => {
     fg: fg ? `/api/art/${fg}` : null,
     line: reading.line,
     observation: reading.observation,
+    scene: reading.scene,
     photoId: photo.id,
     createdAt: new Date().toISOString(),
   };
