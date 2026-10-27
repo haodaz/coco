@@ -2,6 +2,7 @@
 
 import { use, useEffect, useRef, useState } from "react";
 import Character, { type Mood } from "@/components/Character";
+import { PageLoading } from "@/components/Loading";
 
 type Info = { pet: { name: string; species: string; breed: string | null; sex: string | null }; label: string; topics: string[]; moods: Record<string, string[]>; cards: { id: string; name: string; line: string; art: string | null }[] };
 type Turn = { question: string; answer: string; mood: Mood; cards: { id: string; name: string; art: string | null }[]; basis: { cardId: string; how: string }[]; gap: { topic: string } | null };
@@ -36,7 +37,7 @@ export default function SitterPage({ params }: { params: Promise<{ token: string
   }
 
   if (err) return <main className="ws grid place-items-center p-8 text-center"><div><div className="serif text-[28px] font-bold">This link is switched off.</div><p className="mt-2 text-[var(--ink2)]">Ask the pet&apos;s owner for a new one.</p></div></main>;
-  if (!info) return <main className="ws grid place-items-center text-[var(--ink3)]">Loading…</main>;
+  if (!info) return <PageLoading label="" />;
   const p = info.pet;
   const her = p.sex === "male" ? "his" : p.sex === "female" ? "her" : "their";
   const mood: Mood = pending ? "thinking" : turns[turns.length - 1]?.mood ?? "idle";

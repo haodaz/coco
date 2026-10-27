@@ -5,6 +5,7 @@ import { use, useEffect, useState } from "react";
 import Character from "@/components/Character";
 import PlaydateView from "@/components/PlaydateView";
 import type { Playdate } from "@/lib/types";
+import { PageLoading } from "@/components/Loading";
 
 type Info = { pet: { name: string; species: string; breed: string | null }; label: string; moods: Record<string, string[]> };
 
@@ -37,7 +38,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   }
 
   if (err) return <main className="ws grid place-items-center p-8 text-center"><div><div className="serif text-[28px] font-bold">This invite is switched off.</div><p className="mt-2 text-[var(--ink2)]">Ask the pet&apos;s owner for a new one.</p></div></main>;
-  if (!info) return <main className="ws grid place-items-center text-[var(--ink3)]">Loading…</main>;
+  if (!info) return <PageLoading label="" />;
   const host = info.pet;
   return (
     <main className="ws block min-h-screen">

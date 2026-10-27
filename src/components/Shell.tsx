@@ -11,6 +11,7 @@ import type { Memory } from "@/components/MemoryPanel";
 import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
 import { rhythm } from "@/lib/rhythm";
 import type { Card, Pet, State } from "@/lib/types";
+import { WorkspaceLoading } from "@/components/Loading";
 
 export type Loaded = State & { live: boolean; signedIn: boolean; admin: boolean; email: string | null; memory: Record<string, Memory> };
 export type Ctx = { state: Loaded; pet: Pet; memory: Memory | undefined; refresh: () => Promise<void>; openCard: (c: Card) => void };
@@ -42,7 +43,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const path = usePathname();
   const params = useSearchParams();
 
-  if (!state) return <main className="ws grid place-items-center text-[var(--ink3)]">Loading…</main>;
+  if (!state) return <WorkspaceLoading />;
   const pet = state.pets[0];
   const banner = !state.live && (
     <div className="mb-4 rounded-lg bg-[#fff7e6] px-3 py-2 text-[12px] text-[#ad6800]">Practice mode: the AI answers are samples. No request goes to the Meta API until live mode is on.</div>

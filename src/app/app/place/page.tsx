@@ -2,6 +2,7 @@
 
 import Shell, { PageHead, Rule } from "@/components/Shell";
 import { AreaPicker, FactCard, HomeForm, Services, usePlace } from "@/components/PlaceView";
+import { CocoLoader } from "@/components/Loading";
 
 // Around us: where the owner and the pet live, and what is true there right now. The pet checks this
 // (weather, the parked-car check, rules) before it speaks up about a plan.
@@ -25,7 +26,7 @@ export default function PlacePage() {
             <div className="max-w-xl">
               <AreaPicker current={place?.area} onPicked={reload} />
             </div>
-            {!data && <p className="mt-6 text-[14px] text-[var(--ink3)]">Checking…</p>}
+            {!data && <div className="mt-10"><CocoLoader size="sm" label="Checking the weather and the rules…" /></div>}
             {place && (
               <>
                 <Rule label="Right now" />

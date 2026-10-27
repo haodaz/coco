@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminAccounts from "@/components/AdminAccounts";
 import Shell from "@/components/Shell";
+import { CocoLoader } from "@/components/Loading";
 
 type Row = { calls: number; tokens: number };
 type Usage = { days: Record<string, Row>; features: Record<string, Row>; people: Record<string, Row>; paintingsToday: number; paintingCap: number; accounts: number };
@@ -19,7 +20,7 @@ function UsageView() {
     });
   }, []);
   if (err) return <p className="text-[14px] text-[var(--sub)]">{err}</p>;
-  if (!u) return <p className="text-[14px] text-[var(--sub)]">Loading…</p>;
+  if (!u) return <div className="py-16"><CocoLoader size="sm" label="Loading…" /></div>;
   const table = (title: string, data: Record<string, Row>) => (
     <section className="rounded-2xl bg-white p-4 shadow-sm">
       <h2 className="text-[15px] font-bold">{title}</h2>

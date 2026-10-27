@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CocoLoader } from "@/components/Loading";
 
 type Account = { id: string; email: string | null; createdAt: string; lastSignIn: string | null; banned: boolean; pets: { id: string; name: string; species: string; breed: string | null }[]; cards: number; photos: number; notes: number; updatedAt: string | null };
 type Detail = {
@@ -26,7 +27,7 @@ export default function AdminAccounts() {
     reload();
   }, []);
   if (err) return <p className="text-[14px] text-[var(--sub)]">{err}</p>;
-  if (!list) return <p className="text-[14px] text-[var(--sub)]">Loading…</p>;
+  if (!list) return <div className="py-16"><CocoLoader size="sm" label="Loading…" /></div>;
   if (open) return <AccountView id={open} back={() => { setOpen(null); reload(); }} />;
   return (
     <section className="overflow-x-auto rounded-2xl bg-white p-4 shadow-sm">
@@ -65,7 +66,7 @@ function AccountView({ id, back }: { id: string; back: () => void }) {
     if (!r.ok) alert((await r.json()).error);
     load();
   }
-  if (!d) return <p className="text-[14px] text-[var(--sub)]">Loading…</p>;
+  if (!d) return <div className="py-16"><CocoLoader size="sm" label="Loading…" /></div>;
   const a = d.account;
   return (
     <div className="space-y-5">
