@@ -187,7 +187,7 @@ export default function AskPanel({
                       </div>
                     )}
                     {t.general.length > 0 && <div className="mt-2 text-[12px] text-[var(--ink3)]"><b>{tr("General knowledge, not a memory:")}</b> {t.general.join(" ")}</div>}
-                    {t.gap && <div className="mt-3 rounded-xl border border-dashed border-[var(--line)] px-3 py-2 text-[12.5px] text-[var(--ink2)]">{tr("You haven't shown me {topic} yet. A photo for {suggest} would teach me.", { topic: t.gap.topic, suggest: t.gap.suggest })}</div>}
+                    {t.gap && <div className="mt-3 rounded-xl border border-dashed border-[var(--line)] px-3 py-2 text-[12.5px] text-[var(--ink2)]">{tr("Nothing about {topic} in my memories yet. A “{suggest}” photo would teach me.", { topic: t.gap.topic.toLowerCase(), suggest: t.gap.suggest })}</div>}
                     {t.action && (
                       <button onClick={() => setPanel(t.action!, t.facts ?? [])} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#efe9ff] px-3 py-1 text-[12.5px] font-medium text-[#5b3fb0] hover:bg-[#e2d8ff]">
                         <PanelRightOpen size={14} /> {tr("I opened {what}", { what: LABEL[t.action.type] })}

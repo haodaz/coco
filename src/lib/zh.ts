@@ -242,7 +242,7 @@ export const ZH: Record<string, string> = {
   "I remember this from": "我是从这些记得的",
   "I checked": "我查了",
   "General knowledge, not a memory:": "常识，不是回忆：",
-  "You haven't shown me {topic} yet. A photo for {suggest} would teach me.": "你还没给我看过{topic}。一张「{suggest}」的照片就能教会我。",
+  "Nothing about {topic} in my memories yet. A “{suggest}” photo would teach me.": "我的回忆里还没有关于{topic}的。一张「{suggest}」的照片就能教会我。",
   "I opened {what}": "我打开了{what}",
   "Looking through our moments…": "正在翻我们的回忆…",
   "Thinking…": "正在想…",
