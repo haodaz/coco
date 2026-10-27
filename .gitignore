@@ -8,3 +8,7 @@ node_modules/
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# teaser video work files
+docs/video/teaser/out/
+docs/video/teaser/tts/

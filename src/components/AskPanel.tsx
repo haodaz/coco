@@ -85,7 +85,8 @@ export default function AskPanel({
     setPending(null);
     if (!r) return;
     setTurns((ts) => [...ts, { ...r, at: new Date().toISOString() }]);
-    if (r.action) setPanel(r.action, r.facts ?? []); // the pet opened something beside the conversation
+    // wide screens open it beside the talk; on phones a sheet would cover the answer, so it waits for a tap on "I opened…"
+    if (r.action && window.matchMedia("(min-width: 1024px)").matches) setPanel(r.action, r.facts ?? []);
     if (r.threadId !== threadId) {
       mine.current = r.threadId;
       onThread(r.threadId);

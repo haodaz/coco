@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;font-family:Inter,sans-serif;color:#1f1d33;background:#f6f4fb}
+.glow1{position:absolute;right:-220px;top:-160px;width:760px;height:760px;border-radius:50%;background:rgba(109,79,209,.16);filter:blur(90px)}
+.glow2{position:absolute;left:-200px;bottom:-200px;width:700px;height:700px;border-radius:50%;background:rgba(194,65,143,.10);filter:blur(90px)}
+.page{position:absolute;inset:0;display:none;padding:0 96px;box-sizing:border-box;flex-direction:column;justify-content:center}
+.on{display:flex}
+.eyebrow{font-size:30px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#6d4fd1}
+h1{white-space:nowrap;font-family:Fraunces,serif;font-weight:700;font-size:84px;line-height:1.02;letter-spacing:-2px;margin:28px 0 0}
+h2{font-family:Fraunces,serif;font-weight:700;font-size:84px;line-height:1.05;letter-spacing:-1.5px;margin:24px 0 56px}
+.sub{font-family:Fraunces,serif;font-style:italic;font-size:44px;color:#5c5a75;margin-top:30px}
+.pet{position:absolute;right:60px;bottom:120px;width:430px;filter:drop-shadow(0 30px 40px rgba(40,30,90,.25))}
+.step{display:flex;align-items:center;gap:34px;border-radius:36px;padding:40px 44px;margin-bottom:26px;font-size:46px;font-weight:600;line-height:1.2;box-shadow:0 18px 40px -22px rgba(40,30,90,.35)}
+.step b{flex:none;display:grid;place-items:center;width:84px;height:84px;border-radius:50%;background:#fff;font-size:40px}
+.s1{background:#e8f0ff;color:#2b3a8f}.s2{background:#efe9ff;color:#5b3fb0}.s3{background:#fde8f2;color:#a3306f}
+.arrow{text-align:center;font-size:44px;color:#9a97b3;margin:-12px 0 14px}
+.logo{font-family:Fraunces,serif;font-weight:700;font-size:150px;letter-spacing:-3px}
+.url{display:inline-block;margin-top:56px;border-radius:999px;padding:22px 44px;font-size:44px;font-weight:700;color:#fff;background:linear-gradient(150deg,#2b3a8f,#5b3fb0 50%,#c2418f)}
+.built{margin-top:70px;font-size:32px;color:#5c5a75;line-height:1.5}
+</style></head><body>
+<div class="glow1"></div><div class="glow2"></div>
+
+<div class="page" id="cover">
+  <div class="eyebrow">coco · co-world</div>
+  <h1>Your pet's photos,<br>grown into a co‑world.</h1>
+  <img class="pet" src="out/pet.png">
+</div>
+
+<div class="page" id="concept" style="padding-top:300px">
+  <div class="eyebrow">How it works</div>
+  <h2>From camera roll<br>to co‑world</h2>
+  <div class="step s1"><b>1</b>A real moment, from your photos</div>
+  <div class="arrow">↓</div>
+  <div class="step s2"><b>2</b>A card that keeps it</div>
+  <div class="arrow">↓</div>
+  <div class="step s3"><b>3</b>Your pet's AI, grown only from those cards</div>
+</div>
+
+<div class="page" id="end">
+  <div class="logo">coco</div>
+  <div class="sub">A co-world for you and your pet.</div>
+  <div><span class="url">cocoverse.app</span></div>
+  <div class="built">Built with Meta Muse Spark, Muse Image<br>and SAM 3.1</div>
+  <img class="pet" src="out/pet.png">
+</div>
+
+<script>const id=new URLSearchParams(location.search).get('p')||'cover';document.getElementById(id).classList.add('on');</script>
+</body></html>
