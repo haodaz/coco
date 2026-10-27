@@ -1,4 +1,6 @@
 import type { Pattern } from "./species";
+import type { Place } from "./place";
+import type { Fact } from "./rules";
 // The pet's world, in four layers: photos and notes (raw material) → traces (what it did)
 // → traits (who it is, each with evidence) → cards (what the owner gets back).
 
@@ -83,7 +85,7 @@ export type Card = {
 // A conversation with the pet, kept so the owner can come back to it (the sidebar's "Recent").
 // Something the pet opens on the owner's screen while it answers (the conversation's side panel).
 export type PetAction = {
-  type: "show_cards" | "open_card" | "open_pack" | "add_photo" | "show_memory" | "make_link";
+  type: "show_cards" | "open_card" | "open_pack" | "add_photo" | "show_memory" | "make_link" | "show_place";
   cardIds: string[];
   topic: Pattern | null;
   slotId: string | null;
@@ -98,6 +100,7 @@ export type ChatTurn = {
   basis: { cardId: string; how: string }[];
   general: string[];
   gap: { topic: string; suggest: string } | null;
+  facts?: Fact[]; // what was checked about the place before answering (weather, rules), as cited
   at: string;
 };
 export type Thread = { id: string; petId: string; title: string; createdAt: string; updatedAt: string; turns: ChatTurn[]; via?: { kind: "sitter"; token: string } };
@@ -132,4 +135,5 @@ export type State = {
   threads?: Thread[];
   shares?: Share[];
   playdates?: Playdate[];
+  place?: Place | null; // where the owner and the pet live, area-level
 };

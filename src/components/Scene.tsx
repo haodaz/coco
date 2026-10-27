@@ -24,6 +24,11 @@ const SCENES: Record<string, Piece[]> = {
   memory: [
     { src: A("polaroids"), style: { right: "0%", bottom: "2%", width: "46%", rotate: "10deg" }, delay: -2 },
   ],
+  place: [
+    { src: A("turtle"), style: { left: "4%", bottom: "2%", width: "40%" }, delay: -1.4 },
+    { src: A("parrot"), style: { right: "8%", top: "4%", width: "28%" }, delay: -0.4 },
+    { src: A("rabbit"), style: { right: "2%", bottom: "0%", width: "30%" }, delay: -2.4 },
+  ],
   signin: [
     { src: A("fan"), style: { left: "12%", top: "4%", width: "76%" }, delay: -1 },
     { src: A("cat"), style: { left: "2%", bottom: "2%", width: "28%" }, delay: -2.2 },

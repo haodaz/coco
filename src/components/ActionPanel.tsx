@@ -15,6 +15,9 @@ import { SENSES } from "@/lib/memory";
 import { appendPhoto } from "@/lib/prepare";
 import { packFor, type Pattern } from "@/lib/species";
 import type { Card, Pet, PetAction, Share, State } from "@/lib/types";
+import type { Fact } from "@/lib/rules";
+import Link from "next/link";
+import { AreaPicker, FactCard } from "@/components/PlaceView";
 
 const TITLE: Record<PetAction["type"], string> = {
   show_cards: "Memories",
@@ -23,10 +26,11 @@ const TITLE: Record<PetAction["type"], string> = {
   add_photo: "Teach me something new",
   show_memory: "How well I know myself",
   make_link: "Introduce me",
+  show_place: "What I checked",
 };
 
 // The conversation's side panel: whatever the pet opened while answering, ready to look at or act on.
-export default function ActionPanel({ action, pet, state, memory, admin, onClose, refresh }: { action: PetAction; pet: Pet; state: State; memory?: Memory; admin: boolean; onClose: () => void; refresh: () => void }) {
+export default function ActionPanel({ action, facts = [], pet, state, memory, admin, onClose, refresh }: { action: PetAction; facts?: Fact[]; pet: Pet; state: State; memory?: Memory; admin: boolean; onClose: () => void; refresh: () => void }) {
   const [card, setCard] = useState<Card | null>(null);
   const slots = packFor(pet.species).quest;
   const patternOf = (c: Card) => c.pattern ?? slots.find((s) => s.id === c.slotId)?.pattern ?? null;
@@ -67,6 +71,18 @@ export default function ActionPanel({ action, pet, state, memory, admin, onClose
         <div className="mt-4 flex flex-wrap justify-center gap-1.5">
           {memory.senses.map((s) => <span key={s.pattern} className={`rounded-full px-2.5 py-1 text-[12px] ${s.imprints ? "bg-[#efe9ff] text-[#5b3fb0]" : "bg-[#eeebf8] text-[var(--ink3)]"}`}>{s.label}{s.imprints ? ` · ${s.imprints}` : ""}</span>)}
         </div>
+      </div>
+    );
+  } else if (action.type === "show_place") {
+    body = state.place ? (
+      <div className="grid gap-3">
+        {facts.length ? facts.map((f) => <FactCard key={f.id} fact={f} />) : <p className="text-[14px] text-[var(--ink2)]">I didn&apos;t need to check anything about {state.place.name} for that.</p>}
+        <Link href="/app/place" className="text-[13px] font-semibold text-[var(--gold)]">Everything around us in {state.place.name} →</Link>
+      </div>
+    ) : (
+      <div>
+        <p className="mb-3 text-[14px] text-[var(--ink2)]">Tell me where we live and I&apos;ll check the weather and the rules there before I speak up about a plan.</p>
+        <AreaPicker onPicked={refresh} />
       </div>
     );
   } else if (action.type === "make_link") body = <LinkPanel kind={action.kind ?? "sitter"} pet={pet} onMade={refresh} />;

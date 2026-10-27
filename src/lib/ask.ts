@@ -4,11 +4,12 @@ import type { PetAction } from "./types";
 import { LIVE, askPet, type Answer } from "./meta";
 import { packFor } from "./species";
 import type { Pet, State } from "./types";
+import { placeFacts, type Fact } from "./rules";
 
 // "Ask Coco": the twin answers from its imprints. Everything it says about itself must rest on a card;
 // general knowledge about the species or breed is allowed but kept apart; with no imprints on a topic it says so.
 
-export type AskResult = Answer & { cards: { id: string; name: string; art: string | null; photoId: string }[] };
+export type AskResult = Omit<Answer, "facts"> & { facts: Fact[]; cards: { id: string; name: string; art: string | null; photoId: string }[] };
 
 function age(born: string | null) {
   if (!born) return null;
@@ -56,9 +57,11 @@ export async function ask(state: State, pet: Pet, question: string, opts: { cont
   const patterns = [...new Set(slots.map((s) => s.pattern))];
   const emptySlots = slots.filter((s) => !state.cards.some((c) => c.petId === pet.id && c.slotId === s.id));
   const tools = owner ? { topics: patterns.map((p) => ({ pattern: p, label: SENSES[p] })), emptySlots: emptySlots.map((s) => ({ id: s.id, title: s.title })) } : null;
+  // the place is checked in code before the pet speaks: weather, the parked-car check, rules (owner only)
+  const { place, facts: checked } = owner ? await placeFacts(state.place, pet.name) : { place: null, facts: [] as Fact[] };
   const answer = LIVE
-    ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title), opts.audience, tools)
-    : { answer: `I only know a little about myself so far. Show me more moments and I'll answer that properly.`, basis: [], general: [], gap: null, mood: "confused" as const, action: null };
+    ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title), opts.audience, tools, { area: place?.area ?? null, facts: checked.map(({ id, title, text, source }) => ({ id, title, text, source })) })
+    : { answer: `I only know a little about myself so far. Show me more moments and I'll answer that properly.`, basis: [], general: [], gap: null, mood: "confused" as const, action: null, facts: [] };
 
   // the action must point at real things; a gap with no action still offers a way to add a photo
   let action: PetAction | null = owner ? answer.action : null;
@@ -70,12 +73,16 @@ export async function ask(state: State, pet: Pet, question: string, opts: { cont
     else if (action.type === "make_link" && action.kind !== "sitter" && action.kind !== "playdate") action.kind = "sitter";
   }
   if (owner && !action && answer.gap) action = { type: "add_photo", cardIds: [], topic: null, slotId: null, kind: null };
+  // facts the answer used must be ones we checked; when it used any, the checks open beside the answer
+  const facts = checked.filter((f) => answer.facts.includes(f.id));
+  if (owner && !action && facts.some((f) => f.kind !== "home")) action = { type: "show_place", cardIds: [], topic: null, slotId: null, kind: null };
   answer.action = action;
 
   // keep only cards that exist; the model may not invent evidence
   const basis = answer.basis.filter((b) => cards.some((c) => c.id === b.cardId));
   return {
     ...answer,
+    facts,
     basis,
     cards: basis.map((b) => cards.find((c) => c.id === b.cardId)!).map((c) => ({ id: c.id, name: c.name, art: c.art, photoId: c.photoId })),
   };

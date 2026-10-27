@@ -422,10 +422,11 @@ export type Answer = {
   gap: { topic: string; suggest: string } | null; // what it doesn't know yet, and which card would teach it
   mood: "happy" | "close" | "confused" | "thinking"; // how the character looks while saying it
   action: PetAction | null; // something to open beside the conversation
+  facts: string[]; // ids of the place facts (weather, checks, rules) the answer uses
 };
 
 // The twin answers a question from the owner, in the pet's voice, resting only on its imprints.
-export async function askPet(question: string, profile: object, imprints: object[], senses: string[], slotTitles: string[], audience: "owner" | "sitter" = "owner", tools: { topics: { pattern: string; label: string }[]; emptySlots: { id: string; title: string }[] } | null = null): Promise<Answer> {
+export async function askPet(question: string, profile: object, imprints: object[], senses: string[], slotTitles: string[], audience: "owner" | "sitter" = "owner", tools: { topics: { pattern: string; label: string }[]; emptySlots: { id: string; title: string }[] } | null = null, place: { area: string | null; facts: { id: string; title: string; text: string; source: string }[] } = { area: null, facts: [] }): Promise<Answer> {
   const sitter = audience === "sitter"
     ? [
         "You are NOT talking with your owner now. You are talking with someone your owner trusts to look after you (a sitter or a boarding host). Call your owner \"my person\". Help them care for you well: your routines, places, likes, how you react to things, all from your imprints.",
@@ -444,12 +445,20 @@ export async function askPet(question: string, profile: object, imprints: object
       "If the imprints say nothing about the topic, say plainly that you haven't shown the owner that yet, and fill gap with the topic and which kind of photo would teach you (pick from the photo kinds listed); keep those photo kind names out of your answer sentence. You may still add one helpful, safe general sentence (for example, most shops don't let dogs in). Otherwise gap is null.",
       "Health, symptoms, food amounts, medicine, vaccines or training methods: do not advise, do not guess, and never say how your body feels. Say kindly, in your own voice, that a vet is the one to ask before giving you anything, and stop there. For these questions gap is null and basis is empty.",
       "Never mention people's identities beyond their role. Never invent dates.",
-      "Never suggest leaving you in a parked car: whether that is safe depends on today's weather, which you cannot see. If it comes up, say the owner should check the weather first, or take you home first.",
+      place.area
+        ? [
+            `Where you and your owner live: ${place.area}. Below are facts about the place, checked just now by code (weather, safety checks, rules, nearby pet places). They are true for now; you did not decide them.`,
+            "When the owner mentions a plan (going out, a shop, the car, a walk, a park, a trip, someone looking after you) or asks about weather or rules, speak up for yourself using these facts: say plainly what fits the plan, give the reason in a few words (the temperature, the rule), and offer a better way when the plan doesn't work for you. List the fact ids you used in facts.",
+            "Never state a temperature, a rule, a law or a place that is not in the facts. If what they need is not there, say you don't know that about where you live and they should check.",
+            "Never suggest leaving you waiting in a parked car, whatever the weather; use the car check for the reason.",
+            "A nearby place from the facts is a listing, not a recommendation; you may name it, never vouch for it.",
+          ].join("\n")
+        : "Never suggest leaving you in a parked car: whether that is safe depends on today's weather, which you cannot see. If it comes up, say you don't know where we live yet, so you can't check the weather; the owner can tell you on the Around us page. facts is empty.",
       "mood: close when the answer is about you and the owner, confused when there is a gap, thinking for the vet answer, happy otherwise.",
       tools
         ? [
             "action: you can open one thing on your owner's screen beside the conversation, when it helps them do or see what they asked; otherwise null.",
-            "show_cards: cards about a topic or the ones you cite (cardIds and/or topic). open_card: one card (cardIds = [its id]). open_pack: today's pack, when they want to add a memory or ask about today's pack. add_photo: when there is a gap, so they can add a photo (slotId = an empty starter slot that fits, or null for a daily pack). show_memory: how well you know yourself / clarity. make_link: when they mention a sitter, boarding, someone looking after you (kind sitter) or finding a playmate (kind playdate).",
+            "show_cards: cards about a topic or the ones you cite (cardIds and/or topic). open_card: one card (cardIds = [its id]). open_pack: today's pack, when they want to add a memory or ask about today's pack. add_photo: when there is a gap, so they can add a photo (slotId = an empty starter slot that fits, or null for a daily pack). show_memory: how well you know yourself / clarity. show_place: the weather and checks for a plan, or where you live (also when no place is set and they talk about a plan). make_link: when they mention a sitter, boarding, someone looking after you (kind sitter) or finding a playmate (kind playdate).",
             `Topics: ${JSON.stringify(tools.topics)}. Empty starter slots: ${JSON.stringify(tools.emptySlots)}.`,
           ].join("\n")
         : "action is always null.",
@@ -458,6 +467,7 @@ export async function askPet(question: string, profile: object, imprints: object
       `Imprints (each is a card with a photo the owner shared): ${JSON.stringify(imprints)}`,
       `What the imprints cover: ${senses.join("; ")}`,
       `Photo kinds that teach you: ${slotTitles.join("; ")}`,
+      place.area ? `Place facts: ${JSON.stringify(place.facts)}` : "",
     ].join("\n"),
     question,
     null,
@@ -465,11 +475,12 @@ export async function askPet(question: string, profile: object, imprints: object
     {
       type: "object",
       additionalProperties: false,
-      required: ["answer", "basis", "general", "gap", "mood", "action"],
+      required: ["answer", "basis", "general", "gap", "mood", "action", "facts"],
       properties: {
         answer: { type: "string" },
         basis: { type: "array", items: { type: "object", additionalProperties: false, required: ["cardId", "how"], properties: { cardId: { type: "string" }, how: { type: "string" } } } },
         general: { type: "array", items: { type: "string" } },
+        facts: { type: "array", items: { type: "string" } },
         mood: { type: "string", enum: ["happy", "close", "confused", "thinking"] },
         action: {
           anyOf: [
@@ -479,7 +490,7 @@ export async function askPet(question: string, profile: object, imprints: object
               additionalProperties: false,
               required: ["type", "cardIds", "topic", "slotId", "kind"],
               properties: {
-                type: { type: "string", enum: ["show_cards", "open_card", "open_pack", "add_photo", "show_memory", "make_link"] },
+                type: { type: "string", enum: ["show_cards", "open_card", "open_pack", "add_photo", "show_memory", "make_link", "show_place"] },
                 cardIds: { type: "array", items: { type: "string" } },
                 topic: { type: ["string", "null"] },
                 slotId: { type: ["string", "null"] },

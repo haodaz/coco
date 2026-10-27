@@ -1,6 +1,6 @@
 "use client";
 
-import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MessageCirclePlus, Shield, Sparkles, type LucideIcon } from "lucide-react";
+import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MapPin, MessageCirclePlus, Shield, Sparkles, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
@@ -69,6 +69,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
     { href: "/app/pack", label: "Today's pack", icon: Gift, badge: r.left ? `${r.left}` : undefined, on: path.startsWith("/app/pack") },
     { href: "/app/cards", label: "Cards", icon: Layers, badge: `${cards.length}`, on: path.startsWith("/app/cards") },
     { href: "/app/memory", label: "Memory", icon: BookHeart, badge: memory ? `Lv ${memory.level}` : undefined, on: path.startsWith("/app/memory") },
+    { href: "/app/place", label: "Around us", icon: MapPin, badge: state.place ? undefined : "Set", on: path.startsWith("/app/place") },
     { href: "/app/friends", label: "Friends", icon: HeartHandshake, badge: (state.playdates ?? []).filter((p) => p.petId === pet.id).length ? `${(state.playdates ?? []).filter((p) => p.petId === pet.id).length}` : undefined, on: path.startsWith("/app/friends") },
   ];
   if (state.admin) NAV.push({ href: "/app/admin", label: "Admin", icon: Shield, on: path.startsWith("/app/admin") });

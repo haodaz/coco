@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, PanelRightOpen, Square } from "lucide-react";
+import { Mic, PanelRightOpen, ShieldCheck, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ActionPanel from "@/components/ActionPanel";
 import Character, { type Mood } from "@/components/Character";
@@ -9,6 +9,7 @@ import type { Memory } from "@/components/MemoryPanel";
 import { call } from "@/lib/api";
 import { useRecorder } from "@/lib/useRecorder";
 import type { Card, ChatTurn, Pet, PetAction, State } from "@/lib/types";
+import type { Fact } from "@/lib/rules";
 
 const STARTERS = (name: string) => ["What do you love most?", "Where do you like to sleep?", "I'm going to the store this afternoon. Want to come?", `What don't you know about yourself yet, ${name}?`];
 
@@ -37,7 +38,12 @@ export default function AskPanel({
   admin?: boolean;
   refresh: () => void;
 }) {
-  const [panel, setPanel] = useState<PetAction | null>(null);
+  const [panel, setPanelAction] = useState<PetAction | null>(null);
+  const [panelFacts, setPanelFacts] = useState<Fact[]>([]);
+  const setPanel = (a: PetAction | null, facts: Fact[] = []) => {
+    setPanelAction(a);
+    setPanelFacts(facts);
+  };
   const saved = (state.threads ?? []).find((t) => t.id === threadId)?.turns ?? [];
   const [turns, setTurns] = useState<ChatTurn[]>(saved);
   const [pending, setPending] = useState<string | null>(null);
@@ -68,7 +74,7 @@ export default function AskPanel({
     setPending(null);
     if (!r) return;
     setTurns((ts) => [...ts, { ...r, at: new Date().toISOString() }]);
-    if (r.action) setPanel(r.action); // the pet opened something beside the conversation
+    if (r.action) setPanel(r.action, r.facts ?? []); // the pet opened something beside the conversation
     if (r.threadId !== threadId) {
       mine.current = r.threadId;
       onThread(r.threadId);
@@ -99,7 +105,7 @@ export default function AskPanel({
   const mood: Mood = pending ? waiting : recording ? "close" : ((last?.mood as Mood) ?? "idle");
   const cardOf = (id: string) => state.cards.find((c) => c.id === id);
 
-  const LABEL: Record<PetAction["type"], string> = { show_cards: "the cards", open_card: "the card", open_pack: "today's pack", add_photo: "a place to add a photo", show_memory: "how well I know myself", make_link: "a link" };
+  const LABEL: Record<PetAction["type"], string> = { show_cards: "the cards", open_card: "the card", open_pack: "today's pack", add_photo: "a place to add a photo", show_memory: "how well I know myself", make_link: "a link", show_place: "what I checked" };
   const character = (cls: string) =>
     pet.character ? (
       <Character moods={pet.character.moods} mood={mood} version={pet.character.at} className={cls} />
@@ -150,10 +156,23 @@ export default function AskPanel({
                         </div>
                       </div>
                     )}
+                    {!!t.facts?.length && (
+                      <div className="mt-3 border-t border-[var(--line)] pt-2.5">
+                        <div className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">I checked</div>
+                        <div className="mt-1.5 flex flex-wrap gap-2">
+                          {t.facts.map((f) => (
+                            <button key={f.id} onClick={() => setPanel({ type: "show_place", cardIds: [], topic: null, slotId: null, kind: null }, t.facts)} className="inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--paper)] px-2.5 py-1 text-[12px] hover:border-[var(--gold)]">
+                              <ShieldCheck size={12} className={f.level === "no" ? "text-[#b4234a]" : f.level === "careful" ? "text-[#9a5b00]" : "text-[var(--gold)]"} />
+                              {f.title}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {t.general.length > 0 && <div className="mt-2 text-[12px] text-[var(--ink3)]"><b>General knowledge, not a memory:</b> {t.general.join(" ")}</div>}
                     {t.gap && <div className="mt-3 rounded-xl border border-dashed border-[var(--line)] px-3 py-2 text-[12.5px] text-[var(--ink2)]">I haven&apos;t shown you <b>{t.gap.topic}</b> yet. A photo for <b>{t.gap.suggest}</b> would teach me.</div>}
                     {t.action && (
-                      <button onClick={() => setPanel(t.action!)} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#efe9ff] px-3 py-1 text-[12.5px] font-medium text-[#5b3fb0] hover:bg-[#e2d8ff]">
+                      <button onClick={() => setPanel(t.action!, t.facts ?? [])} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#efe9ff] px-3 py-1 text-[12.5px] font-medium text-[#5b3fb0] hover:bg-[#e2d8ff]">
                         <PanelRightOpen size={14} /> I opened {LABEL[t.action.type]}
                       </button>
                     )}
@@ -187,7 +206,7 @@ export default function AskPanel({
       {(turns.length > 0 || !!pending) && pet.character && <Companion moods={pet.character.moods} mood={mood} version={pet.character.at} home={panel ? "panel" : "composer"} />}
       {panel && (
         <div className="fixed inset-x-3 bottom-3 top-24 z-40 lg:static lg:inset-auto lg:z-auto lg:h-full">
-          <ActionPanel action={panel} pet={pet} state={state} memory={memory} admin={admin} onClose={() => setPanel(null)} refresh={refresh} />
+          <ActionPanel action={panel} facts={panelFacts} pet={pet} state={state} memory={memory} admin={admin} onClose={() => setPanel(null)} refresh={refresh} />
         </div>
       )}
     </div>

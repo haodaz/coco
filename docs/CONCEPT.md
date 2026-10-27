@@ -39,6 +39,7 @@ co- means together, as in *companion*: from Latin *com* (with) + *panis* (bread)
 | Soul portrait | A full starter set unlocks a legend: the pet says who it is, citing cards | The first landmark of the co-world |
 | The pet as a character | 3D character from its photos; a standard set of moves unlocked by clarity; a companion that hops to what you're looking at, sits by the pack, comes down when you type, naps after 20 s, reacts to a tap | Bonding: the more memories, the more alive |
 | Agentic chat | The pet answers from its prints and opens things beside the conversation: cards, today's pack, the photo it's missing, clarity, a sitter or playdate link | It helps, not just talks |
+| Around us | The owner picks their town (never an address); live weather and air, a parked-car check, US rules (state hot-car laws, ADA service animals, the FDA Food Code), home notes, pet places nearby from OpenStreetMap. Every fact shows its source and when it was checked | The pet speaks up about a plan with real reasons, and code does the checking, not the model |
 | Sitters | A link to the twin for whoever looks after the pet; owner chooses topics; questions land in the owner's Recent | The past helping the future |
 | Playmates (agent to agent) | Two twins meet first, each from its own play moments; an honest note for both owners | The social side of a co-world |
 | Hosted product | Supabase per-user data and media, email/password sign-in, limits, admin review and usage | Real people can use it |
@@ -51,7 +52,7 @@ Muse Spark (reading moments, answering, structured output, actions), Muse Image 
 
 1. The 3-minute demo video.
 2. A real playdate with a second real pet (a friend's pet, filmed for the video).
-3. Place: the co-world learns where the two of you live (home area, live weather and air, local rules, pet services). Every fact has a source and a date, and code runs the checks before the pet speaks up about a plan.
+3. Place, beyond the first version: rules outside the US, city leash and park rules, a check per destination.
 4. Care reminders in the pet's own voice, dates only from records.
 5. Own email sender for sign-in links before inviting more people.
 6. Moments from short videos (SAM 3.1 video tracking).
