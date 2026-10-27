@@ -50,6 +50,7 @@ export default function AskPanel({
   const [waiting, setWaiting] = useState<Mood>("busy");
   const [q, setQ] = useState("");
   const [making, setMaking] = useState(false);
+  const [typing, setTyping] = useState(false); // the box has focus: the pet comes down to it
   const end = useRef<HTMLDivElement>(null);
   const asked = useRef(false);
   const mine = useRef<string | null>(null); // the thread this page just created, so switching to it doesn't wipe the turns
@@ -58,6 +59,7 @@ export default function AskPanel({
   useEffect(() => {
     if (threadId && threadId === mine.current) return;
     setTurns((state.threads ?? []).find((t) => t.id === threadId)?.turns ?? []);
+    setPanel(null);
   }, [threadId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -108,7 +110,7 @@ export default function AskPanel({
   const LABEL: Record<PetAction["type"], string> = { show_cards: "the cards", open_card: "the card", open_pack: "today's pack", add_photo: "a place to add a photo", show_memory: "how well I know myself", make_link: "a link", show_place: "what I checked" };
   const character = (cls: string) =>
     pet.character ? (
-      <Character moods={pet.character.moods} mood={mood} version={pet.character.at} className={cls} />
+      <Character moods={pet.character.moods} mood={mood} version={pet.character.at} className={cls} interactive />
     ) : (
       // eslint-disable-next-line @next/next/no-img-element
       <img src={`/api/likeness/${pet.id}`} alt="" className={`${cls} rounded-xl object-cover [image-rendering:pixelated]`} />
@@ -120,7 +122,7 @@ export default function AskPanel({
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           {!turns.length && !pending ? (
             <div className="flex min-h-full flex-col items-center justify-center py-6 text-center">
-              <div className="relative aspect-[3/4] w-[200px]">{character("h-full w-full")}</div>
+              <div className={`relative aspect-[3/4] w-[200px] transition-[opacity,scale] duration-300 ${typing && pet.character ? "scale-90 opacity-0" : ""}`}>{character("h-full w-full")}</div>
               <div className="serif mt-2 text-[30px] font-bold">Hi, it&apos;s me, {pet.name}.</div>
               <p className="mt-1 max-w-md text-[14.5px] text-[var(--ink2)]">Ask me anything about us. If I haven&apos;t seen something yet, I&apos;ll say so and open a way to show me.</p>
               {!pet.character && (
@@ -193,7 +195,7 @@ export default function AskPanel({
         {/* the composer, with the pet resting on its top edge once you're talking */}
         <div className="relative mx-auto w-full max-w-3xl pt-2">
           <form data-coco-spot="composer" data-coco-x="0.03" onSubmit={(e) => { e.preventDefault(); ask(q); }} className="relative flex items-center gap-2 rounded-2xl border border-[var(--line)] bg-white px-2 py-1.5 shadow-[0_10px_30px_-12px_rgba(35,32,27,.25)] focus-within:border-[var(--gold)]">
-            <input value={q} onFocus={() => spotCoco("composer")} onBlur={() => spotCoco(null)} onChange={(e) => { setQ(e.target.value); spotCoco("composer"); }} placeholder={recording ? "Listening… tap the square to stop" : `Say something to ${pet.name}`} className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] outline-none" />
+            <input value={q} onFocus={() => { setTyping(true); spotCoco("composer"); }} onBlur={() => { setTyping(!!q.trim()); spotCoco(null); }} onChange={(e) => { setQ(e.target.value); spotCoco("composer"); }} placeholder={recording ? "Listening… tap the square to stop" : `Say something to ${pet.name}`} className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] outline-none" />
             <button type="button" onClick={toggle} disabled={!!pending} title={recording ? "Stop" : "Say it"} className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${recording ? "animate-pulse bg-[#ff4d4f] text-white" : "bg-[#eeebf8] text-[var(--ink2)]"}`}>
               {recording ? <Square size={14} /> : <Mic size={16} />}
             </button>
@@ -203,7 +205,7 @@ export default function AskPanel({
         </div>
       </section>
 
-      {(turns.length > 0 || !!pending) && pet.character && <Companion moods={pet.character.moods} mood={mood} version={pet.character.at} home={panel ? "panel" : "composer"} />}
+      {(turns.length > 0 || !!pending || typing) && pet.character && <Companion moods={pet.character.moods} mood={mood} version={pet.character.at} home={panel ? "panel" : "composer"} />}
       {panel && (
         <div className="fixed inset-x-3 bottom-3 top-24 z-40 lg:static lg:inset-auto lg:z-auto lg:h-full">
           <ActionPanel action={panel} facts={panelFacts} pet={pet} state={state} memory={memory} admin={admin} onClose={() => setPanel(null)} refresh={refresh} />

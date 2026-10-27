@@ -50,7 +50,19 @@ export default function Character({ moods, mood: asked, version = "", className 
   const steps = TIMELINE[mood].filter(([f]) => f < frames.length);
   const show = steps[step]?.[0] ?? 0;
   const visible = frames[show];
-  // every frame of every mood stays mounted and loaded; switching only changes opacity, so nothing flashes
+  const base = frames[0];
+  const quick = (steps[step]?.[1] ?? 1000) < 300; // a blink: swap at once, no fade
+  const [prev, setPrev] = useState<string | null>(null);
+  const last = useRef(visible);
+  useEffect(() => {
+    if (last.current === visible) return;
+    setPrev(last.current);
+    last.current = visible;
+    const t = setTimeout(() => setPrev(null), 260);
+    return () => clearTimeout(t);
+  }, [visible]);
+  // every frame of every mood stays mounted and loaded; switching only changes opacity, and something opaque is
+  // always underneath (the mood's first frame, and the frame just left), so the body never turns see-through
   const all = [...new Set(Object.values(moods).flat())];
   // a tap on the same mood restarts its movement without remounting anything
   const body = useRef<HTMLDivElement>(null);
@@ -71,7 +83,13 @@ export default function Character({ moods, mood: asked, version = "", className 
       <div ref={body} className="char absolute inset-0" data-mood={mood}>
         {all.map((f) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} decoding="async" className="absolute inset-0 h-full w-full object-contain transition-opacity duration-200 ease-out" style={{ opacity: f === visible ? 1 : 0 }} />
+          <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} decoding="async" className="absolute inset-0 h-full w-full object-contain"
+            style={{
+              opacity: f === visible || f === prev || f === base ? 1 : 0,
+              zIndex: f === visible ? 3 : f === prev ? 2 : f === base ? 1 : 0,
+              transition: f === visible && !quick ? "opacity 200ms ease-out" : "none",
+            }}
+          />
         ))}
       </div>
       {reacting > 0 && (

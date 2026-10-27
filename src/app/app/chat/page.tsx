@@ -15,7 +15,6 @@ function Chat() {
     <Shell>
       {({ pet, state, memory, refresh, openCard }) => (
         <AskPanel
-          key={thread ? "t" : "new"}
           pet={pet}
           state={state}
           threadId={thread}
