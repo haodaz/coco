@@ -10,6 +10,7 @@ import Scene from "@/components/Scene";
 import UnlockToast from "@/components/UnlockToast";
 import type { Memory } from "@/components/MemoryPanel";
 import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
+import { tasksFor } from "@/lib/points";
 import { rhythm } from "@/lib/rhythm";
 import type { Card, Pet, State } from "@/lib/types";
 import { WorkspaceLoading } from "@/components/Loading";
@@ -63,16 +64,17 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
       </main>
     );
 
-  const cards = state.cards.filter((c) => c.petId === pet.id);
+  const cards = state.cards.filter((c) => c.petId === pet.id && !c.sealed);
   const r = rhythm(cards);
   const memory = state.memory?.[pet.id];
+  const tasksLeft = tasksFor(state, pet).filter((t) => !t.done).length;
   const threads = (state.threads ?? []).filter((t) => t.petId === pet.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const thread = params.get("thread");
   const face = pet.character?.moods.idle?.[0];
   const faceSrc = face ? (face.startsWith("/") ? face : `/api/art/${face}?v=${encodeURIComponent(pet.character?.at ?? "")}`) : "";
   const NAV: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean }[] = [
     { href: "/app", label: "Home", icon: House, on: path === "/app" },
-    { href: "/app/pack", label: "Today's pack", icon: Gift, badge: r.left ? `${r.left}` : undefined, on: path.startsWith("/app/pack") },
+    { href: "/app/pack", label: "Today", icon: Gift, badge: tasksLeft ? `${tasksLeft}` : undefined, on: path.startsWith("/app/pack") },
     { href: "/app/cards", label: "Cards", icon: Layers, badge: `${cards.length}`, on: path.startsWith("/app/cards") },
     { href: "/app/memory", label: "Memory", icon: BookHeart, badge: memory ? `Lv ${memory.level}` : undefined, on: path.startsWith("/app/memory") },
     { href: "/app/place", label: "Around us", icon: MapPin, badge: state.place ? undefined : "Set", on: path.startsWith("/app/place") },
@@ -84,7 +86,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   // phones: five places along the bottom, talking in the middle; the rest is in the drawer
   const TABS: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean; talk?: boolean }[] = [
     NAV[0],
-    { ...NAV[1], label: "Pack" },
+    { ...NAV[1], label: "Today" },
     { href: "/app/chat", label: pet.name.length <= 6 ? `Talk to ${pet.name}` : "Talk", icon: MessageCircle, on: chat, talk: true },
     NAV[2],
     NAV[3],

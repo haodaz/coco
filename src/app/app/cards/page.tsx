@@ -16,7 +16,7 @@ export default function Cards() {
   return (
     <Shell>
       {({ pet, state, refresh, openCard }) => {
-        const mine = state.cards.filter((c) => c.petId === pet.id);
+        const mine = state.cards.filter((c) => c.petId === pet.id && !c.sealed); // shared memories not opened yet aren't cards
         const memories = mine.filter((c) => c.kind !== "legendary");
         const legends = mine.filter((c) => c.rarity === 3).length;
         const moves = moveCards(pet, state);

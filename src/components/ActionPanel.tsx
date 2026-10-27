@@ -34,7 +34,7 @@ export default function ActionPanel({ action, facts = [], pet, state, memory, ad
   const [card, setCard] = useState<Card | null>(null);
   const slots = packFor(pet.species).quest;
   const patternOf = (c: Card) => c.pattern ?? slots.find((s) => s.id === c.slotId)?.pattern ?? null;
-  const mine = state.cards.filter((c) => c.petId === pet.id);
+  const mine = state.cards.filter((c) => c.petId === pet.id && !c.sealed);
 
   let body: React.ReactNode = null;
   if (card) body = <CardDetail card={card} state={state} pet={pet} onChanged={refresh} compact />;

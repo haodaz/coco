@@ -18,6 +18,7 @@ export default function HomeMobile({
   greeting,
   line,
   r,
+  today,
   memory,
   cardCount,
   recent,
@@ -29,6 +30,7 @@ export default function HomeMobile({
   greeting: string;
   line: string;
   r: ReturnType<typeof rhythm>;
+  today: { tasksLeft: number; points: number; canOpen: boolean };
   memory?: Memory;
   cardCount: number;
   recent: Card[];
@@ -49,7 +51,7 @@ export default function HomeMobile({
           <div className="relative aspect-[768/1057] w-[32%] max-w-[130px] shrink-0">
             <div className="absolute inset-x-[-10%] bottom-[2%] top-[30%] rounded-full bg-[radial-gradient(closest-side,rgba(109,79,209,.2),transparent)]" />
             {pet.character ? (
-              <HomePet moods={pet.character.moods} version={pet.character.at} eager={r.left > 0} className="h-full w-full" />
+              <HomePet moods={pet.character.moods} version={pet.character.at} eager={today.tasksLeft > 0} className="h-full w-full" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="relative h-full w-full rounded-2xl object-cover" />
@@ -66,32 +68,16 @@ export default function HomeMobile({
         </div>
       </section>
 
-      {/* today's pack: the one big button */}
-      {r.left ? (
-        <Link href="/app/pack" className="pack relative mt-5 flex items-center gap-3 overflow-hidden rounded-[20px] p-4 text-white">
-          <div className="min-w-0 flex-1">
-            <div className="text-[10.5px] font-bold uppercase tracking-[.2em] opacity-85">Today&apos;s pack</div>
-            <div className="serif mt-0.5 text-[22px] font-bold leading-tight">{r.left} Memory Print{r.left > 1 ? "s" : ""} waiting</div>
-            <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#3b2a8f]">Open it <ArrowRight size={14} /></div>
-          </div>
-          <PackArt kind="booster" art={petArt(pet)} className="float-card -my-6 -mr-1 w-[26%] shrink-0 rotate-[8deg]" />
-        </Link>
-      ) : (
-        <section className="ws-card mt-5 p-4">
-          <div className="flex items-baseline">
-            <div className="text-[10.5px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Today&apos;s pack · opened</div>
-            <div className="ml-auto text-[12px] text-[var(--ink2)]">Next in <b>{r.nextPackIn}</b></div>
-          </div>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {r.today.map((c) => (
-              <button key={c.id} onClick={() => openCard(c)}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={c.art ?? `/api/photos/${c.photoId}`} alt={c.name} className="aspect-[3/4] w-full rounded-lg object-cover shadow-sm" />
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* today: the one big button */}
+      <Link href="/app/pack" className="pack relative mt-5 flex items-center gap-3 overflow-hidden rounded-[20px] p-4 text-white">
+        <div className="min-w-0 flex-1">
+          <div className="text-[10.5px] font-bold uppercase tracking-[.2em] opacity-85">Today</div>
+          <div className="serif mt-0.5 text-[22px] font-bold leading-tight">{today.tasksLeft ? `${today.tasksLeft} task${today.tasksLeft > 1 ? "s" : ""} waiting` : "Tasks done for today"}</div>
+          <div className="mt-0.5 text-[12.5px] opacity-90">{today.points} Memory Point{today.points === 1 ? "" : "s"}{today.canOpen ? " · enough for a pack" : ""}</div>
+          <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#3b2a8f]">{today.canOpen ? "Open a pack" : "See today's tasks"} <ArrowRight size={14} /></div>
+        </div>
+        <PackArt kind="booster" art={petArt(pet)} className="float-card -my-6 -mr-1 w-[26%] shrink-0 rotate-[8deg]" />
+      </Link>
 
       {/* three small numbers */}
       <div className="mt-3 grid grid-cols-3 gap-2.5">

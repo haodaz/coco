@@ -11,6 +11,7 @@ import PackArt from "@/components/PackArt";
 import { petArt } from "@/components/PetFace";
 import Shell, { PageHead, Rule } from "@/components/Shell";
 import { finishFor } from "@/lib/finish";
+import { balance, PACK_COST, sealedPrints, tasksFor } from "@/lib/points";
 import { rhythm } from "@/lib/rhythm";
 
 const greeting = () => {
@@ -27,10 +28,11 @@ export default function Home() {
       {({ pet, state, memory, openCard }) => {
         const cards = state.cards.filter((c) => c.petId === pet.id);
         const r = rhythm(cards);
-        const recent = cards.filter((c) => c.kind !== "legendary").sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
+        const recent = cards.filter((c) => c.kind !== "legendary" && !c.sealed).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
         const threads = (state.threads ?? []).filter((t) => t.petId === pet.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 3);
-        const latest = cards.filter((c) => c.kind === "daily").sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-        const line = r.left ? `Today's pack is here. Will you show me another moment of ours?` : latest ? latest.line : `Ask me anything about us.`;
+        const latest = cards.filter((c) => c.kind === "daily" && !c.sealed).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+        const t = { tasksLeft: tasksFor(state, pet).filter((x) => !x.done).length, points: balance(state, pet.id), canOpen: sealedPrints(state, pet.id).length > 0 && (state.admin || balance(state, pet.id) >= PACK_COST) };
+        const line = t.tasksLeft ? `There's a moment of ours I'd love to see today. Will you find it?` : latest ? latest.line : `Ask me anything about us.`;
         const legends = cards.filter((c) => c.rarity === 3).length;
         const lit = memory?.senses.filter((s) => s.imprints).length ?? 0;
         const week = Array.from({ length: 7 }, (_, i) => {
@@ -44,7 +46,7 @@ export default function Home() {
           <>
             {/* phones get their own Home, one thing per row */}
             <div className="home-m">
-              <HomeMobile pet={pet} greeting={greeting()} line={line} r={r} memory={memory} cardCount={cards.length} recent={recent} threads={threads} openCard={openCard} ask={go} />
+              <HomeMobile pet={pet} greeting={greeting()} line={line} r={r} today={t} memory={memory} cardCount={cards.filter((c) => !c.sealed).length} recent={recent} threads={threads} openCard={openCard} ask={go} />
             </div>
             <div className="home-d">
             <PageHead eyebrow="Home" art="home" title={greeting()} sub={`Your co-world with ${pet.name}`} />
@@ -55,7 +57,7 @@ export default function Home() {
                 {/* the pet stands on the card's floor and breaks out of its top edge */}
                 <div className="pointer-events-none relative mx-auto -mb-6 -mt-24 aspect-[768/1057] w-[240px] shrink-0 sm:absolute sm:-bottom-[26px] sm:-left-2 sm:mx-0 sm:mb-0 sm:mt-0 sm:w-[310px] [&>*]:pointer-events-auto">
                   {pet.character ? (
-                    <HomePet moods={pet.character.moods} version={pet.character.at} eager={r.left > 0} className="h-full w-full" />
+                    <HomePet moods={pet.character.moods} version={pet.character.at} eager={t.tasksLeft > 0} className="h-full w-full" />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full rounded-2xl object-cover" />
@@ -78,31 +80,16 @@ export default function Home() {
                 </div>
               </section>
 
-              {/* today's pack */}
-              {r.left ? (
-                <Link href="/app/pack" className="pack group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[22px] p-5 text-white">
-                  <PackArt kind="booster" art={petArt(pet)} className="float-card absolute -right-2 -top-6 w-[46%] rotate-[10deg]" />
-                  <div className="relative">
-                    <div className="text-[11px] font-bold uppercase tracking-[.2em] opacity-85">Today&apos;s pack</div>
-                    <div className="serif mt-1 text-[28px] font-bold leading-tight">{r.left} Memory Print{r.left > 1 ? "s" : ""} waiting</div>
-                    <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[13.5px] font-semibold text-[#3b2a8f] transition group-hover:gap-2.5">Open it <ArrowRight size={15} /></div>
-                  </div>
-                </Link>
-              ) : (
-                <section className="ws-card flex min-h-[280px] flex-col p-5">
-                  <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Today&apos;s pack · opened</div>
-                  <div className="serif mt-1 text-[22px] font-bold">{r.today.length} memories kept today</div>
-                  <div className="mt-3 flex gap-2">
-                    {r.today.map((c) => (
-                      <button key={c.id} onClick={() => openCard(c)} className="w-1/3 transition hover:-translate-y-1">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={c.art ?? `/api/photos/${c.photoId}`} alt={c.name} className="aspect-[3/4] w-full rounded-lg object-cover shadow-sm" />
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-auto pt-4 text-[13px] text-[var(--ink2)]">Next pack in <b>{r.nextPackIn}</b></div>
-                </section>
-              )}
+              {/* today: tasks, points, a pack */}
+              <Link href="/app/pack" className="pack group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[22px] p-5 text-white">
+                <PackArt kind="booster" art={petArt(pet)} className="float-card absolute -right-2 -top-6 w-[46%] rotate-[10deg]" />
+                <div className="relative">
+                  <div className="text-[11px] font-bold uppercase tracking-[.2em] opacity-85">Today</div>
+                  <div className="serif mt-1 text-[28px] font-bold leading-tight">{t.tasksLeft ? `${t.tasksLeft} task${t.tasksLeft > 1 ? "s" : ""} waiting` : "Tasks done for today"}</div>
+                  <div className="mt-1 text-[13.5px] opacity-90">{t.points} Memory Point{t.points === 1 ? "" : "s"}{t.canOpen ? " · enough for a pack" : ""}</div>
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[13.5px] font-semibold text-[#3b2a8f] transition group-hover:gap-2.5">{t.canOpen ? "Open a pack" : "See today's tasks"} <ArrowRight size={15} /></div>
+                </div>
+              </Link>
             </div>
 
             <div className="mt-5 grid gap-5 sm:grid-cols-3">
@@ -134,7 +121,7 @@ export default function Home() {
               </Link>
               <Link href="/app/cards" className="ws-card p-5 transition hover:border-[var(--gold)]">
                 <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Collection</div>
-                <div className="serif mt-1 text-[40px] font-bold leading-none">{cards.length}<span className="ml-1 text-[16px] font-medium text-[var(--ink2)]">cards</span></div>
+                <div className="serif mt-1 text-[40px] font-bold leading-none">{cards.filter((c) => !c.sealed).length}<span className="ml-1 text-[16px] font-medium text-[var(--ink2)]">cards</span></div>
                 <div className="mt-3 text-[13px] text-[var(--ink2)]">{legends} legend{legends === 1 ? "" : "s"} · {lit}/{memory?.senses.length ?? 0} kinds of moment</div>
               </Link>
             </div>

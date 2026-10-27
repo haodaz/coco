@@ -77,8 +77,9 @@ export function cardTags(card: Card, state: State, pet: Pet): string[] {
 }
 
 // each series with the card that fills each slot (the rarest, then the owner's favourite, then the earliest)
-export function seriesProgress(state: State, pet: Pet) {
-  const cards = state.cards.filter((c) => c.petId === pet.id && c.kind !== "legendary");
+// (memories not opened into cards yet count only when asked: they fill a gap for the AI, not the collection)
+export function seriesProgress(state: State, pet: Pet, withSealed = false) {
+  const cards = state.cards.filter((c) => c.petId === pet.id && c.kind !== "legendary" && (withSealed || !c.sealed));
   const tagged = cards.map((c) => ({ card: c, tags: cardTags(c, state, pet) }));
   const rank = (a: Card, b: Card) => b.rarity - a.rarity || Number(!!b.starred) - Number(!!a.starred) || a.createdAt.localeCompare(b.createdAt);
   return SERIES.map((s) => {

@@ -3,29 +3,28 @@
 import Companion from "@/components/Companion";
 import DailyPack from "@/components/DailyPack";
 import Shell, { PageHead } from "@/components/Shell";
+import { balance, tasksFor } from "@/lib/points";
 import { rhythm } from "@/lib/rhythm";
 
-// Today's pack: the daily ritual of adding one more memory, with a surprise in every card.
+// Today: teach the pet (today's tasks and free shares earn Memory Points) and open packs with the points.
 export default function PackPage() {
   return (
     <Shell>
       {({ pet, state, refresh }) => {
         const r = rhythm(state.cards.filter((c) => c.petId === pet.id));
-        const her = pet.sex === "male" ? "his" : pet.sex === "female" ? "her" : "their";
+        const left = tasksFor(state, pet).filter((t) => !t.done).length;
+        const points = balance(state, pet.id);
         return (
           <>
             <PageHead
-              eyebrow="Today's pack"
+              eyebrow="Today"
               art="pack"
-              title={r.left ? "A new pack is waiting." : "Today's pack is open."}
-              sub={r.left ? `Up to ${r.left} more Memory Print${r.left > 1 ? "s" : ""} today` : `The next one arrives in ${r.nextPackIn}`}
-              lead={`${r.left ? "Tap the pack to see what's inside. " : ""}${r.streak ? `${r.streak} day${r.streak > 1 ? "s" : ""} in a row so far.` : `Come back tomorrow and the days start to add up.`}`}
+              title={left ? `${left} task${left > 1 ? "s" : ""} for today` : "Today's tasks are done."}
+              sub={`${points} Memory Point${points === 1 ? "" : "s"}`}
+              lead={`Every memory you share teaches ${pet.name} right away and earns points; points open packs that paint your memories into cards. ${r.streak ? `${r.streak} day${r.streak > 1 ? "s" : ""} in a row so far.` : ""}`}
             />
             <DailyPack pet={pet} state={state} onChange={refresh} admin={state.admin} />
             {pet.character && <Companion moods={pet.character.moods} mood="idle" version={pet.character.at} home="pack" />}
-            {r.today.length > 0 && !r.left && (
-              <p className="mt-6 text-center text-[14px] text-[var(--ink2)]">Today you kept {r.today.length} memories of {pet.name}. You can find them in {her} cards.</p>
-            )}
           </>
         );
       }}
