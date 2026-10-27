@@ -70,10 +70,10 @@ function SignIn() {
 
   return (
     <main className="ws block min-h-screen">
-      <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-5 py-10 md:grid-cols-[minmax(0,420px)_1fr]">
-      <div className="order-2 md:order-1">
+      <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-6 px-5 py-8 pt-[max(32px,env(safe-area-inset-top))] md:gap-10 md:py-10 md:grid-cols-[minmax(0,420px)_1fr]">
+      <div>
       <Link href="/" className="serif text-[26px] font-bold tracking-tight">coco</Link>
-      <div className="mt-10 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">coco · co-world</div>
+      <div className="mt-6 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)] md:mt-10">coco · co-world</div>
       <h1 className="serif mt-2 text-[38px] font-bold leading-[1.08] tracking-tight">Step into your co-world.</h1>
       <p className="serif mt-2 text-[17px] italic text-[var(--ink2)]">{mode === "signup" ? "Make an account, then start with one photo." : "Sign in to open today\u2019s pack."}</p>
       {state === "sent" ? (
@@ -132,8 +132,9 @@ function SignIn() {
         </form>
       )}
       </div>
-      <div className="order-1 md:order-2">
-        <Scene name="signin" className="mx-auto max-w-[620px]" />
+      {/* phones: the form comes first, the little scene sits under it */}
+      <div>
+        <Scene name="signin" className="mx-auto max-w-[340px] md:max-w-[620px]" />
         <p className="mt-2 text-center text-[13px] text-[var(--ink3)]">Dogs, cats, birds, turtles, rabbits: one AI for each pet, grown only from its real moments.</p>
       </div>
       </div>

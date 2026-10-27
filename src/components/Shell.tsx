@@ -1,6 +1,6 @@
 "use client";
 
-import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MapPin, MessageCirclePlus, Shield, Sparkles, type LucideIcon } from "lucide-react";
+import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MapPin, Menu, MessageCircle, MessageCirclePlus, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
@@ -29,6 +29,7 @@ export default function Shell({ children }: { children: (ctx: Ctx) => ReactNode 
 function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const [state, setState] = useState<Loaded | null>(null);
   const [card, setCard] = useState<Card | null>(null);
+  const [menu, setMenu] = useState(false); // phones: the sidebar slides in as a drawer
   const refresh = useCallback(async () => {
     const r = await fetch("/api/state");
     if (r.status === 401) return void location.assign(`/login?next=${encodeURIComponent(location.pathname)}`);
@@ -42,6 +43,8 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   }, [refresh]);
   const path = usePathname();
   const params = useSearchParams();
+  const threadParam = params.get("thread");
+  useEffect(() => setMenu(false), [path, threadParam]);
 
   if (!state) return <WorkspaceLoading />;
   const pet = state.pets[0];
@@ -75,9 +78,41 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   ];
   if (state.admin) NAV.push({ href: "/app/admin", label: "Admin", icon: Shield, on: path.startsWith("/app/admin") });
 
+  const chat = path.startsWith("/app/chat");
+  // phones: five places along the bottom, talking in the middle; the rest is in the drawer
+  const TABS: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean; talk?: boolean }[] = [
+    NAV[0],
+    { ...NAV[1], label: "Pack" },
+    { href: "/app/chat", label: "Talk", icon: MessageCircle, on: chat, talk: true },
+    NAV[2],
+    NAV[3],
+  ];
+
   return (
-    <div className="ws">
-      <aside className="ws-side">
+    <div className={`ws ${chat ? "ws-chat" : ""}`}>
+      <header className="ws-mtop">
+        <button onClick={() => setMenu(true)} className="-ml-1.5 rounded-lg p-1.5 text-[var(--ink)]" aria-label="Open menu"><Menu size={21} /></button>
+        <Link href="/app" className="flex items-baseline gap-1.5">
+          <span className="serif text-[21px] font-bold tracking-tight">coco</span>
+          <span className="text-[9px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
+        </Link>
+        <Link href="/app/memory" className="ml-auto flex items-center gap-2 rounded-full border border-[var(--line)] bg-white py-0.5 pl-0.5 pr-2.5" aria-label={pet.name}>
+          <span className="relative h-7 w-7 overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_30%,#fff,#ebe5fb)]">
+            {face ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={faceSrc} alt="" className="absolute -bottom-[40px] left-1/2 w-[230%] max-w-none -translate-x-1/2" />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full object-cover" />
+            )}
+          </span>
+          <span className="serif text-[14px] font-bold">{pet.name}</span>
+          {memory && <span className="text-[11px] font-semibold text-[var(--ink3)]">Lv {memory.level}</span>}
+        </Link>
+      </header>
+      {menu && <div className="ws-scrim" onClick={() => setMenu(false)} />}
+      <aside className={`ws-side ${menu ? "open" : ""}`}>
+        <button onClick={() => setMenu(false)} className="ws-only-sm absolute right-3 top-4 rounded-lg p-1.5 text-[var(--ink2)]" aria-label="Close menu"><X size={19} /></button>
         <div className="flex items-center gap-2 px-5 pb-3 pt-5">
           <Link href="/" className="serif text-[24px] font-bold tracking-tight">coco</Link>
           <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
@@ -169,6 +204,19 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
           {children({ state, pet, memory, refresh, openCard: setCard })}
         </div>
       </main>
+      {!chat && (
+        <nav className="ws-tabs">
+          {TABS.map((t) => (
+            <Link key={t.href} href={t.href} className={`${t.on ? "on" : ""} ${t.talk ? "talk" : ""}`}>
+              <span className="ic">
+                <t.icon size={t.talk ? 22 : 20} strokeWidth={t.talk ? 2 : 1.7} />
+                {t.badge && t.href === "/app/pack" && <b>{t.badge}</b>}
+              </span>
+              {t.label}
+            </Link>
+          ))}
+        </nav>
+      )}
       {card && <CardModal card={card} state={state} pet={pet} onClose={() => setCard(null)} onChanged={refresh} />}
       <UnlockToast pet={pet} />
     </div>

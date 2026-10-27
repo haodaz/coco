@@ -72,13 +72,16 @@ export default function HoloCard({ art, fg, finish, name, line, stars, label, id
       s.setProperty("--on", cur.on.toFixed(3));
       raf = requestAnimationFrame(tick);
     };
+    el.style.touchAction = "pan-y"; // phones: a sideways drag turns the card, an up-down swipe still scrolls the page
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerleave", leave);
+    el.addEventListener("pointercancel", leave);
     raf = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(raf);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerleave", leave);
+      el.removeEventListener("pointercancel", leave);
     };
   }, [idle]);
 

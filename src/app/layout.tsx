@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "coco — a co-world for you and your pet",
   description: "Every moment with your pet becomes a Memory Print kept in a card; your pet's AI grows only from them. A co-world for the two of you.",
 };
+
+// phones: draw under the notch and home bar (the app pads with safe-area insets), and tint the browser bar
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#f6f4fb" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -27,7 +27,7 @@ export function CardDetail({ card, state, pet, onClose, onChanged, compact = fal
       <div className={`grid gap-8 ${compact ? "" : "md:grid-cols-[minmax(0,340px)_1fr]"}`}>
         <div className={`mx-auto w-full ${compact ? "max-w-[260px]" : "max-w-[340px]"} ${live.kind === "legendary" ? "pt-10" : ""}`}>
           <HoloCard art={live.art ?? `/api/photos/${live.photoId}`} fg={live.fg} finish={finishFor(live)} name={live.name} line={live.line} stars={live.rarity} label={`${pet.name} · ${live.style}`} idle={false} />
-          <div className="mt-3 text-center text-[12px] text-[var(--ink3)]">Move over the card to turn it in the light</div>
+          <div className="mt-3 text-center text-[12px] text-[var(--ink3)]"><span className="hidden md:inline">Move over the card to turn it in the light</span><span className="md:hidden">Drag across the card to turn it in the light</span></div>
         </div>
         <div className="min-w-0">
           <div className="flex items-start gap-3">
@@ -86,7 +86,11 @@ export default function CardModal({ card, state, pet, onClose, onChanged }: { ca
   }, [onClose]);
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(30,24,16,.55)] backdrop-blur-sm" onClick={onClose}>
-      <div className="mx-auto my-6 max-w-4xl rounded-[28px] bg-[var(--paper)] p-5 shadow-2xl md:my-12 md:p-8" onClick={(e) => e.stopPropagation()}>
+      <div className="mx-auto mt-8 min-h-[calc(100%-32px)] max-w-4xl rounded-t-[28px] bg-[var(--paper)] p-5 pb-[max(20px,env(safe-area-inset-bottom))] shadow-2xl md:my-12 md:min-h-0 md:rounded-[28px] md:p-8" onClick={(e) => e.stopPropagation()}>
+        {/* phones: a close button that stays in reach while the card scrolls */}
+        <div className="sticky top-2 z-10 -mb-9 flex justify-end md:hidden">
+          <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full bg-white/95 text-[var(--ink)] shadow-[0_4px_14px_rgba(31,29,51,.18)]" aria-label="Close"><X size={18} /></button>
+        </div>
         <CardDetail card={card} state={state} pet={pet} onClose={onClose} onChanged={onChanged} />
       </div>
     </div>

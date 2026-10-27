@@ -51,6 +51,15 @@ export default function AskPanel({
   const [q, setQ] = useState("");
   const [making, setMaking] = useState(false);
   const [typing, setTyping] = useState(false); // the box has focus: the pet comes down to it
+  // wide screens show the panel beside the talk and the pet hops onto it; on phones the panel is a sheet over the talk
+  const [wide, setWide] = useState(true);
+  useEffect(() => {
+    const m = window.matchMedia("(min-width: 1024px)");
+    const on = () => setWide(m.matches);
+    on();
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
   const end = useRef<HTMLDivElement>(null);
   const asked = useRef(false);
   const mine = useRef<string | null>(null); // the thread this page just created, so switching to it doesn't wipe the turns
@@ -117,7 +126,7 @@ export default function AskPanel({
     );
 
   return (
-    <div className={`grid h-[calc(100dvh-112px)] gap-5 ${panel ? "lg:grid-cols-[minmax(0,1fr)_440px]" : ""}`}>
+    <div className={`ws-chat-h grid gap-5 ${panel ? "lg:grid-cols-[minmax(0,1fr)_440px]" : ""}`}>
       <section className="relative flex min-h-0 flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           {!turns.length && !pending ? (
@@ -208,9 +217,9 @@ export default function AskPanel({
         </div>
       </section>
 
-      {(turns.length > 0 || !!pending || typing) && pet.character && <Companion moods={pet.character.moods} mood={mood} version={pet.character.at} home={panel ? "panel" : "composer"} />}
+      {(turns.length > 0 || !!pending || typing) && !(panel && !wide) && pet.character && <Companion moods={pet.character.moods} mood={mood} version={pet.character.at} home={panel ? "panel" : "composer"} />}
       {panel && (
-        <div className="fixed inset-x-3 bottom-3 top-24 z-40 lg:static lg:inset-auto lg:z-auto lg:h-full">
+        <div className="fixed inset-x-0 bottom-0 top-[64px] z-[44] p-2 pb-[max(8px,env(safe-area-inset-bottom))] lg:static lg:inset-auto lg:z-auto lg:h-full lg:p-0">
           <ActionPanel action={panel} facts={panelFacts} pet={pet} state={state} memory={memory} admin={admin} onClose={() => setPanel(null)} refresh={refresh} />
         </div>
       )}
