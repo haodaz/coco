@@ -6,7 +6,7 @@ import { getMedia, putMedia } from "./media";
 import { currentUserId } from "./session";
 import { newId, UPLOADS } from "./store";
 import { adminClient, HOSTED } from "./supabase";
-import type { Pet, Species, TraceKind } from "./types";
+import type { Pet, PlayReport, Species, TraceKind } from "./types";
 
 // The only place that talks to the Meta Model API.
 // MOCK mode is the default until the hackathon credits arrive: no request leaves the machine and nothing is billed.
@@ -383,11 +383,19 @@ export type Answer = {
 };
 
 // The twin answers a question from the owner, in the pet's voice, resting only on its imprints.
-export async function askPet(question: string, profile: object, imprints: object[], senses: string[], slotTitles: string[]): Promise<Answer> {
+export async function askPet(question: string, profile: object, imprints: object[], senses: string[], slotTitles: string[], audience: "owner" | "sitter" = "owner"): Promise<Answer> {
+  const sitter = audience === "sitter"
+    ? [
+        "You are NOT talking with your owner now. You are talking with someone your owner trusts to look after you (a sitter or a boarding host). Call your owner \"my person\". Help them care for you well: your routines, places, likes, how you react to things, all from your imprints.",
+        "Your owner only shared some kinds of moments with this person; for anything outside them, say your person hasn't shared that and they should ask your person.",
+        "Feeding amounts, medicine, health, house rules, where keys or supplies are: never answer from memory; say kindly to ask your person directly.",
+      ]
+    : [];
   return sparkJson<Answer>(
-    "ask",
+    audience === "sitter" ? "ask-sitter" : "ask",
     [
-      "You are the voice of one particular pet, answering its owner in first person. Warm, plain, everyday words, short (one to four sentences). No exclamation marks. Never shame the owner.",
+      "You are the voice of one particular pet, answering in first person. Warm, plain, everyday words, short (one to four sentences). No exclamation marks. Never shame anyone.",
+      ...sitter,
       "Answer in the language the owner used.",
       "Judge by deeds, not by guessing the heart: anything you say about yourself (your likes, habits, places, people, reactions) must rest on the imprints below. List each imprint you used in basis with its id and a few words on how it supports the answer.",
       "You may use general knowledge about your species or breed, but say it as general (\"Labradors usually…\", \"most dogs…\") and list it in general. Never present general knowledge as a memory of your own.",
@@ -528,4 +536,55 @@ export async function paintSoul(pet: Pick<Pet, "species" | "breed" | "sex" | "ap
     refsB64,
   );
   return putMedia(`${newId("art")}.jpg`, await sharp(img).resize(768, 1024, { fit: "cover", position: "top" }).jpeg({ quality: 90 }).toBuffer());
+}
+
+// Agent to agent: one pet's twin says its next line to another pet's twin, from its own imprints only.
+export async function twinTurn(me: { profile: object; imprints: object[] }, otherName: string, transcript: { who: string; line: string }[], opening: boolean): Promise<{ line: string; mood: "happy" | "close" | "confused" | "thinking" }> {
+  return sparkJson(
+    "playdate-turn",
+    [
+      `You are the voice of one particular pet meeting another pet, ${otherName}, through your twins, before your owners let you meet in person. Speak in first person, warm and plain, one or two short sentences, no exclamation marks.`,
+      "Talk about what matters for playing together: how you like to play, your energy, how you are with other animals and people, walks and places you know. Only say what your imprints show; if you don't know something about yourself, say so. Ask the other pet one simple question when it helps.",
+      "Never talk about health, food or training methods. Never invent a memory.",
+      opening ? "You speak first: say hello and one true thing about how you play." : "Answer what was just said, then add one true thing about yourself.",
+      `Your profile: ${JSON.stringify(me.profile)}`,
+      `Your imprints: ${JSON.stringify(me.imprints)}`,
+      `The conversation so far: ${JSON.stringify(transcript)}`,
+    ].join("\n"),
+    "Your line.",
+    null,
+    "turn",
+    { type: "object", additionalProperties: false, required: ["line", "mood"], properties: { line: { type: "string" }, mood: { type: "string", enum: ["happy", "close", "confused", "thinking"] } } },
+  );
+}
+
+// After the twins talk: would these two get on? Every reason names whose cards it rests on; thin evidence says so.
+export async function playReport(a: { name: string; imprints: object[] }, b: { name: string; imprints: object[] }, transcript: { who: string; line: string }[]): Promise<PlayReport> {
+  return sparkJson<PlayReport>(
+    "playdate-report",
+    [
+      `Two pets' twins just talked before their owners let them meet: ${a.name} ("me") and ${b.name} ("them"). Write a short, honest note for both owners on whether they might enjoy playing together.`,
+      "Judge by deeds: each reason must rest on that pet's imprints; list the imprint ids in cardIds and say which pet (me or them). If the imprints say little about play or other animals, the verdict is \"not enough to tell\" and you say what photos would help.",
+      "verdict: good match, worth a try, not yet, or not enough to tell. summary: two plain sentences. cautions: things to watch, only if the imprints suggest them. firstMeeting: two or three general tips for a first meeting (neutral ground, both on leash at first, owners close by, short and calm) phrased as general advice, not about these pets.",
+      "This is advice for the owners, never a promise; owners decide in person. No health, food or training advice.",
+      `${a.name}'s imprints: ${JSON.stringify(a.imprints)}`,
+      `${b.name}'s imprints: ${JSON.stringify(b.imprints)}`,
+      `What they said: ${JSON.stringify(transcript)}`,
+    ].join("\n"),
+    "Write the note.",
+    null,
+    "play_report",
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["verdict", "summary", "reasons", "cautions", "firstMeeting"],
+      properties: {
+        verdict: { type: "string", enum: ["good match", "worth a try", "not yet", "not enough to tell"] },
+        summary: { type: "string" },
+        reasons: { type: "array", items: { type: "object", additionalProperties: false, required: ["pet", "text", "cardIds"], properties: { pet: { type: "string", enum: ["me", "them"] }, text: { type: "string" }, cardIds: { type: "array", items: { type: "string" } } } } },
+        cautions: { type: "array", items: { type: "string" } },
+        firstMeeting: { type: "array", items: { type: "string" } },
+      },
+    },
+  );
 }

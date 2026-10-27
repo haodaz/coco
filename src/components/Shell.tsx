@@ -1,6 +1,6 @@
 "use client";
 
-import { BookHeart, Gift, House, Layers, LogOut, MessageCirclePlus, Shield, Sparkles, type LucideIcon } from "lucide-react";
+import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MessageCirclePlus, Shield, Sparkles, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
@@ -67,6 +67,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
     { href: "/app/pack", label: "Today's pack", icon: Gift, badge: r.left ? `${r.left}` : undefined, on: path.startsWith("/app/pack") },
     { href: "/app/cards", label: "Cards", icon: Layers, badge: `${cards.length}`, on: path.startsWith("/app/cards") },
     { href: "/app/memory", label: "Memory", icon: BookHeart, badge: memory ? `Lv ${memory.level}` : undefined, on: path.startsWith("/app/memory") },
+    { href: "/app/friends", label: "Friends", icon: HeartHandshake, badge: (state.playdates ?? []).filter((p) => p.petId === pet.id).length ? `${(state.playdates ?? []).filter((p) => p.petId === pet.id).length}` : undefined, on: path.startsWith("/app/friends") },
   ];
   if (state.admin) NAV.push({ href: "/app/admin", label: "Admin", icon: Shield, on: path.startsWith("/app/admin") });
 
@@ -167,7 +168,7 @@ export function PageHead({ eyebrow, title, sub, lead, art, portrait, children }:
   return (
     <header className="ws-head">
       {art && <div className="ws-head-art"><Scene name={art} portrait={portrait} /></div>}
-      <div className="relative max-w-2xl">
+      <div className="relative max-w-2xl md:max-w-[60%]">
         <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{eyebrow}</div>
         <h1 className="serif mt-2 text-[34px] font-bold leading-[1.1] tracking-tight md:text-[42px]">{title}</h1>
         {sub && <div className="serif mt-1 text-[17px] italic text-[var(--ink2)]">{sub}</div>}

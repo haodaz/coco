@@ -89,7 +89,28 @@ export type ChatTurn = {
   gap: { topic: string; suggest: string } | null;
   at: string;
 };
-export type Thread = { id: string; petId: string; title: string; createdAt: string; updatedAt: string; turns: ChatTurn[] };
+export type Thread = { id: string; petId: string; title: string; createdAt: string; updatedAt: string; turns: ChatTurn[]; via?: { kind: "sitter"; token: string } };
+
+// A link the owner hands out. "sitter": someone looking after the pet talks with its twin before and during the stay.
+// "playdate": another owner brings their pet, the two twins meet first. The owner chooses which kinds of moment it shares.
+export type Share = { token: string; kind: "sitter" | "playdate"; petId: string; topics: Pattern[]; label: string; createdAt: string; revokedAt?: string | null };
+
+// Two twins met (agent to agent) before their pets do; both owners keep the result.
+export type Playdate = {
+  id: string;
+  petId: string; // this owner's pet
+  other: { name: string; species: string; breed: string | null; face: string | null };
+  transcript: { who: "me" | "them"; line: string; mood: string }[];
+  report: PlayReport;
+  at: string;
+};
+export type PlayReport = {
+  verdict: "good match" | "worth a try" | "not yet" | "not enough to tell";
+  summary: string;
+  reasons: { pet: "me" | "them"; text: string; cardIds: string[] }[];
+  cautions: string[];
+  firstMeeting: string[];
+};
 
 export type State = {
   pets: Pet[];
@@ -98,4 +119,6 @@ export type State = {
   traits: Trait[];
   cards: Card[];
   threads?: Thread[];
+  shares?: Share[];
+  playdates?: Playdate[];
 };

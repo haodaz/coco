@@ -47,11 +47,11 @@ export function petContext(state: State, pet: Pet) {
   return { slots, cards, imprints, profile, senses };
 }
 
-export async function ask(state: State, pet: Pet, question: string): Promise<AskResult> {
-  const { slots, cards, imprints, profile, senses } = petContext(state, pet);
+export async function ask(state: State, pet: Pet, question: string, opts: { context?: ReturnType<typeof petContext>; audience?: "owner" | "sitter" } = {}): Promise<AskResult> {
+  const { slots, cards, imprints, profile, senses } = opts.context ?? petContext(state, pet);
 
   const answer = LIVE
-    ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title))
+    ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title), opts.audience)
     : { answer: `I only know a little about myself so far. Show me more moments and I'll answer that properly.`, basis: [], general: [], gap: null, mood: "confused" as const };
 
   // keep only cards that exist; the model may not invent evidence

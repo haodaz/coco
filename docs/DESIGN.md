@@ -229,3 +229,11 @@ Cost: one image per day; measure Muse Image pricing once credits arrive.
 
 - Product name (team name "coco" for now).
 - Stack: Next.js + Vercel as in earlier projects, unless the kickoff suggests otherwise.
+
+## Built from the past, here for the future (Elodie, 2026-10-27)
+
+Every Memory Print is something that already happened; what grows from them is for the days ahead. The pet's AI keeps the owner company for as long as they want it near, and never pretends to a memory it doesn't have.
+
+**Sitters.** Before someone looks after the pet, they talk with its twin through a link the owner makes. The owner chooses which kinds of moment the link shares; the twin answers in its own voice from those only, cites the cards, sends food amounts, medicine and house rules back to the owner, and every question lands in the owner's Recent. No sign-in for the sitter; 40 questions a day per link; the owner can switch a link off.
+
+**Playmates (agent to agent).** An owner sends a playdate invite; another owner opens it with their own pet. The two twins talk a few turns, each from its own moments of play, walks, trips and other animals only, then both owners get a note: a good match, worth a try, not yet, or not enough to tell. Every reason names whose cards it rests on; first-meeting tips are general advice; owners decide in person.

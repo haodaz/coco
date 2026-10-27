@@ -234,6 +234,55 @@ export default function Landing() {
         />
       )}
 
+      {/* the past, for the future */}
+      <section className="mx-auto max-w-6xl px-5 pt-16">
+        <div className="text-[12.5px] font-semibold uppercase tracking-[.16em] text-[var(--primary)]">Built from your past together</div>
+        <h2 className="mt-2 max-w-3xl text-[28px] font-bold leading-tight tracking-tight md:text-[34px]">Here for what comes next.</h2>
+        <p className="mt-3 max-w-3xl text-[15.5px] leading-relaxed text-[#3d4460]">
+          Every Memory Print is something that already happened. What grows from them is for the days ahead: the version of your pet that remembers everything you shared, for as long as you want it near, and never pretends to a memory it doesn&apos;t have.
+        </p>
+      </section>
+
+      <Module
+        n="07"
+        tag="Sitters"
+        title="Before someone looks after your pet, they can talk with its twin."
+        points={[
+          "Make a link for a sitter or a boarding host; choose which kinds of moment it shares",
+          "They ask in plain words and your pet answers in its own voice, citing the moments behind it, no sign-in needed",
+          "Food amounts, medicine and house rules always go back to you; you see every question they asked",
+        ]}
+        panel={
+          <Panel title={`A sitter asking ${PET}, from a real link`}>
+            <div className="space-y-4">
+              <Exchange q="How are you in the car, and what do you do on walks?" a="In the car I sit on the seat by the window and look out, and my person keeps my harness and collar on me. On walks we go to the park where I sit and rest with my pink leash beside me." because={["Happy Car Ride", "My Window Seat", "Sunny Park Pause"]} />
+              <Exchange q="How much food do you get for dinner?" a="Please ask my person directly about my dinner amount, and a vet is the one to ask before giving me anything." />
+            </div>
+          </Panel>
+        }
+      />
+
+      <Module
+        n="08"
+        tag="Playmates"
+        title="Before two pets meet, their twins meet first."
+        flip
+        points={[
+          "Send a playdate invite; the other owner opens it with their own pet",
+          "The two twins talk, each only from its own real moments of play, walks and other animals",
+          "Both owners get an honest note: a good match, worth a try, not yet, or not enough to tell. You still decide in person",
+        ]}
+        panel={
+          <Panel title="How a playdate works">
+            <ol className="space-y-3 text-[14px] leading-relaxed text-[#3d4460]">
+              <li><b className="text-[var(--ink)]">1 · Invite.</b> You choose what your pet shares: play, walks, trips, other animals.</li>
+              <li><b className="text-[var(--ink)]">2 · The twins talk.</b> Agent to agent, a few turns each, no invented memories.</li>
+              <li><b className="text-[var(--ink)]">3 · A note for both of you.</b> Every reason names whose moments it rests on, with general tips for a calm first meeting.</li>
+            </ol>
+          </Panel>
+        }
+      />
+
       {/* any pet */}
       <section className="mx-auto max-w-6xl px-5 py-20">
         <h2 className="max-w-3xl text-[28px] font-bold leading-tight tracking-tight md:text-[34px]">For the 94 million US households with a pet, not one breed.</h2>
