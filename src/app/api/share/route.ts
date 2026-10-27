@@ -29,7 +29,7 @@ export const POST = withUser(async (req: Request) => {
   const taskId = String(form.get("task") ?? "") || null;
   const task = taskId ? tasksFor(s, pet).find((t) => t.id === taskId && !t.done) : null;
   const freeLeft = isAdmin() ? FREE_PER_DAY : FREE_PER_DAY - sharesToday(s, pet.id);
-  if (!task && freeLeft <= 0) return NextResponse.json({ error: `You've shared ${FREE_PER_DAY} moments today. Today's tasks still give points.` }, { status: 400 });
+  if (!task && freeLeft <= 0) return NextResponse.json({ error: `You've shared ${FREE_PER_DAY} moments today. Today's tasks still give M pt.` }, { status: 400 });
 
   const words = String(form.get("words") ?? "").trim().slice(0, 500);
   const kinds = [...new Set(packFor(pet.species).quest.map((q) => q.pattern))].map((p) => ({ pattern: p, label: SENSES[p] }));

@@ -73,7 +73,7 @@ export default function HomeMobile({
         <div className="min-w-0 flex-1">
           <div className="text-[10.5px] font-bold uppercase tracking-[.2em] opacity-85">Today</div>
           <div className="serif mt-0.5 text-[22px] font-bold leading-tight">{today.tasksLeft ? `${today.tasksLeft} task${today.tasksLeft > 1 ? "s" : ""} waiting` : "Tasks done for today"}</div>
-          <div className="mt-0.5 text-[12.5px] opacity-90">{today.points} Memory Point{today.points === 1 ? "" : "s"}{today.canOpen ? " · enough for a pack" : ""}</div>
+          <div className="mt-0.5 text-[12.5px] opacity-90">{today.points} M pt{today.canOpen ? " · enough for a pack" : ""}</div>
           <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#3b2a8f]">{today.canOpen ? "Open a pack" : "See today's tasks"} <ArrowRight size={14} /></div>
         </div>
         <PackArt kind="booster" art={petArt(pet)} className="float-card -my-6 -mr-1 w-[26%] shrink-0 rotate-[8deg]" />

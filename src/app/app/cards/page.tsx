@@ -30,8 +30,8 @@ export default function Cards() {
               eyebrow="Cards"
               art="cards"
               title={`${pet.name}'s collection`}
-              sub={`${memories.length} memory cards · ${moves.length} move card${moves.length === 1 ? "" : "s"} · ${legends} legend${legends === 1 ? "" : "s"}`}
-              lead="Each card holds one Memory Print: a moment that really happened. Fill the series over time, star your favourites and arrange them your way."
+              sub={`${memories.length} M Card${memories.length === 1 ? "" : "s"} · ${moves.length} move card${moves.length === 1 ? "" : "s"} · ${legends} legend${legends === 1 ? "" : "s"}`}
+              lead="Each M Card holds one Memory Print: a moment that really happened. Fill the series over time, star your favourites and arrange them your way."
             />
             <Legend pet={pet} state={state} onChange={refresh} openCard={openCard} />
 

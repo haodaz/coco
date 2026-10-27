@@ -26,7 +26,7 @@ export const POST = withUser(async (req: Request) => {
   if (!pet) return NextResponse.json({ error: "pet not found" }, { status: 404 });
   const prints = sealedPrints(s, pet.id).slice(0, PACK_SIZE);
   if (!prints.length) return NextResponse.json({ error: "Share a memory first: a pack paints the memories you've shared." }, { status: 400 });
-  if (!isAdmin() && balance(s, pet.id) < PACK_COST) return NextResponse.json({ error: `A pack costs ${PACK_COST} Memory Points.` }, { status: 400 });
+  if (!isAdmin() && balance(s, pet.id) < PACK_COST) return NextResponse.json({ error: `A pack costs ${PACK_COST} M pt.` }, { status: 400 });
 
   const before = clarityOf(s, pet).level;
   const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);

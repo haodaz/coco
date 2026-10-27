@@ -131,7 +131,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
           <span className="min-w-0 flex-1">
             <span className="block text-[10.5px] font-bold uppercase tracking-[.2em] text-[#ffd27a]">Start here · free</span>
             <span className="serif block text-[19px] font-bold leading-tight">Your Starter Kit: {starterLeft} card{starterLeft > 1 ? "s" : ""} to go</span>
-            <span className="block text-[13px] opacity-90">Each photo becomes a card right away, no points needed. Finish it for the first move card.</span>
+            <span className="block text-[13px] opacity-90">Each photo becomes a card right away, no M pt needed. Finish it for the first move card.</span>
           </span>
         </Link>
       )}
@@ -139,18 +139,18 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       {/* points and the pack */}
       <div className="ws-card flex flex-col items-center gap-5 p-5 sm:flex-row sm:items-center">
         <div data-coco-spot="pack" data-coco-side="left" className="w-[min(170px,44vw)] shrink-0">
-          <PackArt kind="booster" art={petArt(pet)} title={phase === "sealed" ? "Painting…" : waiting ? `${Math.min(waiting, 3)} memor${Math.min(waiting, 3) === 1 ? "y" : "ies"}` : "Empty for now"} sub={phase === "sealed" ? "about half a minute" : undefined} badge={`${PACK_COST} points`} sealed={phase === "sealed"} />
+          <PackArt kind="booster" art={petArt(pet)} title={phase === "sealed" ? "Painting…" : waiting ? `${Math.min(waiting, 3)} memor${Math.min(waiting, 3) === 1 ? "y" : "ies"}` : "Empty for now"} sub={phase === "sealed" ? "about half a minute" : undefined} badge={`${PACK_COST} M pt`} sealed={phase === "sealed"} />
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-left">
-          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Memory Points</div>
+          <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">M pt · Memory points</div>
           <div className="serif text-[52px] font-bold leading-none">{points}</div>
           <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink2)]">
-            {waiting ? `${waiting} shared memor${waiting === 1 ? "y is" : "ies are"} waiting to become cards.` : `Share a memory below; a pack paints your shared memories into cards.`} A Daily Booster costs {PACK_COST} points and paints up to three, each in a style you won&apos;t know until it turns over.
+            {waiting ? `${waiting} shared memor${waiting === 1 ? "y is" : "ies are"} waiting to become M Cards.` : `Share a memory below; a pack paints your shared memories into M Cards.`} A Daily Booster costs {PACK_COST} M pt and paints up to three, each in a style you won&apos;t know until it turns over.
           </p>
           <button disabled={!canOpen || phase === "sealed"} onClick={open} className="pack mt-3 rounded-xl px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-40">
-            {phase === "sealed" ? "Painting your cards…" : `Open a pack · ${PACK_COST} points`}
+            {phase === "sealed" ? "Painting your cards…" : `Open a pack · ${PACK_COST} M pt`}
           </button>
-          {!canOpen && phase !== "sealed" && <div className="mt-1.5 text-[12.5px] text-[var(--ink3)]">{!waiting ? "Nothing to paint yet." : `${PACK_COST - points} more point${PACK_COST - points === 1 ? "" : "s"} to go.`}</div>}
+          {!canOpen && phase !== "sealed" && <div className="mt-1.5 text-[12.5px] text-[var(--ink3)]">{!waiting ? "Nothing to paint yet." : `${PACK_COST - points} more M pt to go.`}</div>}
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       <div>
         <div className="flex items-baseline gap-2">
           <h3 className="serif text-[20px] font-bold">Today&apos;s tasks</h3>
-          <span className="text-[13px] text-[var(--ink2)]">+{TASK_POINTS} each · moments {pet.name} doesn&apos;t know yet</span>
+          <span className="text-[13px] text-[var(--ink2)]">+{TASK_POINTS} M pt each · moments {pet.name} doesn&apos;t know yet</span>
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           {tasks.map((t) => (
@@ -168,10 +168,10 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
               <div className="serif mt-1 text-[18px] font-bold leading-tight">{t.label}</div>
               <div className="mt-0.5 text-[13px] text-[var(--ink2)]">Find a photo: {t.hint.toLowerCase()}.</div>
               {t.done ? (
-                <div className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-[#1f7a46]"><Check size={15} /> Done · +{TASK_POINTS}</div>
+                <div className="mt-3 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-[#1f7a46]"><Check size={15} /> Done · +{TASK_POINTS} M pt</div>
               ) : (
                 <button disabled={!!busy} onClick={() => choose(t)} className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[13.5px] font-semibold disabled:opacity-50">
-                  <ImagePlus size={15} /> {busy === t.id ? "Reading…" : `Find a photo · +${TASK_POINTS}`}
+                  <ImagePlus size={15} /> {busy === t.id ? "Reading…" : `Find a photo · +${TASK_POINTS} M pt`}
                 </button>
               )}
             </div>
@@ -183,12 +183,12 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       <div className="ws-card p-4">
         <div className="flex flex-wrap items-baseline gap-2">
           <h3 className="serif text-[20px] font-bold">Share any moment</h3>
-          <span className="text-[13px] text-[var(--ink2)]">+1 each · {freeLeft} of {FREE_PER_DAY} left today</span>
+          <span className="text-[13px] text-[var(--ink2)]">+1 M pt each · {freeLeft} of {FREE_PER_DAY} left today</span>
         </div>
         <p className="mt-1 text-[13.5px] text-[var(--ink2)]">Any day of your life together. Add a few words if you like; your words teach {pet.name} what no photo shows.</p>
         <textarea value={words} onChange={(e) => setWords(e.target.value)} rows={2} maxLength={500} placeholder={`Anything to tell ${pet.name} about it? (optional)`} className="mt-3 w-full resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]" />
         <button disabled={!!busy || freeLeft <= 0} onClick={() => choose(null)} className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-[var(--ink)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-40">
-          <ImagePlus size={15} /> {busy === "free" ? "Reading…" : freeLeft > 0 ? "Choose a photo · +1" : "Come back tomorrow"}
+          <ImagePlus size={15} /> {busy === "free" ? "Reading…" : freeLeft > 0 ? "Choose a photo · +1 M pt" : "Come back tomorrow"}
         </button>
         <p className="mt-2 text-[12px] text-[var(--ink3)]">People&apos;s faces are blurred on your device before anything is uploaded.</p>
       </div>

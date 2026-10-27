@@ -86,7 +86,7 @@ export default function Home() {
                 <div className="relative">
                   <div className="text-[11px] font-bold uppercase tracking-[.2em] opacity-85">Today</div>
                   <div className="serif mt-1 text-[28px] font-bold leading-tight">{t.tasksLeft ? `${t.tasksLeft} task${t.tasksLeft > 1 ? "s" : ""} waiting` : "Tasks done for today"}</div>
-                  <div className="mt-1 text-[13.5px] opacity-90">{t.points} Memory Point{t.points === 1 ? "" : "s"}{t.canOpen ? " · enough for a pack" : ""}</div>
+                  <div className="mt-1 text-[13.5px] opacity-90">{t.points} M pt{t.canOpen ? " · enough for a pack" : ""}</div>
                   <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[13.5px] font-semibold text-[#3b2a8f] transition group-hover:gap-2.5">{t.canOpen ? "Open a pack" : "See today's tasks"} <ArrowRight size={15} /></div>
                 </div>
               </Link>

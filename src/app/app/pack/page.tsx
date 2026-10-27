@@ -20,8 +20,8 @@ export default function PackPage() {
               eyebrow="Today"
               art="pack"
               title={left ? `${left} task${left > 1 ? "s" : ""} for today` : "Today's tasks are done."}
-              sub={`${points} Memory Point${points === 1 ? "" : "s"}`}
-              lead={`Every memory you share teaches ${pet.name} right away and earns points; points open packs that paint your memories into cards. ${r.streak ? `${r.streak} day${r.streak > 1 ? "s" : ""} in a row so far.` : ""}`}
+              sub={`${points} M pt`}
+              lead={`Every memory you share teaches ${pet.name} right away and earns M pt; M pt open packs that paint your memories into M Cards. ${r.streak ? `${r.streak} day${r.streak > 1 ? "s" : ""} in a row so far.` : ""}`}
             />
             <DailyPack pet={pet} state={state} onChange={refresh} admin={state.admin} />
             {pet.character && <Companion moods={pet.character.moods} mood="idle" version={pet.character.at} home="pack" />}
