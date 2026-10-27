@@ -97,19 +97,6 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
           <span className="serif text-[21px] font-bold tracking-tight">coco</span>
           <span className="text-[9px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
         </Link>
-        <Link href="/app/memory" className="ml-auto flex items-center gap-2 rounded-full border border-[var(--line)] bg-white py-0.5 pl-0.5 pr-2.5" aria-label={pet.name}>
-          <span className="relative h-7 w-7 overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_30%,#fff,#ebe5fb)]">
-            {face ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={faceSrc} alt="" className="absolute -bottom-[40px] left-1/2 w-[230%] max-w-none -translate-x-1/2" />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full object-cover" />
-            )}
-          </span>
-          <span className="serif text-[14px] font-bold">{pet.name}</span>
-          {memory && <span className="text-[11px] font-semibold text-[var(--ink3)]">Lv {memory.level}</span>}
-        </Link>
       </header>
       {menu && <div className="ws-scrim" onClick={() => setMenu(false)} />}
       <aside className={`ws-side ${menu ? "open" : ""}`}>
