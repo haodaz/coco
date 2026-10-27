@@ -43,6 +43,8 @@ Like a deck you build up and slot cards into: each card is an **Imprint**, one m
 - Traces taken from both photo and words, each marked with where it came from (photo, owner). The owner's words count as stronger evidence than the model's reading of a photo.
 - When the photo was taken, so imprints spread across real days of the pet's life.
 
+**Some memories are true for now.** Favourites change: Coco picks a new favourite toy about every three months (her owner's words). The owner's words can carry a time span, so the AI says "right now" for such things, lets those prints fade as they age, and after about that span asks the owner whether something has changed instead of repeating an old favourite as fact.
+
 **Training the AI to know what a card is worth.** The owner's sentence is also feedback: what the model saw versus what the owner says actually matters in this moment. Over time the AI learns which details carry meaning for this pet (the sock, not the floor).
 
 **Clarity: you can see how well the AI knows your pet.** The AI's picture of the pet is shown at the resolution it has earned.
