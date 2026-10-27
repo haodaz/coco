@@ -6,8 +6,8 @@ export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy"
 
 // How each mood loops through its frames: [frame index, milliseconds] pairs.
 const TIMELINE: Record<Mood, [number, number][]> = {
-  idle: [[0, 2800], [1, 140], [0, 1900], [1, 140]],
-  happy: [[0, 260], [1, 260], [0, 260], [2, 420]],
+  idle: [[0, 3600], [1, 160], [0, 2600], [1, 160]],
+  happy: [[0, 620], [1, 480], [0, 520], [2, 760]],
   confused: [[0, 2200], [1, 150]],
   thinking: [[0, 1100], [1, 1100]],
   close: [[0, 1600], [1, 1800]],
@@ -58,7 +58,7 @@ export default function Character({ moods, mood: asked, version = "", className 
         {/* every frame stays loaded and stacked, so switching never flickers */}
         {frames.map((f, i) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} className="absolute inset-0 h-full w-full object-contain" style={{ opacity: i === show ? 1 : 0 }} />
+          <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} className="absolute inset-0 h-full w-full object-contain transition-opacity duration-200 ease-out" style={{ opacity: i === show ? 1 : 0 }} />
         ))}
       </div>
       {reacting > 0 && (

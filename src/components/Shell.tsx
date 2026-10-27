@@ -63,6 +63,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const threads = (state.threads ?? []).filter((t) => t.petId === pet.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const thread = params.get("thread");
   const face = pet.character?.moods.idle?.[0];
+  const faceSrc = face ? (face.startsWith("/") ? face : `/api/art/${face}?v=${encodeURIComponent(pet.character?.at ?? "")}`) : "";
   const NAV: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean }[] = [
     { href: "/app", label: "Home", icon: House, on: path === "/app" },
     { href: "/app/pack", label: "Today's pack", icon: Gift, badge: r.left ? `${r.left}` : undefined, on: path.startsWith("/app/pack") },
@@ -81,13 +82,20 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
         </div>
 
         <Link href="/app" className="ws-hide-sm mx-3 flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white p-2.5 pr-3">
-          <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_30%,#fff,#efe6d6)] ring-2 ring-white" style={{ boxShadow: "0 0 0 3px rgba(176,137,78,.45)" }}>
-            {face ? (
+          {/* the pet sits in its circle and pokes its head out over the top, breaking out of the paper */}
+          <span className="relative mt-3 h-14 w-14 shrink-0">
+            <span className="absolute inset-0 overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_30%,#fff,#efe6d6)]" style={{ boxShadow: "0 0 0 2px #fff, 0 0 0 4px rgba(176,137,78,.45)" }}>
+              {face ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={faceSrc} alt="" className="absolute -bottom-[83px] left-1/2 w-[234%] max-w-none -translate-x-1/2" />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full object-cover" />
+              )}
+            </span>
+            {face && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={face.startsWith("/") ? face : `/api/art/${face}?v=${encodeURIComponent(pet.character?.at ?? "")}`} alt="" className="absolute left-1/2 top-[4%] w-[170%] max-w-none -translate-x-1/2" />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full object-cover" />
+              <img src={faceSrc} alt="" className="pointer-events-none absolute -bottom-[83px] left-1/2 w-[234%] max-w-none -translate-x-1/2 drop-shadow-[0_2px_3px_rgba(35,32,27,.18)]" style={{ clipPath: "inset(0 0 62% 0)" }} />
             )}
           </span>
           <span className="min-w-0">

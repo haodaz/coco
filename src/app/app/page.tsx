@@ -4,7 +4,7 @@ import { ArrowRight, Flame, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Character from "@/components/Character";
+import HomePet from "@/components/HomePet";
 import HoloCard from "@/components/HoloCard";
 import Shell, { PageHead, Rule } from "@/components/Shell";
 import { finishFor } from "@/lib/finish";
@@ -41,12 +41,13 @@ export default function Home() {
           <>
             <PageHead eyebrow="Home" art="home" title={greeting()} sub={`${pet.name}'s world, today`} />
 
-            <div className="grid gap-5 lg:grid-cols-3">
+            <div className="grid gap-5 sm:mt-16 lg:grid-cols-3">
               {/* the pet, ready to talk */}
-              <section className="ws-card relative flex flex-col gap-4 overflow-hidden p-5 sm:flex-row sm:items-end lg:col-span-2">
-                <div className="relative mx-auto aspect-[3/4] w-[180px] shrink-0 sm:mx-0">
+              <section className="ws-card relative mt-10 flex flex-col gap-4 p-5 sm:mt-0 sm:min-h-[260px] sm:flex-row sm:items-end sm:pl-[268px] lg:col-span-2">
+                {/* the pet stands on the card's floor and breaks out of its top edge */}
+                <div className="pointer-events-none relative mx-auto -mb-6 -mt-24 aspect-[768/1057] w-[240px] shrink-0 sm:absolute sm:-bottom-[26px] sm:-left-2 sm:mx-0 sm:mb-0 sm:mt-0 sm:w-[310px] [&>*]:pointer-events-auto">
                   {pet.character ? (
-                    <Character moods={pet.character.moods} mood={r.left ? "happy" : "idle"} version={pet.character.at} className="h-full w-full" interactive />
+                    <HomePet moods={pet.character.moods} version={pet.character.at} eager={r.left > 0} className="h-full w-full" />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full rounded-2xl object-cover" />
