@@ -8,6 +8,34 @@ import { CocoLoader } from "@/components/Loading";
 type Row = { calls: number; tokens: number };
 type Usage = { days: Record<string, Row>; features: Record<string, Row>; people: Record<string, Row>; paintingsToday: number; paintingCap: number; accounts: number };
 
+// Old layered cards: give them a clean scene behind the pet, a few at a time.
+function FixLayers() {
+  const [left, setLeft] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    fetch("/api/admin/plates").then((r) => r.json()).then((j) => setLeft(j.left ?? 0));
+  }, []);
+  if (!left) return null;
+  async function run() {
+    setBusy(true);
+    let n = left ?? 0;
+    while (n > 0) {
+      const r = await fetch("/api/admin/plates", { method: "POST" }).then((x) => x.json());
+      if (!r.fixed) break;
+      n = r.left;
+      setLeft(n);
+    }
+    setBusy(false);
+    window.dispatchEvent(new Event("coco-refresh"));
+  }
+  return (
+    <section className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
+      <div className="min-w-0 flex-1 text-[14px]"><b>{left} layered card{left === 1 ? "" : "s"}</b> still show the pet inside the scene behind it. Paint a clean scene for them (one image each) so they move without a ghost.</div>
+      <button disabled={busy} onClick={run} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white disabled:opacity-50">{busy ? "Painting…" : "Fix card layers"}</button>
+    </section>
+  );
+}
+
 // Admin: the site's model use today and this week, so the budget never surprises anyone.
 function UsageView() {
   const [u, setU] = useState<Usage | null>(null);
@@ -61,6 +89,7 @@ function Admin() {
           <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium capitalize ${tab === t ? "bg-white shadow-sm" : "text-[var(--sub)]"}`}>{t}</button>
         ))}
       </div>
+      <FixLayers />
       {tab === "usage" ? <UsageView /> : <AdminAccounts />}
     </div>
   );

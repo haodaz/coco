@@ -100,7 +100,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
               <div className="flip-inner">
                 <div className="flip-face"><div className="pack h-full w-full rounded-2xl" /></div>
                 <div className="flip-face front">
-                  <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} finish={finishFor(c)} name={c.name} line={c.line} stars={c.rarity} label={`${pet.name} · ${c.style}`} />
+                  <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} plate={c.plate} finish={finishFor(c)} name={c.name} line={c.line} stars={c.rarity} label={`${pet.name} · ${c.style}`} />
                 </div>
               </div>
             </button>

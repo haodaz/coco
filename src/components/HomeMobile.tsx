@@ -108,7 +108,7 @@ export default function HomeMobile({
           <div className="-mx-4 mt-2 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
             {recent.map((c) => (
               <button key={c.id} onClick={() => openCard(c)} className="w-[38%] shrink-0 snap-start text-left">
-                <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} finish={finishFor(c)} name={c.name} line="" stars={c.rarity} label={pet.name} idle={false} />
+                <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} plate={c.plate} finish={finishFor(c)} name={c.name} line="" stars={c.rarity} label={pet.name} idle={false} />
               </button>
             ))}
           </div>

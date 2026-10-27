@@ -12,3 +12,5 @@ next-env.d.ts
 # teaser video work files
 docs/video/teaser/out/
 docs/video/teaser/tts/
+docs/video/deeds/out/
+docs/video/deeds/tts/

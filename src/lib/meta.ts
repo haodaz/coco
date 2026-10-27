@@ -305,15 +305,40 @@ export async function cutout(imageB64: string, phrase: string): Promise<Buffer |
 
 // Depth layer for a card: the pet alone on a transparent PNG the same size as the art,
 // so the card can move pet and background apart. Returns the stored file name, or null.
+// what a pet wears or holds moves with it, so it is cut out together with the pet
+const WORN_AND_HELD = ["clothing", "collar", "bandana", "harness", "leash", "toy", "ball", "stick", "blanket", "the object in its mouth"];
+
 export async function depthLayer(artFile: string, phrase: string): Promise<string | null> {
   if (!LIVE) return null;
-  const png = await petLayer(await getMedia(artFile), phrase, ["clothing", "toy"], "depth-layer");
+  const png = await petLayer(await getMedia(artFile), phrase, WORN_AND_HELD, "depth-layer");
   if (!png) return null;
   return putMedia(artFile.replace(/\?.*$/, "").replace(/\.jpg$/, "-fg.png"), png);
 }
 
 // The pet alone on a transparent PNG the same size as the image (at most 1024 px on its long side).
 // Things near the pet (what it wears or holds, the cards it plays with) are kept with it, or the layer looks torn.
+// The painting without the pet: the layer behind the moving cut-out, so nothing of the pet is left behind when it moves.
+export async function cleanPlate(artFile: string, phrase: string): Promise<string | null> {
+  if (!LIVE) return null;
+  const art = await getMedia(artFile);
+  const b64 = (await sharp(art).jpeg({ quality: 90 }).toBuffer()).toString("base64");
+  const img = await editImage(
+    "clean-plate",
+    `Remove the ${phrase} from this picture, together with everything it wears or holds (collar, clothes, toys, anything in its mouth or paws), and its shadow. Fill that space with what would be behind it, continuing the same scene. Keep everything else exactly as it is: the same style, colours, light, framing and size. No new animals, people or objects.`,
+    [b64],
+  );
+  const { width, height } = await sharp(art).metadata();
+  const fitted = await sharp(img).resize(width, height, { fit: "cover" }).jpeg({ quality: 90 }).toBuffer();
+  return putMedia(artFile.replace(/\?.*$/, "").replace(/\.(jpg|png)$/, "") + "-bg.jpg", fitted);
+}
+
+// Both layers of a card that moves in depth: the pet (with what it wears and holds) and the scene without it.
+// Without a clean scene the card still gets the pet layer, but the two are shown together, never apart.
+export async function depthLayers(artFile: string, phrase: string): Promise<{ fg: string | null; plate: string | null }> {
+  const [fg, plate] = await Promise.all([depthLayer(artFile, phrase).catch(() => null), cleanPlate(artFile, phrase).catch(() => null)]);
+  return { fg, plate: fg ? plate : null };
+}
+
 export async function petLayer(img: Buffer, phrase: string, extraPhrases: string[], feature: string): Promise<Buffer | null> {
   const { width, height } = await sharp(img).metadata();
   if (!width || !height) return null;

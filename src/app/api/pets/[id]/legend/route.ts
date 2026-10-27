@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { petContext } from "@/lib/ask";
 import { samPhrase } from "@/lib/finish";
-import { depthLayer, LIVE, paintSoul, readSoul, writeIn } from "@/lib/meta";
+import { depthLayers, LIVE, paintSoul, readSoul, writeIn } from "@/lib/meta";
 import { photoBase64 } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, update } from "@/lib/store";
@@ -34,7 +34,7 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: 
   const photoIds = [...new Set([pet.avatarPhotoId, ...[...quest].sort((a, b) => b.rarity - a.rarity).map((c) => c.photoId)].filter(Boolean) as string[])].slice(0, 4);
   const refs = await Promise.all(photoIds.map((pid) => photoBase64(s.photos.find((p) => p.id === pid)!.file)));
   const art = await paintSoul(pet, refs, soul.scene);
-  const fg = await depthLayer(art, samPhrase(pet.species)).catch(() => null);
+  const { fg, plate } = await depthLayers(art, samPhrase(pet.species));
 
   const card: Card = {
     id: newId("card"),
@@ -47,6 +47,7 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: 
     style: "Legend",
     art: `/api/art/${art}`,
     fg: fg ? `/api/art/${fg}` : null,
+    plate: plate ? `/api/art/${plate}` : null,
     line: soul.line,
     observation: soul.essence.join(" · "),
     basis,

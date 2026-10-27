@@ -3,7 +3,7 @@ import { unlockMoves } from "@/lib/character";
 import { samPhrase } from "@/lib/finish";
 import { refreshLikeness } from "@/lib/likeness";
 import { clarityOf } from "@/lib/memory";
-import { depthLayer, paintCard } from "@/lib/meta";
+import { depthLayers, paintCard } from "@/lib/meta";
 import { nextPull } from "@/lib/moves";
 import { photoBase64 } from "@/lib/photos";
 import { balance, PACK_COST, PACK_SIZE, sealedPrints } from "@/lib/points";
@@ -32,17 +32,23 @@ export const POST = withUser(async (req: Request) => {
   const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);
   const ref = avatar ? await photoBase64(avatar.file) : null;
   const now = new Date().toISOString();
-  await Promise.all(
+  // each card is painted on its own; a painting that fails twice leaves that memory sealed for the next pack
+  const painted = await Promise.all(
     prints.map(async (card) => {
       const photo = s.photos.find((p) => p.id === card.photoId);
-      if (!photo) return;
+      if (!photo) return false;
       const style = drawStyle();
       const rarity = Math.max(card.rarity, style.tier) as 1 | 2 | 3;
-      const art = await paintCard(await photoBase64(photo.file), pet, style.prompt, card.scene || card.observation, ref);
-      const fg = art && rarity >= 2 ? await depthLayer(art, samPhrase(pet.species)).catch(() => null) : null;
-      Object.assign(card, { style: style.label, rarity, art: art ? `/api/art/${art}` : null, fg: fg ? `/api/art/${fg}` : null, sealed: false, openedAt: now });
+      const b64 = await photoBase64(photo.file);
+      const paint = () => paintCard(b64, pet, style.prompt, card.scene || card.observation, ref);
+      const art = await paint().catch(() => paint()).catch(() => undefined);
+      if (art === undefined) return false;
+      const layers = art && rarity >= 2 ? await depthLayers(art, samPhrase(pet.species)) : { fg: null, plate: null };
+      Object.assign(card, { style: style.label, rarity, art: art ? `/api/art/${art}` : null, fg: layers.fg ? `/api/art/${layers.fg}` : null, plate: layers.plate ? `/api/art/${layers.plate}` : null, sealed: false, openedAt: now });
+      return true;
     }),
   );
+  if (!painted.some(Boolean)) return NextResponse.json({ error: "The painter is busy right now. Try again in a minute; your M pt weren't spent." }, { status: 503 });
   if (!isAdmin()) (s.points ??= []).push({ petId: pet.id, at: now, delta: -PACK_COST, why: "pack" });
   const bonus = nextPull(pet, s);
   if (bonus) pet.moveCards = [...(pet.moveCards ?? []), { mood: bonus, at: now, from: "pack" }];
@@ -50,5 +56,5 @@ export const POST = withUser(async (req: Request) => {
   await save(s);
   const owner = currentUserId();
   after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
-  return NextResponse.json({ cards: prints, bonus, levelBefore: before, levelAfter: clarityOf(s, pet).level, balance: balance(s, pet.id) });
+  return NextResponse.json({ cards: prints.filter((_, i) => painted[i]), bonus, levelBefore: before, levelAfter: clarityOf(s, pet).level, balance: balance(s, pet.id) });
 });

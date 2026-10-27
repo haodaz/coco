@@ -1,7 +1,7 @@
 import { after, NextResponse } from "next/server";
 import { samPhrase } from "@/lib/finish";
 import { refreshLikeness } from "@/lib/likeness";
-import { depthLayer, paintCard, readQuestPhoto } from "@/lib/meta";
+import { depthLayers, paintCard, readQuestPhoto } from "@/lib/meta";
 import { photoBase64, storePhoto, uploadMeta } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
@@ -39,7 +39,7 @@ export const POST = withUser(async (req: Request) => {
   const reading = await readQuestPhoto(b64, slot, pet.name || "me", pet.sex, ref);
   const art = await paintCard(b64, pet, slot.style, reading.scene || reading.observation, ref);
   // rare cards and up get a depth layer; a failed cutout just leaves the card flat
-  const fg = art && reading.rarity >= 2 ? await depthLayer(art, samPhrase(pet.species)).catch(() => null) : null;
+  const layers = art && reading.rarity >= 2 ? await depthLayers(art, samPhrase(pet.species)) : { fg: null, plate: null };
 
   const traces: Trace[] = reading.traces.map((t) => ({
     id: newId("tr"),
@@ -57,7 +57,8 @@ export const POST = withUser(async (req: Request) => {
     rarity: reading.rarity,
     style: slot.style,
     art: art ? `/api/art/${art}` : null,
-    fg: fg ? `/api/art/${fg}` : null,
+    fg: layers.fg ? `/api/art/${layers.fg}` : null,
+    plate: layers.plate ? `/api/art/${layers.plate}` : null,
     line: reading.line,
     observation: reading.observation,
     scene: reading.scene,

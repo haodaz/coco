@@ -49,7 +49,7 @@ export default function ActionPanel({ action, facts = [], pet, state, memory, ad
         <div className="grid grid-cols-2 gap-3">
           {picked.map((c) => (
             <button key={c.id} data-coco-spot={`card-${c.id}`} data-coco-x="0.55" onMouseEnter={() => spotCoco(`card-${c.id}`)} onMouseLeave={() => spotCoco(null)} onClick={() => { setCard(c); spotCoco(null); }} className="text-left">
-              <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} finish={finishFor(c)} name={c.name} line="" stars={c.rarity} label={pet.name} idle={false} />
+              <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} plate={c.plate} finish={finishFor(c)} name={c.name} line="" stars={c.rarity} label={pet.name} idle={false} />
             </button>
           ))}
         </div>

@@ -91,7 +91,7 @@ export default function MyCards({ pet, cards, openCard, onChange }: { pet: Pet; 
         {list.map((c) => (
           <div key={c.id} className={`relative transition ${arranging ? "cursor-pointer" : ""} ${picked === c.id ? "-translate-y-1.5 rounded-2xl ring-4 ring-[var(--gold)]" : ""} ${arranging && picked && picked !== c.id ? "opacity-80" : ""}`}>
             <button onClick={() => tap(c)} className="block w-full text-left">
-              <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} finish={finishFor(c)} name={c.name} line={c.line} stars={c.rarity} label={`${pet.name} · ${c.style}`} idle={!arranging} />
+              <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} plate={c.plate} finish={finishFor(c)} name={c.name} line={c.line} stars={c.rarity} label={`${pet.name} · ${c.style}`} idle={!arranging} />
             </button>
             {!arranging && (
               <button onClick={() => star(c)} className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/90 shadow" aria-label={starred(c) ? "Unstar" : "Star"}>

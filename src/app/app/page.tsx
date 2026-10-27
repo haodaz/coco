@@ -130,7 +130,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
               {recent.map((c) => (
                 <button key={c.id} onClick={() => openCard(c)} className="text-left">
-                  <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} finish={finishFor(c)} name={c.name} line="" stars={c.rarity} label={pet.name} />
+                  <HoloCard art={c.art ?? `/api/photos/${c.photoId}`} fg={c.fg} plate={c.plate} finish={finishFor(c)} name={c.name} line="" stars={c.rarity} label={pet.name} />
                 </button>
               ))}
             </div>

@@ -28,7 +28,7 @@ export function CardDetail({ card, state, pet, onClose, onChanged, compact = fal
   return (
       <div className={`grid gap-8 ${compact ? "" : "md:grid-cols-[minmax(0,340px)_1fr]"}`}>
         <div className={`mx-auto w-full ${compact ? "max-w-[260px]" : "max-w-[340px]"} ${live.kind === "legendary" ? "pt-10" : ""}`}>
-          <HoloCard art={live.art ?? `/api/photos/${live.photoId}`} fg={live.fg} finish={finishFor(live)} name={live.name} line={live.line} stars={live.rarity} label={`${pet.name} · ${live.style}`} idle={false} />
+          <HoloCard art={live.art ?? `/api/photos/${live.photoId}`} fg={live.fg} plate={live.plate} finish={finishFor(live)} name={live.name} line={live.line} stars={live.rarity} label={`${pet.name} · ${live.style}`} idle={false} />
           <div className="mt-3 text-center text-[12px] text-[var(--ink3)]"><span className="hidden md:inline">{tr("Move over the card to turn it in the light")}</span><span className="md:hidden">{tr("Drag across the card to turn it in the light")}</span></div>
         </div>
         <div className="min-w-0">

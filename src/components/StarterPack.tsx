@@ -59,7 +59,7 @@ function QuestCard({ slot, index, pet, card, onChange, openCard }: { slot: Quest
         <div className="flip-inner">
           <div className="flip-face"><CardBack pattern={slot.pattern} title={slot.title} index={index} /></div>
           <div className="flip-face front">
-            {card && <HoloCard art={card.art ?? `/api/photos/${card.photoId}`} fg={card.fg} finish={finishFor(card)} name={card.name} line={card.line} stars={card.rarity} label={`${pet.name} · No. ${String(index + 1).padStart(2, "0")}`} />}
+            {card && <HoloCard art={card.art ?? `/api/photos/${card.photoId}`} fg={card.fg} plate={card.plate} finish={finishFor(card)} name={card.name} line={card.line} stars={card.rarity} label={`${pet.name} · No. ${String(index + 1).padStart(2, "0")}`} />}
           </div>
         </div>
       </button>

@@ -39,7 +39,7 @@ export default function Legend({ pet, state, onChange, openCard }: { pet: Pet; s
   return (
     <section className="grid items-center gap-8 md:grid-cols-[minmax(240px,340px)_1fr]">
       <div className="mx-auto w-full max-w-[340px] cursor-pointer pt-10" onClick={() => openCard?.(legend)}>
-        <HoloCard art={legend.art ?? ""} fg={legend.fg} finish="popout" name={legend.name} line="" stars={3} label={`${pet.name} · Legend`} />
+        <HoloCard art={legend.art ?? ""} fg={legend.fg} plate={legend.plate} finish="popout" name={legend.name} line="" stars={3} label={`${pet.name} · Legend`} />
       </div>
       <div>
         <div className="text-[12px] font-semibold uppercase tracking-[.16em] text-[var(--gold)]">Legendary · soul portrait</div>

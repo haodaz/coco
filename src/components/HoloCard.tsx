@@ -11,6 +11,7 @@ import type { Finish } from "@/lib/finish";
 type Props = {
   art: string;
   fg?: string | null;
+  plate?: string | null; // the scene without the pet: only with it do the two layers move apart
   finish: Finish;
   name: string;
   line?: string;
@@ -19,7 +20,10 @@ type Props = {
   idle?: boolean;
 };
 
-export default function HoloCard({ art, fg, finish, name, line, stars, label, idle = true }: Props) {
+export default function HoloCard({ art, fg, plate, finish, name, line, stars, label, idle = true }: Props) {
+  // depth "2": the pet moves over a scene that no longer has it in it. depth "1": a pet layer but no clean scene yet,
+  // so the layers stay together (no ghost of the pet behind it, nothing it wears left behind)
+  const depth = fg && plate ? "2" : fg ? "1" : "0";
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -86,11 +90,11 @@ export default function HoloCard({ art, fg, finish, name, line, stars, label, id
   }, [idle]);
 
   return (
-    <div ref={ref} className="hc" data-finish={finish} data-depth={fg ? "1" : "0"}>
+    <div ref={ref} className="hc" data-finish={finish} data-depth={depth}>
       <div className="hc-card">
         <div className="hc-window">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="hc-bg" src={art} alt="" draggable={false} />
+          <img className="hc-bg" src={depth === "2" ? plate! : art} alt="" draggable={false} />
           <div className="hc-texture" />
           {/* the pet sits above the texture, so foil and holo shine on the world around it */}
           {fg && finish !== "popout" && (
