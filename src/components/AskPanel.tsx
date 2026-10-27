@@ -122,7 +122,10 @@ export default function AskPanel({
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           {!turns.length && !pending ? (
             <div className="flex min-h-full flex-col items-center justify-center py-6 text-center">
-              <div className={`relative aspect-[3/4] w-[200px] transition-[opacity,scale] duration-300 ${typing && pet.character ? "scale-90 opacity-0" : ""}`}>{character("h-full w-full")}</div>
+              {/* while typing the pet has gone down to the box, so its spot folds away and the greeting closes up */}
+              <div className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${typing && pet.character ? "max-h-0 opacity-0" : "max-h-[280px]"}`}>
+                <div className="relative aspect-[3/4] w-[200px]">{character("h-full w-full")}</div>
+              </div>
               <div className="serif mt-2 text-[30px] font-bold">Hi, it&apos;s me, {pet.name}.</div>
               <p className="mt-1 max-w-md text-[14.5px] text-[var(--ink2)]">Ask me anything about us. If I haven&apos;t seen something yet, I&apos;ll say so and open a way to show me.</p>
               {!pet.character && (
