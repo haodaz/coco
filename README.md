@@ -33,6 +33,7 @@ photos you already have ──► cards (Imprints) ──► the AI's memory of 
 | **Muse Spark 1.3** | [`src/lib/meta.ts`](src/lib/meta.ts) | Identifies the animal; reads each photo into traces, a card name and a line in the pet's voice; reads the owner's notes; answers as the pet (structured output, image input) |
 | **Muse Image 1.0** | `paintCard`, `paintLikeness`, [`src/lib/character.ts`](src/lib/character.ts) | Card art (a new painting per moment), the AI's portrait of the pet at each clarity level, the 3D character and its mood frames |
 | **SAM 3.1** | `petLayer` in `src/lib/meta.ts` | Cuts the pet (with what it wears or holds) out of each painting for card depth, and out of every character frame so the character has no background |
+| **Muse Spark Open** (open weights, on Baseten) | `chat` in `src/lib/meta.ts` | Answers sitters and runs the twin-to-twin playdates; either Muse Spark takes over if the other fails |
 | **Muse Voice Transcribe 1.0** | `transcribe` in `src/lib/meta.ts` | Spoken notes about a card, spoken questions to the pet |
 
 Every live call's token use is logged to `data/usage.jsonl`.
