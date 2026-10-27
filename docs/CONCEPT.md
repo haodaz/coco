@@ -4,7 +4,7 @@
 
 ## In one line
 
-**A cocoverse for you and your pet, built from the moments you share.**
+**cocoverse — a little universe for you and your pet, built from the moments you share.**
 Every real moment becomes a Memory Print, kept in a card worth collecting. Your pet's AI grows only from those prints: the more you keep, the more it becomes your pet.
 
 ## The name

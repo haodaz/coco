@@ -1,6 +1,6 @@
 # coco
 
-**A cocoverse for you and your pet.** co- means together, as in *companion*, the one you share your bread with: coco is the two of you, you and them; verse, as in universe, is everything you share. Say it fast and it sounds like *converse*: here, your pet talks back.
+**cocoverse — a little universe for you and your pet.** co- means together, as in *companion*, the one you share your bread with: coco is the two of you, you and them; verse, as in universe, is everything you share. Say it fast and it sounds like *converse*: here, your pet talks back.
 
 An AI for each owner that knows their one pet. Dog, cat, bird, turtle, anything. It learns who *this* animal is from the photos you already have, keeps every moment as a collectible card, and talks back as your pet, only about what it has actually seen.
 

@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "coco — a cocoverse for you and your pet",
-  description: "Every moment with your pet becomes a Memory Print kept in a card; your pet's AI grows only from them. A cocoverse for the two of you.",
+  title: "cocoverse — a little universe for you and your pet",
+  description: "Every moment with your pet becomes a Memory Print kept in a card; your pet's AI grows only from them. A little universe for the two of you.",
 };
 
 // phones: draw under the notch and home bar (the app pads with safe-area insets), and tint the browser bar

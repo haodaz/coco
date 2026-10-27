@@ -263,4 +263,4 @@ Rules for this layer, same spirit as the cards:
 
 ## The name, grown: cocoverse (Elodie, 2026-10-27)
 
-The space is a cocoverse, not a co-world: coco (the two of you) + verse, as in universe, everything you share, the friends you meet and the days ahead. Said fast it sounds like *converse*, and the pet does talk back. It matches the domain, cocoverse.app. Next to the coco mark the small label reads "verse", so the two together read cocoverse. In Chinese: 小宇宙.
+The space is a cocoverse, not a co-world: coco (the two of you) + verse, as in universe, everything you share, the friends you meet and the days ahead. Said fast it sounds like *converse*, and the pet does talk back. It matches the domain, cocoverse.app. Next to the coco mark the small label reads "verse", so the two together read cocoverse. In Chinese: 小宇宙. Tagline: "cocoverse — a little universe for you and your pet": little because only the two of you are in it, and it doesn't need to be big.
