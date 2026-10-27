@@ -259,3 +259,8 @@ Rules for this layer, same spirit as the cards:
 - **Checks happen outside the model.** Weather limits and rule lookups are code; the model only words the result.
 - **Coarse location.** Area-level only; the exact address never leaves the owner's device.
 - **Services are listings, not advice.** A clinic's name and hours, never a diagnosis or a recommendation for treatment.
+
+
+## The name, grown: cocoverse (Elodie, 2026-10-27)
+
+The space is a cocoverse, not a co-world: coco (the two of you) + verse, as in universe, everything you share, the friends you meet and the days ahead. Said fast it sounds like *converse*, and the pet does talk back. It matches the domain, cocoverse.app. Next to the coco mark the small label reads "verse", so the two together read cocoverse. In Chinese: 小宇宙.

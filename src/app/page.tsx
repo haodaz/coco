@@ -49,18 +49,18 @@ export default function Landing() {
       <header className="mx-auto grid max-w-6xl items-center gap-8 px-5 pb-20 pt-6 md:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] md:pt-12">
         <div>
           <h1 className="text-[38px] font-bold leading-[1.08] tracking-tight md:text-[52px]">
-            A co-world for you and your pet.
+            A cocoverse for you and your pet.
             <br />
             <span className="text-[var(--primary)]">Built from the moments you share.</span>
           </h1>
           <p className="mt-5 max-w-xl text-[16.5px] leading-relaxed text-[#3d4460]">
-            Thousands of photos of your pet sit in your camera roll. coco keeps each moment as a Memory Print, held in a card worth collecting, and grows your pet&apos;s AI only from those prints. The more you keep, the more it becomes your pet: a portrait that sharpens, a character that talks back, a co-world that belongs to the two of you.
+            Thousands of photos of your pet sit in your camera roll. coco keeps each moment as a Memory Print, held in a card worth collecting, and grows your pet&apos;s AI only from those prints. The more you keep, the more it becomes your pet: a portrait that sharpens, a character that talks back, a cocoverse that belongs to the two of you.
           </p>
           <p className="mt-3 max-w-xl text-[13.5px] leading-relaxed text-[var(--sub)]">
-            <b className="text-[var(--ink)]">Why coco?</b> co- means together, as in <i>companion</i>: from Latin, the one you share your bread with. coco is the two of you, you and them.
+            <b className="text-[var(--ink)]">Why cocoverse?</b> co- means together, as in <i>companion</i>: from Latin, the one you share your bread with. coco is the two of you, you and them; verse, as in universe, is everything you share. Say it fast and it sounds like <i>converse</i>: here, your pet talks back.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/app" className="rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(109,79,209,.55)]">Start your co-world →</Link>
+            <Link href="/app" className="rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(109,79,209,.55)]">Start your cocoverse →</Link>
             <a href="#how" className="rounded-xl bg-white px-5 py-3 text-[15px] font-semibold shadow-sm">See how it grows</a>
           </div>
           <ul className="mt-6 grid gap-2 text-[13.5px] text-[#3d4460] sm:grid-cols-2">
@@ -75,7 +75,7 @@ export default function Landing() {
 
       {/* the four beats */}
       <section id="how" className="mx-auto max-w-6xl px-5">
-        <h2 className="text-[28px] font-bold tracking-tight md:text-[34px]">From a scattered camera roll to a co-world</h2>
+        <h2 className="text-[28px] font-bold tracking-tight md:text-[34px]">From a scattered camera roll to a cocoverse</h2>
         <p className="mt-2 max-w-2xl text-[15.5px] text-[#3d4460]">Each step is something you do in the app, and something it gives back.</p>
       </section>
 
@@ -337,8 +337,8 @@ export default function Landing() {
       </section>
 
       <footer className="py-16 text-center">
-        <h2 className="text-[28px] font-bold tracking-tight">Every pet deserves a co-world.</h2>
-        <Link href="/app" className="mt-5 inline-block rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white">Start your co-world →</Link>
+        <h2 className="text-[28px] font-bold tracking-tight">Every pet deserves a cocoverse.</h2>
+        <Link href="/app" className="mt-5 inline-block rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white">Start your cocoverse →</Link>
         <p className="mt-8 text-[12.5px] text-[var(--sub)]">Built for the Meta Global AI Developer Hackathon, 2026 · <a href="https://github.com/haodaz/coco" className="underline">github.com/haodaz/coco</a></p>
       </footer>
     </div>

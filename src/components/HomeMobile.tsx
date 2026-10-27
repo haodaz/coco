@@ -45,7 +45,7 @@ export default function HomeMobile({
     <div className="-mt-1">
       {/* the pet and its line */}
       <div className="serif text-[26px] font-bold leading-tight">{greeting}</div>
-      <div className="serif text-[15px] italic text-[var(--ink2)]">{t("Your co-world with {name}", { name: pet.name })}</div>
+      <div className="serif text-[15px] italic text-[var(--ink2)]">{t("Your cocoverse with {name}", { name: pet.name })}</div>
 
       <section className="relative mt-2">
         {/* the pet beside its speech bubble, small enough to leave room for everything else */}

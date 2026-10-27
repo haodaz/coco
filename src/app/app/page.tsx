@@ -49,7 +49,7 @@ export default function Home() {
               <HomeMobile pet={pet} greeting={tr(greeting())} line={line} r={r} today={t} memory={memory} cardCount={cards.filter((c) => !c.sealed).length} recent={recent} threads={threads} openCard={openCard} ask={go} />
             </div>
             <div className="home-d">
-            <PageHead eyebrow={tr("Home")} art="home" title={tr(greeting())} sub={tr("Your co-world with {name}", { name: pet.name })} />
+            <PageHead eyebrow={tr("Home")} art="home" title={tr(greeting())} sub={tr("Your cocoverse with {name}", { name: pet.name })} />
 
             <div className="grid gap-5 sm:mt-16 lg:grid-cols-3">
               {/* the pet, ready to talk */}

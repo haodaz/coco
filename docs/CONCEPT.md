@@ -4,19 +4,19 @@
 
 ## In one line
 
-**A co-world for you and your pet, built from the moments you share.**
+**A cocoverse for you and your pet, built from the moments you share.**
 Every real moment becomes a Memory Print, kept in a card worth collecting. Your pet's AI grows only from those prints: the more you keep, the more it becomes your pet.
 
 ## The name
 
-co- means together, as in *companion*: from Latin *com* (with) + *panis* (bread), the one you share your bread with. coco is co + co: you and them. Each owner's space is their **co-world**. Coco, a black Labrador, is simply the first pet with one.
+co- means together, as in *companion*: from Latin *com* (with) + *panis* (bread), the one you share your bread with. coco is co + co: you and them. verse, as in universe, is everything the two of you share, and cocoverse sounds like *converse*: the pet talks back. Each owner's space is their **cocoverse** (the domain is cocoverse.app). Coco, a black Labrador, is simply the first pet with one.
 
 ## The story in four beats
 
 1. **Memories are scattered.** Thousands of photos of a pet sit in a camera roll that nobody opens again.
 2. **Kept as cards.** Each moment becomes a card worth collecting. The card is the vessel; what it keeps is a **Memory Print**: the photo, the day, what it shows, and the owner's own words.
 3. **Grown from what really happened.** The pet's AI is not invented; it grows only from Memory Prints (judge by deeds, 论迹不论心). Its own picture of the pet sharpens from a two-colour mosaic to a real portrait as it learns.
-4. **A world of your own.** Cards, portrait and a pet that talks back, moves, naps and helps: a co-world that belongs to the two of you. Built from your past together, here for what comes next.
+4. **A world of your own.** Cards, portrait and a pet that talks back, moves, naps and helps: a cocoverse that belongs to the two of you. Built from your past together, here for what comes next.
 
 ## Principles
 
@@ -37,12 +37,12 @@ co- means together, as in *companion*: from Latin *com* (with) + *panis* (bread)
 | Memory Prints + the owner's words | Typed or spoken; outrank the model's reading | One sentence carries what no photo shows |
 | Clarity | 9 levels from mosaic to portrait, the AI's own repainted picture | Make honest progress visible |
 | Daily pack | Up to 3 photos a day from any day of the pet's life; streak | A small daily ritual of remembering |
-| Soul portrait | A full starter set unlocks a legend: the pet says who it is, citing cards | The first landmark of the co-world |
+| Soul portrait | A full starter set unlocks a legend: the pet says who it is, citing cards | The first landmark of the cocoverse |
 | The pet as a character | 3D character from its photos; a standard set of moves unlocked by clarity; a companion that hops to what you're looking at, sits by the pack, comes down when you type, naps after 20 s, reacts to a tap | Bonding: the more memories, the more alive |
 | Agentic chat | The pet answers from its prints and opens things beside the conversation: cards, today's pack, the photo it's missing, clarity, a sitter or playdate link | It helps, not just talks |
 | Around us | The owner picks their town (never an address); live weather and air, a parked-car check, US rules (state hot-car laws, ADA service animals, the FDA Food Code), home notes, pet places nearby from OpenStreetMap. Every fact shows its source and when it was checked | The pet speaks up about a plan with real reasons, and code does the checking, not the model |
 | Sitters | A link to the twin for whoever looks after the pet; owner chooses topics; questions land in the owner's Recent | The past helping the future |
-| Playmates (agent to agent) | Two twins meet first, each from its own play moments; an honest note for both owners | The social side of a co-world |
+| Playmates (agent to agent) | Two twins meet first, each from its own play moments; an honest note for both owners | The social side of a cocoverse |
 | Hosted product | Supabase per-user data and media, email/password sign-in, limits, admin review and usage | Real people can use it |
 
 ## Meta models

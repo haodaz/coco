@@ -101,7 +101,7 @@ export function StartWithOnePhoto({ onDone }: { onDone: () => void }) {
       {step === 0 && (
         <div className="mt-8">
           <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{t("Welcome")}</div>
-          <h1 className="serif mt-2 text-[36px] font-bold leading-[1.08] tracking-tight">{t("Let's start your co‑world.")}</h1>
+          <h1 className="serif mt-2 text-[36px] font-bold leading-[1.08] tracking-tight">{t("Let's start your cocoverse.")}</h1>
           <p className="mt-3 text-[15px] leading-relaxed text-[var(--ink2)]">{t("A space for you and your pet, built only from moments that really happened. Here is what you get:")}</p>
           <div className="mt-5 grid gap-3">
             {[

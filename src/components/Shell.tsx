@@ -116,7 +116,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
         <button onClick={() => setMenu(true)} className="-ml-1.5 rounded-lg p-1.5 text-[var(--ink)]" aria-label="Open menu"><Menu size={21} /></button>
         <Link href="/app" className="flex items-baseline gap-1.5">
           <CocoLogo size={19} />
-          <span className="text-[9px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
+          <span className="text-[9px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">verse</span>
         </Link>
       </header>
       {menu && <div className="ws-scrim" onClick={() => setMenu(false)} />}
@@ -124,7 +124,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
         <button onClick={() => setMenu(false)} className="ws-only-sm absolute right-3 top-4 rounded-lg p-1.5 text-[var(--ink2)]" aria-label="Close menu"><X size={19} /></button>
         <div className="flex items-center gap-2 px-5 pb-3 pt-5">
           <Link href="/"><CocoLogo size={22} /></Link>
-          <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
+          <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">verse</span>
         </div>
 
         <Link href="/app" className="ws-hide-sm mx-3 flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white p-2.5 pr-3">

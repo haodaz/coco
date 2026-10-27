@@ -81,7 +81,7 @@ export default function PackArt({
           <CocoMark mono="#fff" style={{ width: "13cqw", height: "9cqw" }} />
           <span className="font-bold leading-none tracking-tight" style={{ fontSize: "10cqw", fontFamily: "var(--serif)" }}>coco</span>
         </div>
-        <div className="absolute inset-x-0 top-[19.5%] text-center font-bold uppercase text-white/80" style={{ fontSize: "4.2cqw", letterSpacing: ".32em" }}>co-world</div>
+        <div className="absolute inset-x-0 top-[19.5%] text-center font-bold uppercase text-white/80" style={{ fontSize: "4.2cqw", letterSpacing: ".32em" }}>verse</div>
 
         {/* the window with the pet */}
         <div className="absolute left-1/2 top-[26%] aspect-square w-[78%] -translate-x-1/2 rounded-full" style={{ background: s.window }}>

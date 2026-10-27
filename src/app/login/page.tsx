@@ -74,8 +74,8 @@ function SignIn() {
       <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-6 px-5 py-8 pt-[max(32px,env(safe-area-inset-top))] md:gap-10 md:py-10 md:grid-cols-[minmax(0,420px)_1fr]">
       <div>
       <Link href="/"><CocoLogo size={24} /></Link>
-      <div className="mt-6 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)] md:mt-10">coco · co-world</div>
-      <h1 className="serif mt-2 text-[38px] font-bold leading-[1.08] tracking-tight">Step into your co-world.</h1>
+      <div className="mt-6 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)] md:mt-10">cocoverse</div>
+      <h1 className="serif mt-2 text-[38px] font-bold leading-[1.08] tracking-tight">Step into your cocoverse.</h1>
       <p className="serif mt-2 text-[17px] italic text-[var(--ink2)]">{mode === "signup" ? "Make an account, then start with one photo." : "Sign in to open today\u2019s pack."}</p>
       {state === "sent" ? (
         <div className="mt-7">

@@ -1,9 +1,9 @@
 import { CocoLogo } from "@/components/Brand";
 
-// What shows while the co-world loads: three cards from a pack, fanned and taking turns to lift,
+// What shows while the cocoverse loads: three cards from a pack, fanned and taking turns to lift,
 // in the pack's own colours. The workspace version keeps the sidebar's shape so nothing jumps when it arrives.
 
-export function CocoLoader({ label = "Opening your co-world…", size = "md" }: { label?: string; size?: "sm" | "md" }) {
+export function CocoLoader({ label = "Opening your cocoverse…", size = "md" }: { label?: string; size?: "sm" | "md" }) {
   const w = size === "sm" ? "w-7" : "w-12";
   return (
     <div role="status" aria-live="polite" className="flex flex-col items-center">
@@ -35,7 +35,7 @@ export function WorkspaceLoading() {
       <aside className="ws-side">
         <div className="flex items-center gap-2 px-5 pb-3 pt-5">
           <CocoLogo size={22} />
-          <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
+          <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">verse</span>
         </div>
         <div className="ws-hide-sm mx-3 flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white p-2.5">
           <span className="skel h-12 w-12 shrink-0 rounded-full" />
