@@ -53,7 +53,7 @@ export default function Cards() {
             <MyCards pet={pet} cards={memories} openCard={openCard} onChange={refresh} />
 
             <Rule label={starterDone ? "Starter Kit · complete" : "Getting started · Starter Kit"} />
-            <StarterPack pet={pet} state={state} onChange={refresh} openCard={openCard} />
+            <div id="starter" className="scroll-mt-20"><StarterPack pet={pet} state={state} onChange={refresh} openCard={openCard} /></div>
           </>
         );
       }}

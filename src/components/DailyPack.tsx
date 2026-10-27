@@ -9,7 +9,9 @@ import PackArt from "@/components/PackArt";
 import { petArt } from "@/components/PetFace";
 import { call } from "@/lib/api";
 import { finishFor } from "@/lib/finish";
-import { moveOf } from "@/lib/moves";
+import Link from "next/link";
+import { moveOf, starterDoneAt } from "@/lib/moves";
+import { packFor } from "@/lib/species";
 import { balance, FREE_PER_DAY, PACK_COST, sealedPrints, sharesToday, TASK_POINTS, tasksFor, type Task } from "@/lib/points";
 import { appendPhoto } from "@/lib/prepare";
 import type { Card, Pet, State } from "@/lib/types";
@@ -40,6 +42,8 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   const freeLeft = admin ? FREE_PER_DAY : Math.max(0, FREE_PER_DAY - sharesToday(state, pet.id));
   const tasks = tasksFor(state, pet);
   const canOpen = waiting > 0 && (admin || points >= PACK_COST);
+  // the Starter Kit is the base pack: free, each photo painted straight away; points start after it
+  const starterLeft = starterDoneAt(pet, state) ? 0 : packFor(pet.species).quest.filter((q) => !state.cards.some((c) => c.petId === pet.id && c.slotId === q.id)).length;
 
   function choose(task: Task | null) {
     forTask.current = task;
@@ -120,6 +124,17 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   return (
     <section className="grid gap-6">
       <input ref={input} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) share(f); }} />
+
+      {starterLeft > 0 && (
+        <Link href="/app/cards#starter" className="flex items-center gap-4 rounded-[20px] p-4 text-white" style={{ background: "linear-gradient(165deg, #0d4f57, #137a74 48%, #3fb59a)" }}>
+          <PackArt kind="starter" art={petArt(pet)} className="w-14 shrink-0 -rotate-6" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[10.5px] font-bold uppercase tracking-[.2em] text-[#ffd27a]">Start here · free</span>
+            <span className="serif block text-[19px] font-bold leading-tight">Your Starter Kit: {starterLeft} card{starterLeft > 1 ? "s" : ""} to go</span>
+            <span className="block text-[13px] opacity-90">Each photo becomes a card right away, no points needed. Finish it for the first move card.</span>
+          </span>
+        </Link>
+      )}
 
       {/* points and the pack */}
       <div className="ws-card flex flex-col items-center gap-5 p-5 sm:flex-row sm:items-center">
