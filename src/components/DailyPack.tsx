@@ -5,7 +5,9 @@ import HoloCard from "@/components/HoloCard";
 import NoteBox from "@/components/NoteBox";
 import { PER_DAY } from "@/lib/daily";
 import { finishFor } from "@/lib/finish";
+import { appendPhoto } from "@/lib/prepare";
 import type { Card, Pet, State } from "@/lib/types";
+import { call } from "@/lib/api";
 
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-CA");
 
@@ -25,9 +27,9 @@ export default function DailyPack({ pet, state, onChange }: { pet: Pet; state: S
   async function open(files: FileList) {
     const fd = new FormData();
     fd.append("petId", pet.id);
-    [...files].slice(0, left).forEach((f) => fd.append("photos", f));
     setPhase("sealed");
-    const r = await (await fetch("/api/daily", { method: "POST", body: fd })).json();
+    for (const f of [...files].slice(0, left)) await appendPhoto(fd, "photos", f);
+    const r = (await call<{ cards: Card[]; levelBefore: number; levelAfter: number }>("/api/daily", { method: "POST", body: fd })) ?? { cards: null as unknown as Card[], levelBefore: 0, levelAfter: 0 };
     if (!r.cards) return setPhase("idle");
     setFresh(r.cards);
     setShown(0);

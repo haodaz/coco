@@ -4,6 +4,8 @@ import { depthLayer } from "@/lib/meta";
 import { load, save } from "@/lib/store";
 import { withUser } from "@/lib/session";
 
+export const maxDuration = 120; // seconds; model calls and painting take a while
+
 // Cut a card's depth layer again (after the cutout rules change, or when a layer came out wrong).
 export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;

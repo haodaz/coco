@@ -3,9 +3,14 @@ import { ask } from "@/lib/ask";
 import { transcribe } from "@/lib/meta";
 import { load } from "@/lib/store";
 import { withUser } from "@/lib/session";
+import { overLimit } from "@/lib/limits";
+
+export const maxDuration = 60; // seconds; model calls and painting take a while
 
 // Ask the pet: a typed or spoken question (WAV) in, the pet's answer with the imprints it rests on out.
 export const POST = withUser(async (req: Request) => {
+  const limited = await overLimit("ask");
+  if (limited) return limited;
   const form = await req.formData();
   const audio = form.get("audio");
   const typed = String(form.get("question") ?? "").trim();

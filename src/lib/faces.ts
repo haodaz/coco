@@ -14,6 +14,9 @@ const SRC = path.join(process.cwd(), "tools", "faces.swift");
 
 type Box = { x: number; y: number; w: number; h: number };
 
+// The on-device check needs macOS (Vision + swiftc). Elsewhere (Vercel) the browser has already blurred faces.
+export const faceCheckHere = () => process.platform === "darwin";
+
 async function detector() {
   try {
     await fs.access(BIN);

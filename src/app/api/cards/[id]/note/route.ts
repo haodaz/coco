@@ -5,10 +5,15 @@ import { photoBase64 } from "@/lib/photos";
 import { load, newId, save } from "@/lib/store";
 import type { Trace } from "@/lib/types";
 import { withUser } from "@/lib/session";
+import { overLimit } from "@/lib/limits";
+
+export const maxDuration = 120; // seconds; model calls and painting take a while
 
 // The owner's words about a card, typed or spoken (WAV). They become traces marked as the owner's,
 // the card's line is rewritten with them, and the AI's picture of the pet may sharpen.
 export const POST = withUser(async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
+  const limited = await overLimit("note");
+  if (limited) return limited;
   const { id } = await ctx.params;
   const form = await req.formData();
   const audio = form.get("audio");

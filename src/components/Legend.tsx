@@ -4,6 +4,7 @@ import { useState } from "react";
 import HoloCard from "@/components/HoloCard";
 import { packFor } from "@/lib/species";
 import type { Pet, State } from "@/lib/types";
+import { call } from "@/lib/api";
 
 // The soul portrait: locked until the starter set is full, then one tap and the pet says who it is,
 // on a legendary card it steps out of. Shows which cards that rests on.
@@ -24,7 +25,7 @@ export default function Legend({ pet, state, onChange }: { pet: Pet; state: Stat
           {done === slots.length && (
             <button
               disabled={busy}
-              onClick={async () => { setBusy(true); await fetch(`/api/pets/${pet.id}/legend`, { method: "POST" }); await onChange(); setBusy(false); }}
+              onClick={async () => { setBusy(true); await call(`/api/pets/${pet.id}/legend`, { method: "POST" }); await onChange(); setBusy(false); }}
               className="mt-5 rounded-xl bg-white px-5 py-2.5 text-[14.5px] font-semibold text-[#3b2a8f] shadow disabled:opacity-70"
             >
               {busy ? `${pet.name} is reading back through ${her} cards…` : "Unlock the soul portrait"}

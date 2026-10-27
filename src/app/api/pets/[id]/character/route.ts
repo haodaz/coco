@@ -3,9 +3,14 @@ import { makeCharacter } from "@/lib/character";
 import { LIVE } from "@/lib/meta";
 import { load, update } from "@/lib/store";
 import { withUser } from "@/lib/session";
+import { overLimit } from "@/lib/limits";
+
+export const maxDuration = 300; // seconds; model calls and painting take a while
 
 // Bring the pet to life as a character (about a minute: one design, five moods, a few frames each).
 export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: string }> }) => {
+  const limited = await overLimit("character", true);
+  if (limited) return limited;
   const { id } = await ctx.params;
   if (!LIVE) return NextResponse.json({ error: "the character needs live mode" }, { status: 400 });
   const s = await load();

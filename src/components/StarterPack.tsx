@@ -5,8 +5,10 @@ import CardBack from "@/components/CardBack";
 import HoloCard from "@/components/HoloCard";
 import NoteBox from "@/components/NoteBox";
 import { finishFor } from "@/lib/finish";
+import { appendPhoto } from "@/lib/prepare";
 import { packFor, type QuestSlot } from "@/lib/species";
 import type { Card, Pet, State } from "@/lib/types";
+import { call } from "@/lib/api";
 
 // Step 2: the photo quest as a card set.
 export default function StarterPack({ pet, state, onChange }: { pet: Pet; state: State; onChange: () => void }) {
@@ -39,10 +41,10 @@ function QuestCard({ slot, index, pet, card, onChange }: { slot: QuestSlot; inde
   async function upload(f: File) {
     setBusy(true);
     const fd = new FormData();
-    fd.append("photo", f);
+    await appendPhoto(fd, "photo", f);
     fd.append("petId", pet.id);
     fd.append("slotId", slot.id);
-    await fetch("/api/quest", { method: "POST", body: fd });
+    await call("/api/quest", { method: "POST", body: fd });
     setBusy(false);
     onChange();
   }

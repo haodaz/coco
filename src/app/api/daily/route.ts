@@ -4,12 +4,15 @@ import { samPhrase } from "@/lib/finish";
 import { refreshLikeness } from "@/lib/likeness";
 import { clarityOf, SENSES } from "@/lib/memory";
 import { depthLayer, paintCard, readMomentPhoto } from "@/lib/meta";
-import { photoBase64, storePhoto } from "@/lib/photos";
+import { photoBase64, storePhoto, uploadMeta } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
 import { drawStyle } from "@/lib/styles";
 import type { Card, Trace } from "@/lib/types";
+import { overLimit } from "@/lib/limits";
 import { withUser } from "@/lib/session";
+
+export const maxDuration = 300; // seconds; model calls and painting take a while
 
 // Open today's pack: each photo becomes a card in a style drawn from the blind-box pool;
 // a legend-tier style makes the card a legend.
@@ -19,7 +22,10 @@ export const POST = withUser(async (req: Request) => {
   const pet = s.pets.find((p) => p.id === String(form.get("petId") ?? ""));
   if (!pet) return NextResponse.json({ error: "pet not found" }, { status: 404 });
   const left = PER_DAY - openedToday(s, pet.id);
+  const limited = await overLimit("quest", true); // the site-wide painting cap applies to packs too
+  if (limited && limited.status === 503) return limited;
   const files = form.getAll("photos").filter((f): f is File => f instanceof File).slice(0, Math.max(0, left));
+  const metas = form.getAll("photosMeta");
   if (!files.length) return NextResponse.json({ error: left > 0 ? "no photos" : "today's pack is already open" }, { status: 400 });
 
   const kinds = [...new Set(packFor(pet.species).quest.map((q) => q.pattern))].map((p) => ({ pattern: p, label: SENSES[p] }));
@@ -27,8 +33,8 @@ export const POST = withUser(async (req: Request) => {
   const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);
   const ref = avatar ? await photoBase64(avatar.file) : null; // which animal is the pet, when there are several
   const made = await Promise.all(
-    files.map(async (file) => {
-      const photo = await storePhoto(file, pet.id, null);
+    files.map(async (file, i) => {
+      const photo = await storePhoto(file, pet.id, null, uploadMeta(metas[i] ?? null));
       const b64 = await photoBase64(photo.file);
       const reading = await readMomentPhoto(b64, kinds, pet.name || "me", pet.sex, ref);
       const style = drawStyle();

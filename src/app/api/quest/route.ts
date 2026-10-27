@@ -2,14 +2,19 @@ import { NextResponse } from "next/server";
 import { samPhrase } from "@/lib/finish";
 import { refreshLikeness } from "@/lib/likeness";
 import { depthLayer, paintCard, readQuestPhoto } from "@/lib/meta";
-import { photoBase64, storePhoto } from "@/lib/photos";
+import { photoBase64, storePhoto, uploadMeta } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
 import type { Card, Trace } from "@/lib/types";
 import { withUser } from "@/lib/session";
+import { overLimit } from "@/lib/limits";
+
+export const maxDuration = 300; // seconds; model calls and painting take a while
 
 // One quest photo → stored photo, traces with their source, and a card for the owner.
 export const POST = withUser(async (req: Request) => {
+  const limited = await overLimit("quest", true);
+  if (limited) return limited;
   const form = await req.formData();
   const file = form.get("photo");
   const petId = String(form.get("petId") ?? "");
@@ -22,7 +27,7 @@ export const POST = withUser(async (req: Request) => {
   const slot = packFor(pet.species).quest.find((q) => q.id === slotId);
   if (!slot) return NextResponse.json({ error: "unknown slot" }, { status: 400 });
 
-  const photo = await storePhoto(file, pet.id, slot.id);
+  const photo = await storePhoto(file, pet.id, slot.id, uploadMeta(form.get("photoMeta")));
   const b64 = await photoBase64(photo.file);
   const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);
   const ref = avatar ? await photoBase64(avatar.file) : null; // which animal is the pet, when there are several

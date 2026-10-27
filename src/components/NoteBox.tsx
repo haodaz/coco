@@ -4,6 +4,7 @@ import { Mic, Square } from "lucide-react";
 import { useState } from "react";
 import { useRecorder } from "@/lib/useRecorder";
 import type { Card } from "@/lib/types";
+import { call } from "@/lib/api";
 
 // Under a card: the owner says or types what happened in this moment. One sentence is enough.
 export default function NoteBox({ card, petName, onSaved }: { card: Card; petName: string; onSaved: () => void }) {
@@ -13,7 +14,7 @@ export default function NoteBox({ card, petName, onSaved }: { card: Card; petNam
 
   async function send(body: FormData) {
     setSaving(true);
-    await fetch(`/api/cards/${card.id}/note`, { method: "POST", body });
+    await call(`/api/cards/${card.id}/note`, { method: "POST", body });
     setSaving(false);
     setOpen(false);
     setText("");

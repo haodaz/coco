@@ -5,6 +5,7 @@ import { useState } from "react";
 import Character, { type Mood } from "@/components/Character";
 import { useRecorder } from "@/lib/useRecorder";
 import type { Pet } from "@/lib/types";
+import { call } from "@/lib/api";
 
 type Reply = {
   question: string;
@@ -32,10 +33,10 @@ export default function AskPanel({ pet, onBringToLife }: { pet: Pet; onBringToLi
     setWaiting("busy");
     const t = setTimeout(() => setWaiting("thinking"), 3500); // first it goes through its cards, then it thinks
     body.append("petId", pet.id);
-    const r = await (await fetch("/api/ask", { method: "POST", body })).json();
+    const r = (await call<Reply>("/api/ask", { method: "POST", body })) ?? ({} as Partial<Reply>);
     clearTimeout(t);
     setBusy(false);
-    if (r.answer) setReplies((rs) => [r, ...rs]);
+    if (r.answer) setReplies((rs) => [r as Reply, ...rs]);
   }
   const ask = (text: string) => {
     if (!text.trim()) return;

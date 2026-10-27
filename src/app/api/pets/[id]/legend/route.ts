@@ -7,10 +7,15 @@ import { packFor } from "@/lib/species";
 import { load, newId, update } from "@/lib/store";
 import type { Card } from "@/lib/types";
 import { withUser } from "@/lib/session";
+import { overLimit } from "@/lib/limits";
+
+export const maxDuration = 300; // seconds; model calls and painting take a while
 
 // The soul portrait: unlocked when the starter set is full. The pet says who it is from all its imprints,
 // and its legendary card is painted so the pet can step out of the frame.
 export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: string }> }) => {
+  const limited = await overLimit("legend", true);
+  if (limited) return limited;
   const { id } = await ctx.params;
   if (!LIVE) return NextResponse.json({ error: "the soul portrait needs live mode" }, { status: 400 });
   const s = await load();

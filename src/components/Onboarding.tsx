@@ -1,8 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { appendPhoto } from "@/lib/prepare";
 import { PACKS } from "@/lib/species";
 import type { Credential, Pet, Species } from "@/lib/types";
+import { call } from "@/lib/api";
 
 // Step 1: one photo.
 export function StartWithOnePhoto({ onDone }: { onDone: () => void }) {
@@ -11,8 +13,8 @@ export function StartWithOnePhoto({ onDone }: { onDone: () => void }) {
   async function upload(f: File) {
     setBusy(true);
     const fd = new FormData();
-    fd.append("photo", f);
-    await fetch("/api/pets", { method: "POST", body: fd });
+    await appendPhoto(fd, "photo", f);
+    await call("/api/pets", { method: "POST", body: fd });
     setBusy(false);
     onDone();
   }
