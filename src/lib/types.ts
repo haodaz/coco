@@ -1,3 +1,4 @@
+import type { Pattern } from "./species";
 // The pet's world, in four layers: photos and notes (raw material) → traces (what it did)
 // → traits (who it is, each with evidence) → cards (what the owner gets back).
 
@@ -16,6 +17,8 @@ export type Pet = {
   credential: Credential;
   avatarPhotoId: string | null;
   // the AI's own picture of the pet, repainted each time clarity rises; shown pixelated to match the level
+  // the pet as a game character: moods, each a short loop of frames (file names)
+  character?: { style: string; moods: Record<string, string[]>; at: string } | null;
   likeness?: { file: string; level: number; from: "profile" | "imprints"; at: string } | null;
   createdAt: string;
 };
@@ -61,6 +64,7 @@ export type Card = {
   petId: string;
   kind: CardKind;
   slotId: string | null;
+  pattern?: Pattern | null; // the kind of moment, for cards outside the quest (daily packs)
   name: string; // "Window Guardian"
   rarity: 1 | 2 | 3;
   style: string; // art style used for this card

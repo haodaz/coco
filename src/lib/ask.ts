@@ -45,7 +45,7 @@ export async function ask(state: State, pet: Pet, question: string): Promise<Ask
 
   const answer = LIVE
     ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title))
-    : { answer: `I only know a little about myself so far. Show me more moments and I'll answer that properly.`, basis: [], general: [], gap: null };
+    : { answer: `I only know a little about myself so far. Show me more moments and I'll answer that properly.`, basis: [], general: [], gap: null, mood: "confused" as const };
 
   // keep only cards that exist; the model may not invent evidence
   const basis = answer.basis.filter((b) => cards.some((c) => c.id === b.cardId));

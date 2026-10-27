@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
-import type { QuestSlot } from "./species";
+import type { Pattern, QuestSlot } from "./species";
 import { UPLOADS, newId } from "./store";
 import type { Pet, Species, TraceKind } from "./types";
 
@@ -240,11 +240,19 @@ export async function cutout(imageB64: string, phrase: string): Promise<Buffer |
 // so the card can move pet and background apart. Returns the stored file name, or null.
 export async function depthLayer(artFile: string, phrase: string): Promise<string | null> {
   if (!LIVE) return null;
-  const art = await fs.readFile(path.join(UPLOADS, path.basename(artFile)));
-  const { width, height } = await sharp(art).metadata();
+  const png = await petLayer(await fs.readFile(path.join(UPLOADS, path.basename(artFile))), phrase, ["clothing", "toy"], "depth-layer");
+  if (!png) return null;
+  const name = artFile.replace(/\.jpg$/, "-fg.png");
+  await fs.writeFile(path.join(UPLOADS, name), png);
+  return name;
+}
+
+// The pet alone on a transparent PNG the same size as the image (at most 1024 px on its long side).
+// Things near the pet (what it wears or holds, the cards it plays with) are kept with it, or the layer looks torn.
+export async function petLayer(img: Buffer, phrase: string, extraPhrases: string[], feature: string): Promise<Buffer | null> {
+  const { width, height } = await sharp(img).metadata();
   if (!width || !height) return null;
-  // what the pet wears or holds (a sweater, a collar, a toy in its mouth) must move with it, or the layer looks torn
-  const [pets, ...extras] = await Promise.all([phrase, "clothing", "toy"].map((p) => samMasks(art, p, "depth-layer")));
+  const [pets, ...extras] = await Promise.all([phrase, ...extraPhrases].map((p) => samMasks(img, p, feature)));
   if (!pets.length) return null;
   const pad = 0.08;
   const near = (m: (typeof pets)[number]) =>
@@ -252,14 +260,11 @@ export async function depthLayer(artFile: string, phrase: string): Promise<strin
       const w = p.bounds.right - p.bounds.left, h = p.bounds.bottom - p.bounds.top;
       return m.bounds.left < p.bounds.right + w * pad && m.bounds.right > p.bounds.left - w * pad && m.bounds.top < p.bounds.bottom + h * pad && m.bounds.bottom > p.bounds.top - h * pad;
     });
-  const masks = [...pets, ...extras.flat().filter(near)];
-  const hard = await maskAlpha(masks, width, height);
+  const hard = await maskAlpha([...pets, ...extras.flat().filter(near)], width, height);
   // a slightly soft edge so the pet doesn't look cut with scissors
   const soft = await sharp(hard, { raw: { width, height, channels: 1 } }).blur(0.8).extractChannel(0).raw().toBuffer();
-  const rgb = await sharp(art).removeAlpha().raw().toBuffer();
-  const name = artFile.replace(/\.jpg$/, "-fg.png");
-  await fs.writeFile(path.join(UPLOADS, name), await sharp(rgb, { raw: { width, height, channels: 3 } }).joinChannel(soft, { raw: { width, height, channels: 1 } }).png().toBuffer());
-  return name;
+  const rgb = await sharp(img).removeAlpha().raw().toBuffer();
+  return sharp(rgb, { raw: { width, height, channels: 3 } }).joinChannel(soft, { raw: { width, height, channels: 1 } }).png().toBuffer();
 }
 
 const MOCK: Record<string, Omit<PhotoReading, "rarity">> = {
@@ -366,6 +371,7 @@ export type Answer = {
   basis: { cardId: string; how: string }[]; // the imprints this answer rests on
   general: string[]; // general species or breed knowledge used, kept apart from what is known about this pet
   gap: { topic: string; suggest: string } | null; // what it doesn't know yet, and which card would teach it
+  mood: "happy" | "close" | "confused" | "thinking"; // how the character looks while saying it
 };
 
 // The twin answers a question from the owner, in the pet's voice, resting only on its imprints.
@@ -380,6 +386,7 @@ export async function askPet(question: string, profile: object, imprints: object
       "If the imprints say nothing about the topic, say plainly that you haven't shown the owner that yet, and fill gap with the topic and which kind of photo would teach you (pick from the photo kinds listed). You may still add one helpful, safe general sentence (for example, most shops don't let dogs in). Otherwise gap is null.",
       "Health, symptoms, food amounts, medicine, vaccines or training methods: do not advise, do not guess, and never say how your body feels. Say kindly, in your own voice, that a vet is the one to ask before giving you anything, and stop there. For these questions gap is null and basis is empty.",
       "Never mention people's identities beyond their role. Never invent dates.",
+      "mood: close when the answer is about you and the owner, confused when there is a gap, thinking for the vet answer, happy otherwise.",
       "",
       `Profile: ${JSON.stringify(profile)}`,
       `Imprints (each is a card with a photo the owner shared): ${JSON.stringify(imprints)}`,
@@ -392,13 +399,70 @@ export async function askPet(question: string, profile: object, imprints: object
     {
       type: "object",
       additionalProperties: false,
-      required: ["answer", "basis", "general", "gap"],
+      required: ["answer", "basis", "general", "gap", "mood"],
       properties: {
         answer: { type: "string" },
         basis: { type: "array", items: { type: "object", additionalProperties: false, required: ["cardId", "how"], properties: { cardId: { type: "string" }, how: { type: "string" } } } },
         general: { type: "array", items: { type: "string" } },
+        mood: { type: "string", enum: ["happy", "close", "confused", "thinking"] },
         gap: { anyOf: [{ type: "null" }, { type: "object", additionalProperties: false, required: ["topic", "suggest"], properties: { topic: { type: "string" }, suggest: { type: "string" } } }] },
       },
     },
   );
+}
+
+export type MomentReading = PhotoReading & { pattern: Pattern };
+
+// A photo from a daily pack: no slot, so the model also says which kind of moment it is.
+export async function readMomentPhoto(imageB64: string, kinds: { pattern: Pattern; label: string }[], petName: string, sex: Pet["sex"] = null): Promise<MomentReading> {
+  if (!LIVE) {
+    const pattern = kinds[Math.floor(Math.random() * kinds.length)].pattern;
+    return { ...mockReading({ id: "daily", title: "", why: "", pattern, style: "", minRarity: 1 }, petName), pattern };
+  }
+  const pronoun = sex === "female" ? "she/her" : sex === "male" ? "he/him" : "they/them";
+  return sparkJson<MomentReading>(
+    "daily-photo",
+    [
+      `You read one photo of a pet called ${petName} for a collectible card.`,
+      `pattern: which kind of moment this is, one of: ${kinds.map((k) => `${k.pattern} (${k.label})`).join(", ")}.`,
+      "Traces: only things visible in the photo (place, activity, companion, object, time of day). Never guess what is not shown. Do not describe people's faces or identities; a person is just 'owner' or 'a person'.",
+      `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only; one photo cannot show a habit, so never say always, usually or every time. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
+      "rarity: 1 ordinary moment, 2 a moment with real character, 3 something truly unusual. Most photos are 1.",
+      "Never mention health, weight, food amounts, medicine or training advice. No exclamation marks.",
+    ].join("\n"),
+    "Read this photo.",
+    await forModel(imageB64),
+    "moment_reading",
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["pattern", "traces", "cardName", "line", "observation", "rarity"],
+      properties: {
+        pattern: { type: "string", enum: kinds.map((k) => k.pattern) },
+        traces: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["kind", "label", "detail"],
+            properties: { kind: { type: "string", enum: ["place", "activity", "companion", "object", "time", "note"] }, label: { type: "string" }, detail: { type: ["string", "null"] } },
+          },
+        },
+        cardName: { type: "string" },
+        line: { type: "string" },
+        observation: { type: "string" },
+        rarity: { type: "integer", enum: [1, 2, 3] },
+      },
+    },
+  );
+}
+
+// Muse Image edit with any number of reference images; returns the raw image.
+export async function editImage(feature: string, prompt: string, imagesB64: string[]): Promise<Buffer> {
+  const t0 = Date.now();
+  const j = await post("/images/edits", { model: IMAGE, n: 1, prompt, images: imagesB64.slice(0, 4).map((b) => ({ image_url: `data:image/jpeg;base64,${b}` })) });
+  await logUsage(feature, IMAGE, Date.now() - t0, j.usage);
+  const b64 = j.data?.[0]?.b64_json;
+  if (!b64) throw new Error(`Meta API ${feature}: no image returned`);
+  return Buffer.from(b64, "base64");
 }
