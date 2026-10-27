@@ -18,7 +18,7 @@ fs.mkdirSync(outDir, { recursive: true });
 await Promise.all(Object.entries(STYLES).map(async ([k, style]) => {
   const t0 = Date.now();
   const prompt = `Create a completely new artwork of this specific dog, ${who}. Use the photo only to learn what she looks like; do not copy the photo's pose, background or framing. Draw her in a new pose and scene as ${style}. Keep her recognisable: same coat, eye colour, ear shape and face. No people, no text, no border.`;
-  const r = await fetch("https://api.meta.ai/v1/images/edits", { method: "POST", headers: { Authorization: `Bearer ${process.env.META_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "muse-image-1.0", n: 1, prompt, images: [{ image_url: `data:image/jpeg;base64,${b64}` }] }) });
+  const r = await fetch("https://api.meta.ai/v1/images/edits", { method: "POST", headers: { Authorization: `Bearer ${(process.env.MODEL_API_KEY ?? process.env.META_API_KEY)}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "muse-image-1.0", n: 1, prompt, images: [{ image_url: `data:image/jpeg;base64,${b64}` }] }) });
   const j = await r.json();
   const d = j.data?.[0];
   if (!d?.b64_json) return console.log(k, r.status, JSON.stringify(j).slice(0, 300));

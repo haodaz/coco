@@ -11,6 +11,7 @@ import type { Pet, Species, TraceKind } from "./types";
 
 export const LIVE = process.env.META_LIVE === "1";
 const BASE = process.env.META_API_BASE_URL ?? "https://api.meta.ai/v1";
+const API_KEY = process.env.MODEL_API_KEY ?? process.env.META_API_KEY; // MODEL_API_KEY is the name Meta's docs use
 const SPARK = "muse-spark-1.3";
 const IMAGE = "muse-image-1.0";
 
@@ -23,7 +24,7 @@ async function logUsage(feature: string, model: string, ms: number, usage: unkno
 async function post(route: string, body: unknown) {
   const res = await fetch(`${BASE}${route}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.META_API_KEY}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   const json = await res.json().catch(() => null);
@@ -297,7 +298,7 @@ export async function transcribe(wav: Buffer): Promise<string> {
   form.append("request", new Blob([JSON.stringify({ model: "muse-voice-transcribe-1.0", audioEncoding: "WAV", mode: "PUSH_TO_TALK" })], { type: "application/json" }));
   form.append("audio", new Blob([new Uint8Array(wav)], { type: "audio/wav" }), "note.wav");
   const t0 = Date.now();
-  const res = await fetch(`${BASE}/asr/transcribe`, { method: "POST", headers: { Authorization: `Bearer ${process.env.META_API_KEY}`, Accept: "application/json" }, body: form });
+  const res = await fetch(`${BASE}/asr/transcribe`, { method: "POST", headers: { Authorization: `Bearer ${API_KEY}`, Accept: "application/json" }, body: form });
   const j = await res.json().catch(() => null);
   if (!res.ok) throw new Error(`Meta API transcribe ${res.status}: ${JSON.stringify(j)?.slice(0, 200)}`);
   await logUsage("transcribe", "muse-voice-transcribe-1.0", Date.now() - t0, { audioMs: j.audioDurationMs });

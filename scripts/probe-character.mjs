@@ -15,7 +15,7 @@ const load = async (f) => {
 async function edit(prompt, images) {
   const r = await fetch("https://api.meta.ai/v1/images/edits", {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.META_API_KEY}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${(process.env.MODEL_API_KEY ?? process.env.META_API_KEY)}`, "Content-Type": "application/json" },
     body: JSON.stringify({ model: "muse-image-1.0", n: 1, prompt, images: images.map((b) => ({ image_url: `data:image/jpeg;base64,${b}` })) }),
   });
   const j = await r.json();

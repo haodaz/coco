@@ -1,4 +1,4 @@
-# coco — design notes (pre-kickoff, no code yet)
+# coco — design notes
 
 An AI for each owner that knows their one pet — dog, cat, bird or something more exotic. Every pet gets a stable profile and long-term memory, and the AI only talks about that animal. First user: Coco, a Labrador born 2022-05-03.
 
