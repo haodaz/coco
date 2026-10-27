@@ -114,7 +114,7 @@ Subject: Your way back into your co-world
    - 收件人的垃圾箱
    - Supabase → **Logs → Auth**：有没有 SMTP 报错（大多是密码填错，或者 Sender email 不是验证过的域名）
 
-全部通过后跟我说一声，我会把 README 里「正式使用前要换发信服务」那条划掉。
+全部通过后跟我说一声，我会把 CONCEPT.md「Next」里的这一项划掉。
 
 ---
 
