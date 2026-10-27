@@ -31,15 +31,15 @@ async function post(route: string, body: unknown) {
   return json;
 }
 
-// Muse Spark with one image and a JSON schema; returns the parsed object.
-async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string, name: string, schema: object, budget = 6000): Promise<T> {
+// Muse Spark with an optional image and a JSON schema; returns the parsed object.
+async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string | null, name: string, schema: object, budget = 6000): Promise<T> {
   const t0 = Date.now();
   const j = await post("/chat/completions", {
     model: SPARK,
     max_tokens: budget, // reasoning tokens count toward this, so leave room
     messages: [
       { role: "system", content: system },
-      { role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageB64}` } }] },
+      { role: "user", content: imageB64 ? [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageB64}` } }] : prompt },
     ],
     response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
   });
@@ -359,4 +359,46 @@ export async function paintLikeness(pet: Pick<Pet, "species" | "breed" | "sex" |
   await fs.mkdir(UPLOADS, { recursive: true });
   await fs.writeFile(path.join(UPLOADS, name), await sharp(Buffer.from(b64, "base64")).resize(768, 1024, { fit: "cover" }).jpeg({ quality: 88 }).toBuffer());
   return name;
+}
+
+export type Answer = {
+  answer: string; // in the pet's first-person voice
+  basis: { cardId: string; how: string }[]; // the imprints this answer rests on
+  general: string[]; // general species or breed knowledge used, kept apart from what is known about this pet
+  gap: { topic: string; suggest: string } | null; // what it doesn't know yet, and which card would teach it
+};
+
+// The twin answers a question from the owner, in the pet's voice, resting only on its imprints.
+export async function askPet(question: string, profile: object, imprints: object[], senses: string[], slotTitles: string[]): Promise<Answer> {
+  return sparkJson<Answer>(
+    "ask",
+    [
+      "You are the voice of one particular pet, answering its owner in first person. Warm, plain, everyday words, short (one to four sentences). No exclamation marks. Never shame the owner.",
+      "Answer in the language the owner used.",
+      "Judge by deeds, not by guessing the heart: anything you say about yourself (your likes, habits, places, people, reactions) must rest on the imprints below. List each imprint you used in basis with its id and a few words on how it supports the answer.",
+      "You may use general knowledge about your species or breed, but say it as general (\"Labradors usually…\", \"most dogs…\") and list it in general. Never present general knowledge as a memory of your own.",
+      "If the imprints say nothing about the topic, say plainly that you haven't shown the owner that yet, and fill gap with the topic and which kind of photo would teach you (pick from the photo kinds listed). You may still add one helpful, safe general sentence (for example, most shops don't let dogs in). Otherwise gap is null.",
+      "Health, symptoms, food amounts, medicine, vaccines or training methods: do not advise, do not guess, and never say how your body feels. Say kindly, in your own voice, that a vet is the one to ask before giving you anything, and stop there. For these questions gap is null and basis is empty.",
+      "Never mention people's identities beyond their role. Never invent dates.",
+      "",
+      `Profile: ${JSON.stringify(profile)}`,
+      `Imprints (each is a card with a photo the owner shared): ${JSON.stringify(imprints)}`,
+      `What the imprints cover: ${senses.join("; ")}`,
+      `Photo kinds that teach you: ${slotTitles.join("; ")}`,
+    ].join("\n"),
+    question,
+    null,
+    "answer",
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["answer", "basis", "general", "gap"],
+      properties: {
+        answer: { type: "string" },
+        basis: { type: "array", items: { type: "object", additionalProperties: false, required: ["cardId", "how"], properties: { cardId: { type: "string" }, how: { type: "string" } } } },
+        general: { type: "array", items: { type: "string" } },
+        gap: { anyOf: [{ type: "null" }, { type: "object", additionalProperties: false, required: ["topic", "suggest"], properties: { topic: { type: "string" }, suggest: { type: "string" } } }] },
+      },
+    },
+  );
 }

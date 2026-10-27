@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import CardBack from "@/components/CardBack";
 import HoloCard from "@/components/HoloCard";
+import AskPanel from "@/components/AskPanel";
 import MemoryPanel, { type Memory } from "@/components/MemoryPanel";
 import NoteBox from "@/components/NoteBox";
 import { finishFor } from "@/lib/finish";
@@ -122,6 +123,7 @@ function Quest({ pet, state, onChange }: { pet: Pet; state: Loaded; onChange: ()
       </header>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--line)]"><div className="h-full rounded-full bg-[var(--primary)] transition-all" style={{ width: `${(done / slots.length) * 100}%` }} /></div>
       {state.memory?.[pet.id] && <div className="mt-6"><MemoryPanel pet={pet} memory={state.memory[pet.id]} /></div>}
+      <div className="mt-4"><AskPanel pet={pet} /></div>
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {slots.map((s, i) => <QuestCard key={s.id} slot={s} index={i} pet={pet} card={cards.find((c) => c.slotId === s.id)} onChange={onChange} />)}
       </div>
@@ -144,7 +146,7 @@ function QuestCard({ slot, index, pet, card, onChange }: { slot: QuestSlot; inde
     onChange();
   }
   return (
-    <div>
+    <div id={card ? `card-${card.id}` : undefined} className="scroll-mt-6">
       <button onClick={() => input.current?.click()} disabled={busy} className={`flip block aspect-[63/88] w-full ${card ? "flipped" : ""} ${busy ? "animate-pulse" : ""}`} title={card ? "Replace photo" : slot.why}>
         <div className="flip-inner">
           <div className="flip-face"><CardBack pattern={slot.pattern} title={slot.title} index={index} /></div>
