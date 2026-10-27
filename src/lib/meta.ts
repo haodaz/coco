@@ -32,11 +32,11 @@ async function post(route: string, body: unknown) {
 }
 
 // Muse Spark with one image and a JSON schema; returns the parsed object.
-async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string, name: string, schema: object): Promise<T> {
+async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string, name: string, schema: object, budget = 6000): Promise<T> {
   const t0 = Date.now();
   const j = await post("/chat/completions", {
     model: SPARK,
-    max_tokens: 3000, // reasoning tokens count toward this, so leave room
+    max_tokens: budget, // reasoning tokens count toward this, so leave room
     messages: [
       { role: "system", content: system },
       { role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageB64}` } }] },
@@ -45,6 +45,8 @@ async function sparkJson<T>(feature: string, system: string, prompt: string, ima
   });
   await logUsage(feature, SPARK, Date.now() - t0, j.usage);
   const content = j.choices?.[0]?.message?.content;
+  // the model thought too long and the answer was cut off: once more with a bigger budget
+  if (j.choices?.[0]?.finish_reason === "length" && budget < 16000) return sparkJson<T>(feature, system, prompt, imageB64, name, schema, 16000);
   if (!content) throw new Error(`Meta API ${feature}: empty answer (finish_reason ${j.choices?.[0]?.finish_reason})`);
   return JSON.parse(content) as T;
 }
@@ -114,7 +116,7 @@ export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName:
     [
       `You read one photo of a pet called ${petName} for a collectible card. The card slot is "${slot.title}": ${slot.why}`,
       "Traces: only things visible in the photo (place, activity, companion, object, time of day). Never guess what is not shown. Do not describe people's faces or identities; a person is just 'owner' or 'a person'.",
-      `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
+      `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only; one photo cannot show a habit, so never say always, usually or every time. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
       "rarity: 1 ordinary moment, 2 a moment with real character, 3 something truly unusual. Most photos are 1.",
       "Never mention health, weight, food amounts, medicine or training advice. No exclamation marks.",
     ].join("\n"),
@@ -241,8 +243,16 @@ export async function depthLayer(artFile: string, phrase: string): Promise<strin
   const art = await fs.readFile(path.join(UPLOADS, path.basename(artFile)));
   const { width, height } = await sharp(art).metadata();
   if (!width || !height) return null;
-  const masks = await samMasks(art, phrase, "depth-layer");
-  if (!masks.length) return null;
+  // what the pet wears or holds (a sweater, a collar, a toy in its mouth) must move with it, or the layer looks torn
+  const [pets, ...extras] = await Promise.all([phrase, "clothing", "toy"].map((p) => samMasks(art, p, "depth-layer")));
+  if (!pets.length) return null;
+  const pad = 0.08;
+  const near = (m: (typeof pets)[number]) =>
+    pets.some((p) => {
+      const w = p.bounds.right - p.bounds.left, h = p.bounds.bottom - p.bounds.top;
+      return m.bounds.left < p.bounds.right + w * pad && m.bounds.right > p.bounds.left - w * pad && m.bounds.top < p.bounds.bottom + h * pad && m.bounds.bottom > p.bounds.top - h * pad;
+    });
+  const masks = [...pets, ...extras.flat().filter(near)];
   const hard = await maskAlpha(masks, width, height);
   // a slightly soft edge so the pet doesn't look cut with scissors
   const soft = await sharp(hard, { raw: { width, height, channels: 1 } }).blur(0.8).extractChannel(0).raw().toBuffer();
@@ -266,4 +276,87 @@ const MOCK: Record<string, Omit<PhotoReading, "rarity">> = {
 function mockReading(slot: QuestSlot, petName: string): PhotoReading {
   const m = MOCK[slot.pattern] ?? MOCK.mystery;
   return { ...m, line: m.line.replace("{name}", petName), rarity: slot.minRarity };
+}
+
+// Muse Voice Transcribe: the owner's spoken note (WAV) to text.
+export async function transcribe(wav: Buffer): Promise<string> {
+  if (!LIVE) return "";
+  const form = new FormData();
+  form.append("request", new Blob([JSON.stringify({ model: "muse-voice-transcribe-1.0", audioEncoding: "WAV", mode: "PUSH_TO_TALK" })], { type: "application/json" }));
+  form.append("audio", new Blob([new Uint8Array(wav)], { type: "audio/wav" }), "note.wav");
+  const t0 = Date.now();
+  const res = await fetch(`${BASE}/asr/transcribe`, { method: "POST", headers: { Authorization: `Bearer ${process.env.META_API_KEY}`, Accept: "application/json" }, body: form });
+  const j = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(`Meta API transcribe ${res.status}: ${JSON.stringify(j)?.slice(0, 200)}`);
+  await logUsage("transcribe", "muse-voice-transcribe-1.0", Date.now() - t0, { audioMs: j.audioDurationMs });
+  return String(j.transcript ?? "").replace(/\.{3}$/, ".").trim();
+}
+
+export type NoteReading = {
+  traces: { kind: TraceKind; label: string; detail: string | null }[];
+  line: string;
+};
+
+// The owner's words about a card: what they add beyond the photo becomes traces marked as the owner's,
+// and the pet's line is rewritten so it carries what the owner said matters.
+export async function readOwnerNote(imageB64: string, card: { name: string; line: string; observation: string }, note: string, petName: string, sex: Pet["sex"]): Promise<NoteReading> {
+  if (!LIVE) return { traces: [{ kind: "note", label: note.slice(0, 60), detail: null }], line: card.line };
+  const pronoun = sex === "female" ? "she/her" : sex === "male" ? "he/him" : "they/them";
+  return sparkJson<NoteReading>(
+    "owner-note",
+    [
+      `The owner of a pet called ${petName} (${pronoun}) added a note about this photo. The owner knows the pet; their words outrank what the photo seems to show.`,
+      `What the photo reading said: "${card.observation}". The card's line: "${card.line}".`,
+      "traces: only facts the owner's note adds (habits, likes, people, places, times, how often, why). Keep the owner's own words where you can. Do not repeat what the photo already showed. Nothing about people's identities beyond their role (owner, a friend, a child).",
+      `line: rewrite the card's line in ${petName}'s first-person voice, one or two short plain sentences, using what the owner said. No exclamation marks. Never mention health, food amounts, medicine or training advice.`,
+    ].join("\n"),
+    `Owner's note: "${note}"`,
+    await forModel(imageB64),
+    "note_reading",
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["traces", "line"],
+      properties: {
+        traces: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["kind", "label", "detail"],
+            properties: { kind: { type: "string", enum: ["place", "activity", "companion", "object", "time", "note"] }, label: { type: "string" }, detail: { type: ["string", "null"] } },
+          },
+        },
+        line: { type: "string" },
+      },
+    },
+  );
+}
+
+// The AI's picture of the pet. With little memory it only has the profile, so it paints a typical animal of that breed;
+// with imprints it paints from the pet's own photos and what it has learned. Returns the stored file name.
+export async function paintLikeness(pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">, refsB64: string[], learned: string[]): Promise<string | null> {
+  if (!LIVE) return null;
+  const pose = "a calm portrait, sitting, facing the viewer, head and body visible, plain soft background, painterly, no people, no text, no border";
+  const t0 = Date.now();
+  const j = refsB64.length
+    ? await post("/images/edits", {
+        model: IMAGE,
+        n: 1,
+        prompt: [
+          `A portrait of this specific animal: ${describePet(pet)}.`,
+          `The photos all show the same animal; learn its exact face, markings, colours and build from them.`,
+          learned.length ? `Things known about it: ${learned.slice(0, 12).join("; ")}.` : "",
+          `Draw ${pose}. Do not copy any one photo.`,
+        ].join(" "),
+        images: await Promise.all(refsB64.slice(0, 4).map(async (b) => ({ image_url: `data:image/jpeg;base64,${await forModel(b)}` }))),
+      })
+    : await post("/images/generations", { model: IMAGE, n: 1, prompt: `A typical ${describePet(pet)}: ${pose}.` });
+  await logUsage(refsB64.length ? "likeness-imprints" : "likeness-profile", IMAGE, Date.now() - t0, j.usage);
+  const b64 = j.data?.[0]?.b64_json;
+  if (!b64) throw new Error("Meta API likeness: no image returned");
+  const name = `${newId("art")}-likeness.jpg`;
+  await fs.mkdir(UPLOADS, { recursive: true });
+  await fs.writeFile(path.join(UPLOADS, name), await sharp(Buffer.from(b64, "base64")).resize(768, 1024, { fit: "cover" }).jpeg({ quality: 88 }).toBuffer());
+  return name;
 }

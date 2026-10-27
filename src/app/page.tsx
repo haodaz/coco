@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import CardBack from "@/components/CardBack";
 import HoloCard from "@/components/HoloCard";
+import MemoryPanel, { type Memory } from "@/components/MemoryPanel";
+import NoteBox from "@/components/NoteBox";
 import { finishFor } from "@/lib/finish";
 import { PACKS, packFor, type QuestSlot } from "@/lib/species";
 import type { Card, Credential, Pet, Species, State } from "@/lib/types";
 
-type Loaded = State & { live: boolean };
+type Loaded = State & { live: boolean; memory: Record<string, Memory> };
 
 export default function Home() {
   const [state, setState] = useState<Loaded | null>(null);
@@ -119,6 +121,7 @@ function Quest({ pet, state, onChange }: { pet: Pet; state: Loaded; onChange: ()
         </div>
       </header>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--line)]"><div className="h-full rounded-full bg-[var(--primary)] transition-all" style={{ width: `${(done / slots.length) * 100}%` }} /></div>
+      {state.memory?.[pet.id] && <div className="mt-6"><MemoryPanel pet={pet} memory={state.memory[pet.id]} /></div>}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {slots.map((s, i) => <QuestCard key={s.id} slot={s} index={i} pet={pet} card={cards.find((c) => c.slotId === s.id)} onChange={onChange} />)}
       </div>
@@ -151,6 +154,7 @@ function QuestCard({ slot, index, pet, card, onChange }: { slot: QuestSlot; inde
         </div>
       </button>
       <div className="mt-1.5 px-1 text-[11.5px] leading-snug text-[var(--sub)]">{busy ? "Reading the photo and painting…" : card ? card.observation : slot.why}</div>
+      {card && !busy && <NoteBox card={card} petName={pet.name} onSaved={onChange} />}
       <input ref={input} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
     </div>
   );

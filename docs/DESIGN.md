@@ -31,6 +31,32 @@ We cannot ask a pet what it thinks, so we judge by deeds, not by guessing the he
    - "If Coco could talk" — a first-person line or diary for the day's card, only about things that left traces; anything imagined is marked as such.
    - Always an interpretation, never mind-reading: every answer has a "why I think so" with the evidence.
 
+### Imprints: every card is a memory the AI keeps (Elodie, 2026-10-26)
+
+Like a deck you build up and slot cards into: each card is an **Imprint**, one moment of this pet that the AI keeps as memory. (In animal behaviour, imprinting is how a young animal learns who its own are; here the AI learns who its pet is.) The AI's context is its imprints. The more it holds, the clearer the pet becomes.
+
+**What the AI starts with (before any imprint).** The profile (species, breed, sex, age) and general knowledge: the species pack, breed traits, basic care. Its first answers are about "a black Labrador", not yet about Coco.
+
+**What one imprint holds.**
+- The card (photo, painting, name, the pet's line).
+- **The owner's words.** After a card turns over, the owner can say or type a sentence about the moment: "she always does this when the doorbell rings", "first night home, she was eight weeks old". One sentence carries what no photo shows: before and after, who, why, how often. Voice goes through Muse Voice Transcribe.
+- Traces taken from both photo and words, each marked with where it came from (photo, owner). The owner's words count as stronger evidence than the model's reading of a photo.
+- When the photo was taken, so imprints spread across real days of the pet's life.
+
+**Training the AI to know what a card is worth.** The owner's sentence is also feedback: what the model saw versus what the owner says actually matters in this moment. Over time the AI learns which details carry meaning for this pet (the sock, not the floor).
+
+**Clarity: you can see how well the AI knows your pet.** The AI's picture of the pet is shown at the resolution it has earned.
+- No imprints: a two-colour mosaic, a few blocks. Only "a black dog".
+- A first set of cards: a coarse 8-bit portrait; the shape of a dog.
+- About a month of imprints: a pixel portrait where you can see this dog's own features.
+- After that, the pixels keep getting finer, up to the full painting.
+
+Packs: the photo quest is the **starter pack** (10 cards at once). After that, a **daily booster pack** of up to 3 cards. Pacing: a full starter pack with notes reaches the outline of the pet; about 10 days of boosters, a coarse portrait; about a month, its own features; then two, three and five months for the finest levels.
+
+Clarity is earned, not timed: it grows with the number of imprints, how many different kinds of moment they cover (sleep, food, play, walks, people…), how many different days they come from, and whether the owner added words. Honest by construction: the portrait itself is the AI's idea of the pet. At low clarity it is painted from the profile alone (a generic black Lab). Each time clarity rises, it is repainted from the imprints and traits, then shown at the new resolution. So the picture literally becomes Coco as the AI learns her.
+
+**Slotting cards unlocks what the twin can do.** Each kind of imprint opens one sense of the twin: sleep cards → it knows her spots and routine; walk cards → it can talk about walks; car cards → it can speak up about trips ("leave me in the passenger seat"); people and animals → it knows how she meets others. A sense with no imprints stays dark, and the twin says it does not know yet instead of making it up. Every answer names the imprints it rests on.
+
 ### Knowledge: smarter than a dog, still true to this dog (Elodie, 2026-10-26)
 
 The soul comes from the pet's own traces; the knowledge comes from real rules. The twin speaks up for the pet, with both.

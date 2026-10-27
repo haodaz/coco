@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { samPhrase } from "@/lib/finish";
+import { refreshLikeness } from "@/lib/likeness";
 import { depthLayer, paintCard, readQuestPhoto } from "@/lib/meta";
 import { photoBase64, storePhoto } from "@/lib/photos";
 import { packFor } from "@/lib/species";
@@ -55,6 +56,8 @@ export async function POST(req: Request) {
   s.photos.push(photo);
   s.traces.push(...traces);
   s.cards.push(card);
+  // a new imprint may raise clarity; the AI then repaints its picture of the pet
+  await refreshLikeness(s, pet).catch(() => false);
   await save(s);
   return NextResponse.json({ card, traces });
 }
