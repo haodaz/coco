@@ -200,7 +200,7 @@ body {
 .ws-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent); }
 .ws-head { position: relative; display: flex; align-items: flex-end; gap: 20px; min-height: 210px; margin-bottom: 26px; }
 .ws-head-art { position: absolute; right: 0; top: -20px; width: min(360px, 38%); pointer-events: none; }
-.ws-mtop, .ws-tabs, .ws-scrim, .ws-only-sm { display: none; }
+.ws-mtop, .ws-tabs, .ws-scrim, .ws-only-sm, .home-m { display: none; }
 .ws-chat-h { height: calc(100dvh - 112px); }
 @media (max-width: 860px) {
   /* phones: a slim top bar, the sidebar as a drawer, five places along the bottom */
@@ -208,7 +208,8 @@ body {
   .ws-mtop { display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 40; height: 56px; padding: 0 14px; padding-top: env(safe-area-inset-top); box-sizing: content-box; background: rgba(250,249,254,.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
   .ws-side { position: fixed; top: 0; bottom: 0; left: 0; z-index: 70; width: min(86vw, 320px); height: 100dvh; transform: translateX(-104%); transition: transform .28s cubic-bezier(.3,.7,.3,1); box-shadow: 0 0 40px rgba(31,29,51,.18); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
   .ws-side.open { transform: none; }
-  .ws-only-sm { display: block; }
+  .ws-only-sm, .home-m { display: block; }
+  .home-d { display: none; }
   .ws-scrim { display: block; position: fixed; inset: 0; z-index: 69; background: rgba(31,29,51,.32); animation: fade-in .2s ease-out; }
   .ws-main { padding: 16px 16px calc(92px + env(safe-area-inset-bottom)); }
   .ws-chat .ws-main { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }

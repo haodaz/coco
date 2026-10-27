@@ -4,6 +4,7 @@ import { ArrowRight, Flame, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import HomeMobile from "@/components/HomeMobile";
 import HomePet from "@/components/HomePet";
 import HoloCard from "@/components/HoloCard";
 import Shell, { PageHead, Rule } from "@/components/Shell";
@@ -39,6 +40,11 @@ export default function Home() {
         const go = (q: string) => router.push(`/app/chat?q=${encodeURIComponent(q)}`);
         return (
           <>
+            {/* phones get their own Home, one thing per row */}
+            <div className="home-m">
+              <HomeMobile pet={pet} greeting={greeting()} line={line} r={r} memory={memory} cardCount={cards.length} recent={recent} threads={threads} openCard={openCard} ask={go} />
+            </div>
+            <div className="home-d">
             <PageHead eyebrow="Home" art="home" title={greeting()} sub={`Your co-world with ${pet.name}`} />
 
             <div className="grid gap-5 sm:mt-16 lg:grid-cols-3">
@@ -154,6 +160,7 @@ export default function Home() {
                 </div>
               </>
             )}
+            </div>
           </>
         );
       }}
