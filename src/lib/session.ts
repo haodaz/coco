@@ -5,12 +5,13 @@ import { signedInUser } from "./supabase";
 // Every API request runs inside the signed-in user's scope: the state, the photos and paintings,
 // and the usage log all read the user from here, so no code path can touch another user's data.
 
-const scope = new AsyncLocalStorage<{ userId: string; admin: boolean }>();
+const scope = new AsyncLocalStorage<{ userId: string; admin: boolean; email?: string | null }>();
 
 // Admins are listed by email in the server's environment (ADMIN_EMAILS, comma-separated), never in anything a user can edit.
 const ADMINS = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 
 export const isAdmin = () => scope.getStore()?.admin ?? false;
+export const currentEmail = () => scope.getStore()?.email ?? null;
 
 export function currentUserId() {
   const s = scope.getStore();
@@ -24,7 +25,7 @@ export function withUser<C>(handler: Handler<C>): Handler<C> {
   return async (req, ctx) => {
     const user = await signedInUser();
     if (!user) return NextResponse.json({ error: "sign in first" }, { status: 401 });
-    return scope.run({ userId: user.id, admin: !!user.email && ADMINS.includes(user.email.toLowerCase()) }, () => handler(req, ctx));
+    return scope.run({ userId: user.id, email: user.email, admin: !!user.email && ADMINS.includes(user.email.toLowerCase()) }, () => handler(req, ctx));
   };
 }
 

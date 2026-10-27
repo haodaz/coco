@@ -30,12 +30,12 @@ export default function NoteBox({ card, petName, onSaved }: { card: Card; petNam
   if (card.note && !open)
     return (
       <button onClick={() => { setText(card.note!.text); setOpen(true); }} className="mt-1.5 block w-full px-1 text-left text-[11.5px] leading-snug text-[#3d4460]">
-        <span className="text-[var(--sub)]">You said:</span> “{card.note.text}”
+        <span className="text-[var(--ink3)]">You said:</span> “{card.note.text}”
       </button>
     );
   if (!open)
     return (
-      <button onClick={() => setOpen(true)} className="mt-1.5 px-1 text-[12px] font-medium text-[var(--primary)]">
+      <button onClick={() => setOpen(true)} className="mt-1.5 px-1 text-[12px] font-medium text-[var(--gold)]">
         + What happened here?
       </button>
     );
@@ -53,12 +53,12 @@ export default function NoteBox({ card, petName, onSaved }: { card: Card; petNam
         <button onClick={toggle} disabled={state === "saving"} title={state === "recording" ? "Stop" : "Say it"} className={`grid h-8 w-8 place-items-center rounded-full ${state === "recording" ? "animate-pulse bg-[#ff4d4f] text-white" : "bg-[#f2f3f7] text-[#3d4460]"}`}>
           {state === "recording" ? <Square size={13} /> : <Mic size={15} />}
         </button>
-        <span className="text-[11px] text-[var(--sub)]">{state === "recording" ? "Listening… tap to stop" : state === "saving" ? "Remembering…" : ""}</span>
-        <button onClick={() => setOpen(false)} className="ml-auto text-[12px] text-[var(--sub)]">Cancel</button>
+        <span className="text-[11px] text-[var(--ink3)]">{state === "recording" ? "Listening… tap to stop" : state === "saving" ? "Remembering…" : ""}</span>
+        <button onClick={() => setOpen(false)} className="ml-auto text-[12px] text-[var(--ink3)]">Cancel</button>
         <button
           disabled={!text.trim() || state !== "idle"}
           onClick={() => { const fd = new FormData(); fd.append("text", text.trim()); send(fd); }}
-          className="rounded-lg bg-[var(--primary)] px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-40"
+          className="rounded-lg bg-[var(--ink)] px-3 py-1.5 text-[12px] font-semibold text-white disabled:opacity-40"
         >
           Save
         </button>

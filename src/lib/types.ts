@@ -79,10 +79,23 @@ export type Card = {
   createdAt: string;
 };
 
+// A conversation with the pet, kept so the owner can come back to it (the sidebar's "Recent").
+export type ChatTurn = {
+  question: string;
+  answer: string;
+  mood: string;
+  basis: { cardId: string; how: string }[];
+  general: string[];
+  gap: { topic: string; suggest: string } | null;
+  at: string;
+};
+export type Thread = { id: string; petId: string; title: string; createdAt: string; updatedAt: string; turns: ChatTurn[] };
+
 export type State = {
   pets: Pet[];
   photos: Photo[];
   traces: Trace[];
   traits: Trait[];
   cards: Card[];
+  threads?: Thread[];
 };

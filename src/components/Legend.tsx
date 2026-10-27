@@ -3,12 +3,12 @@
 import { useState } from "react";
 import HoloCard from "@/components/HoloCard";
 import { packFor } from "@/lib/species";
-import type { Pet, State } from "@/lib/types";
+import type { Card, Pet, State } from "@/lib/types";
 import { call } from "@/lib/api";
 
 // The soul portrait: locked until the starter set is full, then one tap and the pet says who it is,
 // on a legendary card it steps out of. Shows which cards that rests on.
-export default function Legend({ pet, state, onChange }: { pet: Pet; state: State; onChange: () => Promise<void> }) {
+export default function Legend({ pet, state, onChange, openCard }: { pet: Pet; state: State; onChange: () => Promise<void>; openCard?: (c: Card) => void }) {
   const [busy, setBusy] = useState(false);
   const slots = packFor(pet.species).quest;
   const done = slots.filter((s) => state.cards.some((c) => c.petId === pet.id && c.kind === "quest" && c.slotId === s.id)).length;
@@ -38,25 +38,25 @@ export default function Legend({ pet, state, onChange }: { pet: Pet; state: Stat
   const basis = (legend.basis ?? []).map((id) => state.cards.find((c) => c.id === id)).filter((c) => !!c);
   return (
     <section className="grid items-center gap-8 md:grid-cols-[minmax(240px,340px)_1fr]">
-      <div className="mx-auto w-full max-w-[340px] pt-10">
+      <div className="mx-auto w-full max-w-[340px] cursor-pointer pt-10" onClick={() => openCard?.(legend)}>
         <HoloCard art={legend.art ?? ""} fg={legend.fg} finish="popout" name={legend.name} line="" stars={3} label={`${pet.name} · Legend`} />
       </div>
       <div>
-        <div className="text-[12px] font-semibold uppercase tracking-[.16em] text-[#8a6420]">Legendary · soul portrait</div>
-        <h2 className="mt-1 text-[28px] font-bold leading-tight">{legend.name}</h2>
-        <p className="mt-3 text-[17px] leading-relaxed">“{legend.line}”</p>
+        <div className="text-[12px] font-semibold uppercase tracking-[.16em] text-[var(--gold)]">Legendary · soul portrait</div>
+        <h2 className="serif mt-1 text-[30px] font-bold leading-tight">{legend.name}</h2>
+        <p className="serif mt-3 text-[18px] italic leading-relaxed">“{legend.line}”</p>
         <div className="mt-4 flex flex-wrap gap-1.5">
           {legend.observation.split(" · ").map((e) => <span key={e} className="rounded-full bg-[#fff4d6] px-3 py-1 text-[12.5px] font-medium text-[#7a5618]">{e}</span>)}
         </div>
         {basis.length > 0 && (
           <div className="mt-5">
-            <div className="text-[11px] font-semibold uppercase tracking-[.12em] text-[var(--sub)]">Drawn from {basis.length} of {her} cards</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[.12em] text-[var(--ink3)]">Drawn from {basis.length} of {her} cards</div>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {basis.map((c) => (
-                <a key={c.id} href={`#card-${c.id}`} title={c.name}>
+                <button key={c.id} onClick={() => openCard?.(c)} title={c.name}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={c.art ?? `/api/photos/${c.photoId}`} alt={c.name} className="h-14 w-10 rounded-md object-cover ring-1 ring-[var(--line)]" />
-                </a>
+                  <img src={c.art ?? `/api/photos/${c.photoId}`} alt={c.name} className="h-14 w-10 rounded-md object-cover ring-1 ring-[var(--line)] transition hover:-translate-y-0.5" />
+                </button>
               ))}
             </div>
           </div>

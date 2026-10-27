@@ -1,6 +1,12 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev", "--", "-p", "3030"], "port": 3030 }
+    { "name": "dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev", "--", "-p", "3030"], "port": 3030 },
+    {
+      "name": "coco-local",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_ANON_KEY= SUPABASE_SERVICE_ROLE_KEY= npm run dev -- -p 3031"],
+      "port": 3031
+    }
   ]
 }
