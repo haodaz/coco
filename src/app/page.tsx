@@ -66,7 +66,7 @@ export default function Landing() {
             <Promise>No vet, diet or training advice</Promise>
           </ul>
         </div>
-        <HeroCompanion moods={manifest.moods} cards={manifest.set.filter((c) => c.rarity >= 2).map((c) => c.src).concat(manifest.set.map((c) => c.src))} />
+        <HeroCompanion moods={manifest.moods} assets={{ cards: manifest.set.map((c) => c.src), levels: manifest.levels, legend: manifest.legend?.art ?? null, said: mp?.said ?? "" }} />
       </header>
 
       {/* the four beats */}

@@ -30,12 +30,14 @@ export default function Character({ moods, mood: asked, version = "", className 
     if (steps.length < 2) return;
     let i = 0;
     let t: ReturnType<typeof setTimeout>;
+    // held frames vary a little each time (a blink comes when it comes), so the loop never feels metronomic
+    const hold = (ms: number) => (ms > 600 ? ms * (0.6 + Math.random() * 0.9) : ms);
     const next = () => {
       t = setTimeout(() => {
         i = (i + 1) % steps.length;
         setStep(i);
         next();
-      }, steps[i][1]);
+      }, hold(steps[i][1]));
     };
     next();
     return () => clearTimeout(t);
