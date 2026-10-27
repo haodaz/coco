@@ -14,12 +14,7 @@ const RARITY = ["", "Common", "Rare", "Legend"];
 
 // One card, opened: the card itself to turn in your hands, and the Memory Print it holds —
 // the day, what the photo shows, what you said, what the AI took from it — with a way to add your words or talk about it.
-export default function CardModal({ card, state, pet, onClose, onChanged }: { card: Card; state: State; pet: Pet; onClose: () => void; onChanged: () => void }) {
-  useEffect(() => {
-    const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
-  }, [onClose]);
+export function CardDetail({ card, state, pet, onClose, onChanged, compact = false }: { card: Card; state: State; pet: Pet; onClose?: () => void; onChanged: () => void; compact?: boolean }) {
   const live = state.cards.find((c) => c.id === card.id) ?? card; // pick up a new note after saving
   const photo = state.photos.find((p) => p.id === live.photoId);
   const traces = state.traces.filter((t) => (t.source.type === "photo" && t.source.photoId === live.photoId) || (t.source.type === "note" && t.source.noteId === live.id));
@@ -29,9 +24,8 @@ export default function CardModal({ card, state, pet, onClose, onChanged }: { ca
   const basis = (live.basis ?? []).map((id) => state.cards.find((c) => c.id === id)).filter((c) => !!c);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(30,24,16,.55)] backdrop-blur-sm" onClick={onClose}>
-      <div className="mx-auto my-6 grid max-w-4xl gap-8 rounded-[28px] bg-[var(--paper)] p-5 shadow-2xl md:my-12 md:grid-cols-[minmax(0,340px)_1fr] md:p-8" onClick={(e) => e.stopPropagation()}>
-        <div className={`mx-auto w-full max-w-[340px] ${live.kind === "legendary" ? "pt-10" : ""}`}>
+      <div className={`grid gap-8 ${compact ? "" : "md:grid-cols-[minmax(0,340px)_1fr]"}`}>
+        <div className={`mx-auto w-full ${compact ? "max-w-[260px]" : "max-w-[340px]"} ${live.kind === "legendary" ? "pt-10" : ""}`}>
           <HoloCard art={live.art ?? `/api/photos/${live.photoId}`} fg={live.fg} finish={finishFor(live)} name={live.name} line={live.line} stars={live.rarity} label={`${pet.name} · ${live.style}`} idle={false} />
           <div className="mt-3 text-center text-[12px] text-[var(--ink3)]">Move over the card to turn it in the light</div>
         </div>
@@ -41,7 +35,7 @@ export default function CardModal({ card, state, pet, onClose, onChanged }: { ca
               <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{RARITY[live.rarity]} · {kind}</div>
               <h2 className="serif mt-1 text-[28px] font-bold leading-tight">{live.name}</h2>
             </div>
-            <button onClick={onClose} className="ml-auto rounded-full p-2 hover:bg-[rgba(35,32,27,.06)]" aria-label="Close"><X size={18} /></button>
+            {onClose && <button onClick={onClose} className="ml-auto rounded-full p-2 hover:bg-[rgba(35,32,27,.06)]" aria-label="Close"><X size={18} /></button>}
           </div>
           <p className="serif mt-3 text-[18px] italic leading-relaxed">“{live.line}”</p>
 
@@ -80,6 +74,20 @@ export default function CardModal({ card, state, pet, onClose, onChanged }: { ca
             <MessageCircle size={16} /> Talk with {pet.name} about this moment
           </Link>
         </div>
+      </div>
+  );
+}
+
+export default function CardModal({ card, state, pet, onClose, onChanged }: { card: Card; state: State; pet: Pet; onClose: () => void; onChanged: () => void }) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", esc);
+    return () => window.removeEventListener("keydown", esc);
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(30,24,16,.55)] backdrop-blur-sm" onClick={onClose}>
+      <div className="mx-auto my-6 max-w-4xl rounded-[28px] bg-[var(--paper)] p-5 shadow-2xl md:my-12 md:p-8" onClick={(e) => e.stopPropagation()}>
+        <CardDetail card={card} state={state} pet={pet} onClose={onClose} onChanged={onChanged} />
       </div>
     </div>
   );

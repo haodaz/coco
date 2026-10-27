@@ -30,7 +30,7 @@ export const POST = withUser(async (req: Request) => {
       t = { id: threadId, petId: pet.id, title: question.slice(0, 60), createdAt: now, updatedAt: now, turns: [] };
       f.threads.push(t);
     }
-    t.turns.push({ question, answer: result.answer, mood: result.mood, basis: result.basis, general: result.general, gap: result.gap, at: now });
+    t.turns.push({ question, answer: result.answer, mood: result.mood, basis: result.basis, general: result.general, gap: result.gap, action: result.action, at: now });
     t.updatedAt = now;
   });
   return NextResponse.json({ question, threadId, ...result });

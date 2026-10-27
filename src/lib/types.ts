@@ -80,7 +80,17 @@ export type Card = {
 };
 
 // A conversation with the pet, kept so the owner can come back to it (the sidebar's "Recent").
+// Something the pet opens on the owner's screen while it answers (the conversation's side panel).
+export type PetAction = {
+  type: "show_cards" | "open_card" | "open_pack" | "add_photo" | "show_memory" | "make_link";
+  cardIds: string[];
+  topic: Pattern | null;
+  slotId: string | null;
+  kind: "sitter" | "playdate" | null;
+};
+
 export type ChatTurn = {
+  action?: PetAction | null;
   question: string;
   answer: string;
   mood: string;

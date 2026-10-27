@@ -13,7 +13,7 @@ function Chat() {
   const thread = params.get("thread");
   return (
     <Shell>
-      {({ pet, state, refresh, openCard }) => (
+      {({ pet, state, memory, refresh, openCard }) => (
         <AskPanel
           key={thread ? "t" : "new"}
           pet={pet}
@@ -22,6 +22,9 @@ function Chat() {
           firstQuestion={params.get("q")}
           onThread={(id) => router.replace(`/app/chat?thread=${id}`)}
           openCard={openCard}
+          memory={memory}
+          admin={state.admin}
+          refresh={refresh}
           onBringToLife={async () => {
             await call(`/api/pets/${pet.id}/character`, { method: "POST" });
             await refresh();

@@ -207,3 +207,13 @@ body {
   .ws-head-art { position: relative; top: 0; width: 70%; margin: 0 auto 8px; }
   .ws-head { flex-direction: column-reverse; align-items: stretch; }
 }
+
+/* the companion's hop: up in an arc while it travels, a little squash on landing */
+.companion-hop { animation: companion-hop .65s cubic-bezier(.3,.7,.3,1); transform-origin: 50% 95%; }
+@keyframes companion-hop {
+  0% { translate: 0 0; scale: 1 1; }
+  12% { translate: 0 2px; scale: 1.06 .92; }
+  45% { translate: 0 -38px; scale: .96 1.05; }
+  85% { translate: 0 0; scale: 1.06 .94; }
+  100% { translate: 0 0; scale: 1 1; }
+}

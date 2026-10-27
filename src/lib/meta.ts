@@ -6,7 +6,7 @@ import { getMedia, putMedia } from "./media";
 import { currentUserId } from "./session";
 import { newId, UPLOADS } from "./store";
 import { adminClient, HOSTED } from "./supabase";
-import type { Pet, PlayReport, Species, TraceKind } from "./types";
+import type { Pet, PetAction, PlayReport, Species, TraceKind } from "./types";
 
 // The only place that talks to the Meta Model API.
 // MOCK mode is the default until the hackathon credits arrive: no request leaves the machine and nothing is billed.
@@ -380,10 +380,11 @@ export type Answer = {
   general: string[]; // general species or breed knowledge used, kept apart from what is known about this pet
   gap: { topic: string; suggest: string } | null; // what it doesn't know yet, and which card would teach it
   mood: "happy" | "close" | "confused" | "thinking"; // how the character looks while saying it
+  action: PetAction | null; // something to open beside the conversation
 };
 
 // The twin answers a question from the owner, in the pet's voice, resting only on its imprints.
-export async function askPet(question: string, profile: object, imprints: object[], senses: string[], slotTitles: string[], audience: "owner" | "sitter" = "owner"): Promise<Answer> {
+export async function askPet(question: string, profile: object, imprints: object[], senses: string[], slotTitles: string[], audience: "owner" | "sitter" = "owner", tools: { topics: { pattern: string; label: string }[]; emptySlots: { id: string; title: string }[] } | null = null): Promise<Answer> {
   const sitter = audience === "sitter"
     ? [
         "You are NOT talking with your owner now. You are talking with someone your owner trusts to look after you (a sitter or a boarding host). Call your owner \"my person\". Help them care for you well: your routines, places, likes, how you react to things, all from your imprints.",
@@ -404,6 +405,13 @@ export async function askPet(question: string, profile: object, imprints: object
       "Never mention people's identities beyond their role. Never invent dates.",
       "Never suggest leaving you in a parked car: whether that is safe depends on today's weather, which you cannot see. If it comes up, say the owner should check the weather first, or take you home first.",
       "mood: close when the answer is about you and the owner, confused when there is a gap, thinking for the vet answer, happy otherwise.",
+      tools
+        ? [
+            "action: you can open one thing on your owner's screen beside the conversation, when it helps them do or see what they asked; otherwise null.",
+            "show_cards: cards about a topic or the ones you cite (cardIds and/or topic). open_card: one card (cardIds = [its id]). open_pack: today's pack, when they want to add a memory or ask about today's pack. add_photo: when there is a gap, so they can add a photo (slotId = an empty starter slot that fits, or null for a daily pack). show_memory: how well you know yourself / clarity. make_link: when they mention a sitter, boarding, someone looking after you (kind sitter) or finding a playmate (kind playdate).",
+            `Topics: ${JSON.stringify(tools.topics)}. Empty starter slots: ${JSON.stringify(tools.emptySlots)}.`,
+          ].join("\n")
+        : "action is always null.",
       "",
       `Profile: ${JSON.stringify(profile)}`,
       `Imprints (each is a card with a photo the owner shared): ${JSON.stringify(imprints)}`,
@@ -416,12 +424,29 @@ export async function askPet(question: string, profile: object, imprints: object
     {
       type: "object",
       additionalProperties: false,
-      required: ["answer", "basis", "general", "gap", "mood"],
+      required: ["answer", "basis", "general", "gap", "mood", "action"],
       properties: {
         answer: { type: "string" },
         basis: { type: "array", items: { type: "object", additionalProperties: false, required: ["cardId", "how"], properties: { cardId: { type: "string" }, how: { type: "string" } } } },
         general: { type: "array", items: { type: "string" } },
         mood: { type: "string", enum: ["happy", "close", "confused", "thinking"] },
+        action: {
+          anyOf: [
+            { type: "null" },
+            {
+              type: "object",
+              additionalProperties: false,
+              required: ["type", "cardIds", "topic", "slotId", "kind"],
+              properties: {
+                type: { type: "string", enum: ["show_cards", "open_card", "open_pack", "add_photo", "show_memory", "make_link"] },
+                cardIds: { type: "array", items: { type: "string" } },
+                topic: { type: ["string", "null"] },
+                slotId: { type: ["string", "null"] },
+                kind: { type: ["string", "null"], enum: ["sitter", "playdate", null] },
+              },
+            },
+          ],
+        },
         gap: { anyOf: [{ type: "null" }, { type: "object", additionalProperties: false, required: ["topic", "suggest"], properties: { topic: { type: "string" }, suggest: { type: "string" } } }] },
       },
     },

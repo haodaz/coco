@@ -1,4 +1,6 @@
 import { clarityOf, SENSES } from "./memory";
+import type { Pattern } from "./species";
+import type { PetAction } from "./types";
 import { LIVE, askPet, type Answer } from "./meta";
 import { packFor } from "./species";
 import type { Pet, State } from "./types";
@@ -50,9 +52,25 @@ export function petContext(state: State, pet: Pet) {
 export async function ask(state: State, pet: Pet, question: string, opts: { context?: ReturnType<typeof petContext>; audience?: "owner" | "sitter" } = {}): Promise<AskResult> {
   const { slots, cards, imprints, profile, senses } = opts.context ?? petContext(state, pet);
 
+  const owner = (opts.audience ?? "owner") === "owner";
+  const patterns = [...new Set(slots.map((s) => s.pattern))];
+  const emptySlots = slots.filter((s) => !state.cards.some((c) => c.petId === pet.id && c.slotId === s.id));
+  const tools = owner ? { topics: patterns.map((p) => ({ pattern: p, label: SENSES[p] })), emptySlots: emptySlots.map((s) => ({ id: s.id, title: s.title })) } : null;
   const answer = LIVE
-    ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title), opts.audience)
-    : { answer: `I only know a little about myself so far. Show me more moments and I'll answer that properly.`, basis: [], general: [], gap: null, mood: "confused" as const };
+    ? await askPet(question, profile, imprints, senses, slots.map((s) => s.title), opts.audience, tools)
+    : { answer: `I only know a little about myself so far. Show me more moments and I'll answer that properly.`, basis: [], general: [], gap: null, mood: "confused" as const, action: null };
+
+  // the action must point at real things; a gap with no action still offers a way to add a photo
+  let action: PetAction | null = owner ? answer.action : null;
+  if (action) {
+    action.cardIds = action.cardIds.filter((id) => cards.some((c) => c.id === id));
+    if (action.topic && !patterns.includes(action.topic as Pattern)) action.topic = null;
+    if (action.slotId && !emptySlots.some((s) => s.id === action!.slotId)) action.slotId = null;
+    if (action.type === "open_card" && !action.cardIds.length) action = null;
+    else if (action.type === "make_link" && action.kind !== "sitter" && action.kind !== "playdate") action.kind = "sitter";
+  }
+  if (owner && !action && answer.gap) action = { type: "add_photo", cardIds: [], topic: null, slotId: null, kind: null };
+  answer.action = action;
 
   // keep only cards that exist; the model may not invent evidence
   const basis = answer.basis.filter((b) => cards.some((c) => c.id === b.cardId));
