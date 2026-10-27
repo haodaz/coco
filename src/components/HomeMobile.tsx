@@ -41,19 +41,21 @@ export default function HomeMobile({
       <div className="serif text-[26px] font-bold leading-tight">{greeting}</div>
       <div className="serif text-[15px] italic text-[var(--ink2)]">Your co-world with {pet.name}</div>
 
-      <section className="relative mt-3">
-        <div className="absolute inset-x-6 bottom-2 top-10 rounded-full bg-[radial-gradient(closest-side,rgba(109,79,209,.18),rgba(194,65,143,.06)_60%,transparent)]" />
-        <div className="relative mx-auto -mt-6 aspect-[768/1057] w-[46%] max-w-[200px]">
-          {pet.character ? (
-            <HomePet moods={pet.character.moods} version={pet.character.at} eager={r.left > 0} className="h-full w-full" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full rounded-2xl object-cover" />
-          )}
-        </div>
-        <div className="relative mx-auto -mt-2 max-w-[340px] rounded-2xl bg-white px-4 py-3 text-center shadow-[0_10px_28px_-14px_rgba(40,30,90,.35)]">
-          <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
-          <div className="serif relative text-[17px] italic leading-snug">“{line}”</div>
+      <section className="relative mt-2">
+        {/* the pet beside its speech bubble, small enough to leave room for everything else */}
+        <div className="flex items-end gap-1">
+          <div className="relative aspect-[768/1057] w-[32%] max-w-[130px] shrink-0">
+            <div className="absolute inset-x-[-10%] bottom-[2%] top-[30%] rounded-full bg-[radial-gradient(closest-side,rgba(109,79,209,.2),transparent)]" />
+            {pet.character ? (
+              <HomePet moods={pet.character.moods} version={pet.character.at} eager={r.left > 0} className="h-full w-full" />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="relative h-full w-full rounded-2xl object-cover" />
+            )}
+          </div>
+          <div className="relative mb-[14%] min-w-0 flex-1 rounded-2xl rounded-bl-md bg-white px-3.5 py-3 shadow-[0_10px_28px_-14px_rgba(40,30,90,.35)]">
+            <div className="serif text-[16px] italic leading-snug">“{line}”</div>
+          </div>
         </div>
         <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
           {["What do you love most?", "What did we do this week?", "Where do you like to sleep?"].map((q) => (
