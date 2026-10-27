@@ -145,7 +145,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
           <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">M pt · Memory points</div>
           <div className="serif text-[52px] font-bold leading-none">{points}</div>
           <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink2)]">
-            {waiting ? `${waiting} shared memor${waiting === 1 ? "y is" : "ies are"} waiting to become M Cards.` : `Share a memory below; a pack paints your shared memories into M Cards.`} A Daily Booster costs {PACK_COST} M pt and paints up to three, each in a style you won&apos;t know until it turns over.
+            {waiting ? `${waiting} shared memor${waiting === 1 ? "y is" : "ies are"} waiting to become M Prints.` : `Share a memory below; a pack paints your shared memories into M Prints.`} A Daily Booster costs {PACK_COST} M pt and paints up to three, each in a style you won&apos;t know until it turns over.
           </p>
           <button disabled={!canOpen || phase === "sealed"} onClick={open} className="pack mt-3 rounded-xl px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-40">
             {phase === "sealed" ? "Painting your cards…" : `Open a pack · ${PACK_COST} M pt`}

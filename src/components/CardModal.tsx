@@ -40,7 +40,7 @@ export function CardDetail({ card, state, pet, onClose, onChanged, compact = fal
           <p className="serif mt-3 text-[18px] italic leading-relaxed">“{live.line}”</p>
 
           <div className="mt-6 rounded-2xl border border-[var(--line)] bg-white p-4">
-            <div className="text-[11px] font-bold uppercase tracking-[.16em] text-[var(--ink3)]">The Memory Print inside</div>
+            <div className="text-[11px] font-bold uppercase tracking-[.16em] text-[var(--ink3)]">The memory it keeps</div>
             {when && <div className="mt-2 flex items-center gap-1.5 text-[13.5px] text-[var(--ink2)]"><CalendarDays size={14} /> {when}</div>}
             <div className="mt-3 text-[13.5px] leading-relaxed text-[var(--ink2)]">{live.observation}</div>
             {traces.length > 0 && (
