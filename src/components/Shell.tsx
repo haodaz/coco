@@ -7,7 +7,7 @@ import type { Memory } from "@/components/MemoryPanel";
 import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
 import type { Pet, State } from "@/lib/types";
 
-export type Loaded = State & { live: boolean; memory: Record<string, Memory> };
+export type Loaded = State & { live: boolean; signedIn: boolean; memory: Record<string, Memory> };
 export type Ctx = { state: Loaded; pet: Pet; memory: Memory | undefined; refresh: () => Promise<void> };
 
 const TABS = [
@@ -19,7 +19,11 @@ const TABS = [
 // Every page: load the state, run onboarding until there is a named pet, then show the tabs and the page.
 export default function Shell({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const [state, setState] = useState<Loaded | null>(null);
-  const refresh = useCallback(async () => setState(await (await fetch("/api/state")).json()), []);
+  const refresh = useCallback(async () => {
+    const r = await fetch("/api/state");
+    if (r.status === 401) return void location.assign(`/login?next=${encodeURIComponent(location.pathname)}`);
+    setState(await r.json());
+  }, []);
   useEffect(() => {
     refresh();
   }, [refresh]);
@@ -51,6 +55,18 @@ export default function Shell({ children }: { children: (ctx: Ctx) => ReactNode 
               </Link>
             );
           })}
+          {state.signedIn && (
+            <button
+              onClick={async () => {
+                const { browserClient } = await import("@/lib/supabase-browser");
+                await browserClient().auth.signOut();
+                location.assign("/");
+              }}
+              className="ml-auto text-[13px] text-[var(--sub)] hover:text-[var(--ink)]"
+            >
+              Sign out
+            </button>
+          )}
         </div>
       </nav>
       <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">

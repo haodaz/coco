@@ -6,9 +6,10 @@ import { photoBase64, storePhoto } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
 import type { Card, Trace } from "@/lib/types";
+import { withUser } from "@/lib/session";
 
 // One quest photo → stored photo, traces with their source, and a card for the owner.
-export async function POST(req: Request) {
+export const POST = withUser(async (req: Request) => {
   const form = await req.formData();
   const file = form.get("photo");
   const petId = String(form.get("petId") ?? "");
@@ -62,4 +63,4 @@ export async function POST(req: Request) {
   await refreshLikeness(s, pet).catch(() => false);
   await save(s);
   return NextResponse.json({ card, traces });
-}
+});

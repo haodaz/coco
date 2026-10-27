@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { samPhrase } from "@/lib/finish";
 import { depthLayer } from "@/lib/meta";
 import { load, save } from "@/lib/store";
+import { withUser } from "@/lib/session";
 
 // Cut a card's depth layer again (after the cutout rules change, or when a layer came out wrong).
-export async function POST(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;
   const s = await load();
   const card = s.cards.find((c) => c.id === id);
@@ -14,4 +15,4 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
   card.fg = fg ? `/api/art/${fg}?v=${Date.now().toString(36)}` : null;
   await save(s);
   return NextResponse.json({ card });
-}
+});

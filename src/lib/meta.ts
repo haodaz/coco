@@ -2,7 +2,10 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import type { Pattern, QuestSlot } from "./species";
-import { UPLOADS, newId } from "./store";
+import { getMedia, putMedia } from "./media";
+import { currentUserId } from "./session";
+import { newId, UPLOADS } from "./store";
+import { adminClient, HOSTED } from "./supabase";
 import type { Pet, Species, TraceKind } from "./types";
 
 // The only place that talks to the Meta Model API.
@@ -15,8 +18,13 @@ const API_KEY = process.env.MODEL_API_KEY ?? process.env.META_API_KEY; // MODEL_
 const SPARK = "muse-spark-1.3";
 const IMAGE = "muse-image-1.0";
 
-// Every live call is logged with its token usage to data/usage.jsonl, so cost per feature stays visible.
+// Every live call is logged with its token usage (Supabase usage_log, or data/usage.jsonl locally),
+// so cost per feature stays visible and the daily budget can be checked.
 async function logUsage(feature: string, model: string, ms: number, usage: unknown) {
+  if (HOSTED) {
+    await adminClient().from("usage_log").insert({ user_id: currentUserId(), feature, model, ms, usage }).then(() => {}, () => {});
+    return;
+  }
   const line = JSON.stringify({ at: new Date().toISOString(), feature, model, ms, usage }) + "\n";
   await fs.appendFile(path.join(UPLOADS, "..", "usage.jsonl"), line).catch(() => {});
 }
@@ -177,10 +185,7 @@ export async function paintCard(imageB64: string, pet: Pick<Pet, "species" | "br
   const d = j.data?.[0];
   const raw = d?.b64_json ? Buffer.from(d.b64_json, "base64") : d?.url ? Buffer.from(await (await fetch(d.url)).arrayBuffer()) : null;
   if (!raw) throw new Error("Meta API card-art: no image returned");
-  const name = `${newId("art")}.jpg`;
-  await fs.mkdir(UPLOADS, { recursive: true });
-  await fs.writeFile(path.join(UPLOADS, name), await sharp(raw).resize({ width: 1024, height: 1024, fit: "inside" }).jpeg({ quality: 88 }).toBuffer());
-  return name;
+  return putMedia(`${newId("art")}.jpg`, await sharp(raw).resize({ width: 1024, height: 1024, fit: "inside" }).jpeg({ quality: 88 }).toBuffer());
 }
 
 function describePet(pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">) {
@@ -248,11 +253,9 @@ export async function cutout(imageB64: string, phrase: string): Promise<Buffer |
 // so the card can move pet and background apart. Returns the stored file name, or null.
 export async function depthLayer(artFile: string, phrase: string): Promise<string | null> {
   if (!LIVE) return null;
-  const png = await petLayer(await fs.readFile(path.join(UPLOADS, path.basename(artFile))), phrase, ["clothing", "toy"], "depth-layer");
+  const png = await petLayer(await getMedia(artFile), phrase, ["clothing", "toy"], "depth-layer");
   if (!png) return null;
-  const name = artFile.replace(/\.jpg$/, "-fg.png");
-  await fs.writeFile(path.join(UPLOADS, name), png);
-  return name;
+  return putMedia(artFile.replace(/\?.*$/, "").replace(/\.jpg$/, "-fg.png"), png);
 }
 
 // The pet alone on a transparent PNG the same size as the image (at most 1024 px on its long side).
@@ -368,10 +371,7 @@ export async function paintLikeness(pet: Pick<Pet, "species" | "breed" | "sex" |
   await logUsage(refsB64.length ? "likeness-imprints" : "likeness-profile", IMAGE, Date.now() - t0, j.usage);
   const b64 = j.data?.[0]?.b64_json;
   if (!b64) throw new Error("Meta API likeness: no image returned");
-  const name = `${newId("art")}-likeness.jpg`;
-  await fs.mkdir(UPLOADS, { recursive: true });
-  await fs.writeFile(path.join(UPLOADS, name), await sharp(Buffer.from(b64, "base64")).resize(768, 1024, { fit: "cover" }).jpeg({ quality: 88 }).toBuffer());
-  return name;
+  return putMedia(`${newId("art")}-likeness.jpg`, await sharp(Buffer.from(b64, "base64")).resize(768, 1024, { fit: "cover" }).jpeg({ quality: 88 }).toBuffer());
 }
 
 export type Answer = {
@@ -527,8 +527,5 @@ export async function paintSoul(pet: Pick<Pet, "species" | "breed" | "sex" | "ap
     ].join(" "),
     refsB64,
   );
-  const name = `${newId("art")}.jpg`;
-  await fs.mkdir(UPLOADS, { recursive: true });
-  await fs.writeFile(path.join(UPLOADS, name), await sharp(img).resize(768, 1024, { fit: "cover", position: "top" }).jpeg({ quality: 90 }).toBuffer());
-  return name;
+  return putMedia(`${newId("art")}.jpg`, await sharp(img).resize(768, 1024, { fit: "cover", position: "top" }).jpeg({ quality: 90 }).toBuffer());
 }

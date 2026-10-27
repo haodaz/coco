@@ -9,10 +9,11 @@ import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
 import { drawStyle } from "@/lib/styles";
 import type { Card, Trace } from "@/lib/types";
+import { withUser } from "@/lib/session";
 
 // Open today's pack: each photo becomes a card in a style drawn from the blind-box pool;
 // a legend-tier style makes the card a legend.
-export async function POST(req: Request) {
+export const POST = withUser(async (req: Request) => {
   const form = await req.formData();
   const s = await load();
   const pet = s.pets.find((p) => p.id === String(form.get("petId") ?? ""));
@@ -62,4 +63,4 @@ export async function POST(req: Request) {
   await refreshLikeness(s, pet).catch(() => false);
   await save(s);
   return NextResponse.json({ cards: made.map((m) => m.card), levelBefore: before.level, levelAfter: clarityOf(s, pet).level, left: PER_DAY - openedToday(s, pet.id) });
-}
+});

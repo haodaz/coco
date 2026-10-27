@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { ask } from "@/lib/ask";
 import { transcribe } from "@/lib/meta";
 import { load } from "@/lib/store";
+import { withUser } from "@/lib/session";
 
 // Ask the pet: a typed or spoken question (WAV) in, the pet's answer with the imprints it rests on out.
-export async function POST(req: Request) {
+export const POST = withUser(async (req: Request) => {
   const form = await req.formData();
   const audio = form.get("audio");
   const typed = String(form.get("question") ?? "").trim();
@@ -14,4 +15,4 @@ export async function POST(req: Request) {
   const pet = s.pets.find((p) => p.id === String(form.get("petId") ?? ""));
   if (!pet) return NextResponse.json({ error: "pet not found" }, { status: 404 });
   return NextResponse.json({ question, ...(await ask(s, pet, question)) });
-}
+});

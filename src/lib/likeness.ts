@@ -1,10 +1,8 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import sharp from "sharp";
 import { clarityOf, LEVELS } from "./memory";
 import { paintLikeness } from "./meta";
 import { photoBase64, readPhoto } from "./photos";
-import { UPLOADS } from "./store";
+import { getMedia } from "./media";
 import type { Pet, State } from "./types";
 
 // Keeps the AI's picture of the pet in step with what it knows. Repainted whenever clarity changes level:
@@ -35,7 +33,7 @@ export async function refreshLikeness(state: State, pet: Pet): Promise<boolean> 
 // With no painting yet (practice mode) the avatar photo stands in.
 export async function pixelated(state: State, pet: Pet, level: number): Promise<Buffer> {
   const src = pet.likeness
-    ? await fs.readFile(path.join(UPLOADS, path.basename(pet.likeness.file)))
+    ? await getMedia(pet.likeness.file)
     : await readPhoto(state.photos.find((p) => p.id === pet.avatarPhotoId)?.file ?? "");
   const base = sharp(src).rotate().resize(768, 1024, { fit: "cover" });
   const spec = LEVELS[Math.max(0, Math.min(level, LEVELS.length - 1))];

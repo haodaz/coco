@@ -1,10 +1,9 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import sharp from "sharp";
 import { samPhrase } from "./finish";
 import { editImage, petLayer } from "./meta";
 import { photoBase64 } from "./photos";
-import { newId, UPLOADS } from "./store";
+import { getMedia, putMedia } from "./media";
+import { newId } from "./store";
 import type { Pet, State } from "./types";
 
 // The pet as a character: one base design learned from its photos, then a set of moods drawn from that base,
@@ -39,7 +38,7 @@ const FRAME = "The entire body is in the picture, from the tips of the ears to t
 // by the same amount, so a lying pose doesn't float and the frames of one mood stay aligned with each other.
 const GROUND = 0.95;
 export async function ground(files: string[]) {
-  const first = await sharp(path.join(UPLOADS, files[0])).ensureAlpha().extractChannel(3).raw().toBuffer({ resolveWithObject: true });
+  const first = await sharp(await getMedia(files[0])).ensureAlpha().extractChannel(3).raw().toBuffer({ resolveWithObject: true });
   const { width, height } = first.info;
   let bottom = 0;
   for (let y = height - 1; y >= 0 && !bottom; y--) for (let x = 0; x < width; x++) if (first.data[y * width + x] > 24) { bottom = y; break; }
@@ -47,12 +46,11 @@ export async function ground(files: string[]) {
   if (!bottom || Math.abs(shift) < 4) return;
   await Promise.all(
     files.map(async (f) => {
-      const file = path.join(UPLOADS, f);
-      const img = sharp(await fs.readFile(file)).ensureAlpha();
+      const img = sharp(await getMedia(f)).ensureAlpha();
       const moved = shift > 0
         ? img.extend({ top: shift, bottom: 0, left: 0, right: 0, background: { r: 0, g: 0, b: 0, alpha: 0 } }).extract({ left: 0, top: 0, width, height })
         : img.extend({ top: 0, bottom: -shift, left: 0, right: 0, background: { r: 0, g: 0, b: 0, alpha: 0 } }).extract({ left: 0, top: -shift, width, height });
-      await fs.writeFile(file, await moved.png().toBuffer());
+      await putMedia(f, await moved.png().toBuffer());
     }),
   );
 }
@@ -64,9 +62,7 @@ const ORDER: Mood[] = ["idle", "happy", "confused", "thinking", "close", "busy"]
 async function store(img: Buffer, phrase: string, extras: string[]) {
   const fitted = await sharp(img).resize(768, 1024, { fit: "contain", background: "#ffffff" }).jpeg({ quality: 92 }).toBuffer();
   const cut = await petLayer(fitted, phrase, extras, "character-cutout");
-  const name = `${newId("art")}-char.png`;
-  await fs.writeFile(path.join(UPLOADS, name), cut ?? (await sharp(fitted).png().toBuffer()));
-  return name;
+  return putMedia(`${newId("art")}-char.png`, cut ?? (await sharp(fitted).png().toBuffer()));
 }
 
 export async function makeCharacter(state: State, pet: Pet): Promise<NonNullable<Pet["character"]>> {

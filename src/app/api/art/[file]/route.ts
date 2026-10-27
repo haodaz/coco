@@ -1,7 +1,8 @@
 import { readPhoto } from "@/lib/photos";
+import { withUser } from "@/lib/session";
 
 // Generated card art, stored next to the photos.
-export async function GET(_req: Request, ctx: { params: Promise<{ file: string }> }) {
+export const GET = withUser(async (_req: Request, ctx: { params: Promise<{ file: string }> }) => {
   const { file } = await ctx.params;
   if (!/^art_[\w-]+\.(jpg|png)$/.test(file)) return new Response("not found", { status: 404 });
   try {
@@ -9,4 +10,4 @@ export async function GET(_req: Request, ctx: { params: Promise<{ file: string }
   } catch {
     return new Response("not found", { status: 404 });
   }
-}
+});
