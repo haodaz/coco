@@ -4,7 +4,9 @@ import { ImagePlus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { moodCoco, spotCoco } from "@/components/Companion";
 import HoloCard from "@/components/HoloCard";
+import MoveCard from "@/components/MoveCard";
 import PackArt from "@/components/PackArt";
+import { moveOf } from "@/lib/moves";
 import { petArt } from "@/components/PetFace";
 import { PER_DAY } from "@/lib/daily";
 import { finishFor } from "@/lib/finish";
@@ -21,6 +23,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   const [phase, setPhase] = useState<"idle" | "pick" | "sealed" | "reveal">("idle");
   const [chosen, setChosen] = useState<{ file: File; url: string }[]>([]);
   const [fresh, setFresh] = useState<Card[]>([]);
+  const [bonus, setBonus] = useState<string | null>(null); // a move card that dropped out with the memory cards
   const [shown, setShown] = useState(0);
   const [levelUp, setLevelUp] = useState<[number, number] | null>(null);
   // the companion comes to sit beside the pack: busy while it is painted, happy when the cards turn over
@@ -49,11 +52,12 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
     fd.append("petId", pet.id);
     setPhase("sealed");
     for (const f of files.slice(0, left)) await appendPhoto(fd, "photos", f);
-    const r = (await call<{ cards: Card[]; levelBefore: number; levelAfter: number }>("/api/daily", { method: "POST", body: fd })) ?? { cards: null as unknown as Card[], levelBefore: 0, levelAfter: 0 };
+    const r = (await call<{ cards: Card[]; bonus: string | null; levelBefore: number; levelAfter: number }>("/api/daily", { method: "POST", body: fd })) ?? { cards: null as unknown as Card[], bonus: null, levelBefore: 0, levelAfter: 0 };
     if (!r.cards) return setPhase("pick");
     chosen.forEach((c) => URL.revokeObjectURL(c.url));
     setChosen([]);
     setFresh(r.cards);
+    setBonus(r.bonus);
     setShown(0);
     setLevelUp(r.levelAfter > r.levelBefore ? [r.levelBefore, r.levelAfter] : null);
     setPhase("reveal");
@@ -62,7 +66,9 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
     await onChange();
     setPhase("idle");
     setFresh([]);
+    setBonus(null);
   }
+  const total = fresh.length + (bonus ? 1 : 0);
 
   return (
     <section>
@@ -132,11 +138,23 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
                 </div>
               </button>
             ))}
+            {/* the bonus: a move card with a Special back, last to turn over */}
+            {bonus && (
+              <div className="relative">
+                <span className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#f5d27a] px-2.5 py-0.5 text-[10.5px] font-black uppercase tracking-[.14em] text-[#1f1d33] shadow">Bonus</span>
+                <button onClick={() => shown === fresh.length && setShown(shown + 1)} className={`flip block aspect-[63/88] w-full ${shown > fresh.length ? "flipped" : ""} ${shown === fresh.length ? "rounded-2xl ring-4 ring-[#f5d27a]/70 animate-pulse" : ""}`}>
+                  <div className="flip-inner">
+                    <div className="flip-face"><div className="h-full w-full overflow-hidden rounded-2xl" style={{ background: "linear-gradient(165deg, #14112a, #2a1f55 55%, #3d2470)" }}><div className="pack-holo h-full w-full" /></div></div>
+                    <div className="flip-face front"><MoveCard pet={pet} mood={bonus} owned={{ mood: bonus, at: "", from: "pack" }} /></div>
+                  </div>
+                </button>
+              </div>
+            )}
           </div>
           <div className="mt-4 text-center text-[14px] text-[var(--ink2)]">
-            {shown < fresh.length ? "Tap the glowing card to turn it over." : levelUp ? <b className="text-[var(--ink)]">{pet.name}&apos;s picture just got sharper: clarity {levelUp[0]} → {levelUp[1]}.</b> : "All turned over."}
+            {shown < fresh.length ? "Tap the glowing card to turn it over." : bonus && shown === fresh.length ? <b className="text-[var(--ink)]">Something extra fell out of the pack. Tap it.</b> : bonus && shown > fresh.length ? <b className="text-[var(--ink)]">A move card: {moveOf(bonus)?.name}. {pet.name} can do this now.</b> : levelUp ? <b className="text-[var(--ink)]">{pet.name}&apos;s picture just got sharper: clarity {levelUp[0]} → {levelUp[1]}.</b> : "All turned over."}
           </div>
-          {shown >= fresh.length && <button onClick={done} className="mt-3 rounded-xl bg-[var(--ink)] px-4 py-2 text-[14px] font-semibold text-white">Add to my collection</button>}
+          {shown >= total && <button onClick={done} className="mt-3 rounded-xl bg-[var(--ink)] px-4 py-2 text-[14px] font-semibold text-white">Add to my collection</button>}
         </div>
       )}
 

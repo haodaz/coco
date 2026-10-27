@@ -5,6 +5,7 @@ import CardBack from "@/components/CardBack";
 import HoloCard from "@/components/HoloCard";
 import PackArt from "@/components/PackArt";
 import { petArt } from "@/components/PetFace";
+import { BonusMove } from "@/components/UnlockToast";
 import { finishFor } from "@/lib/finish";
 import { appendPhoto } from "@/lib/prepare";
 import { packFor, type QuestSlot } from "@/lib/species";
@@ -39,6 +40,7 @@ export default function StarterPack({ pet, state, onChange, openCard }: { pet: P
 
 function QuestCard({ slot, index, pet, card, onChange, openCard }: { slot: QuestSlot; index: number; pet: Pet; card?: Card; onChange: () => void; openCard: (c: Card) => void }) {
   const [busy, setBusy] = useState(false);
+  const [bonus, setBonus] = useState<string | null>(null); // the move card the last Starter Kit card brings
   const input = useRef<HTMLInputElement>(null);
   async function upload(f: File) {
     setBusy(true);
@@ -46,8 +48,9 @@ function QuestCard({ slot, index, pet, card, onChange, openCard }: { slot: Quest
     await appendPhoto(fd, "photo", f);
     fd.append("petId", pet.id);
     fd.append("slotId", slot.id);
-    await call("/api/quest", { method: "POST", body: fd });
+    const r = await call<{ bonus: string | null }>("/api/quest", { method: "POST", body: fd });
     setBusy(false);
+    if (r?.bonus) setBonus(r.bonus);
     onChange();
   }
   return (
@@ -62,6 +65,7 @@ function QuestCard({ slot, index, pet, card, onChange, openCard }: { slot: Quest
       </button>
       <div className="mt-1.5 px-1 text-[11.5px] leading-snug text-[var(--ink2)]">{busy ? "Reading the photo and painting…" : card ? slot.title : slot.why}</div>
       <input ref={input} type="file" accept="image/*,.heic,.heif" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+      {bonus && <BonusMove pet={pet} mood={bonus} onClose={() => setBonus(null)} />}
     </div>
   );
 }

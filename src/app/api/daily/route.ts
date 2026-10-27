@@ -12,6 +12,7 @@ import type { Card, Trace } from "@/lib/types";
 import { overLimit } from "@/lib/limits";
 import { currentUserId, isAdmin, runAs, withUser } from "@/lib/session";
 import { unlockMoves } from "@/lib/character";
+import { nextPull } from "@/lib/moves";
 
 export const maxDuration = 300; // seconds; model calls and painting take a while
 
@@ -68,9 +69,12 @@ export const POST = withUser(async (req: Request) => {
     s.cards.push(m.card);
   }
   await refreshLikeness(s, pet).catch(() => false);
+  // a move the pet has learned and that is drawn drops out as a bonus card
+  const bonus = nextPull(pet, s);
+  if (bonus) pet.moveCards = [...(pet.moveCards ?? []), { mood: bonus, at: new Date().toISOString(), from: "pack" }];
   await save(s);
   // more memory may have unlocked new moves; draw them after answering (about a minute)
   const owner = currentUserId();
   after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
-  return NextResponse.json({ cards: made.map((m) => m.card), levelBefore: before.level, levelAfter: clarityOf(s, pet).level, left: isAdmin() ? PER_DAY : PER_DAY - openedToday(s, pet.id) });
+  return NextResponse.json({ cards: made.map((m) => m.card), bonus, levelBefore: before.level, levelAfter: clarityOf(s, pet).level, left: isAdmin() ? PER_DAY : PER_DAY - openedToday(s, pet.id) });
 });

@@ -22,24 +22,39 @@ export const MOVES: { mood: MoveMood; name: string; when: string; level: number 
 export const unlockedMoods = (level: number) => MOVES.filter((m) => level >= m.level).map((m) => m.mood);
 export const moveOf = (mood: string) => MOVES.find((m) => m.mood === mood);
 
-// Move cards: each move the pet has learned is also a Special card in the collection. "Being there" is the pet itself,
-// not a card. Finishing the Starter Kit always gives the first one (Happy wiggle); every move learned after that, as
-// the owner teaches the pet with more moments and their own words, gives another.
+// Move cards: each move the pet learns becomes a Special card, but it has to be pulled: it drops as a bonus card
+// out of a pack. Finishing the Starter Kit always drops the first one (Happy wiggle); after that, every move the pet
+// has learned (as the owner teaches it with more moments and their own words) waits for the next pack.
+// "Being there" is the pet itself, not a card.
 export const MOVE_CARDS = MOVES.filter((m) => m.mood !== "idle");
 export const STARTER_MOVE: MoveMood = "happy";
-export type MoveCard = { mood: MoveMood; at: string; from: "starter" | "taught" };
+export type MoveCard = { mood: string; at: string; from: "starter" | "pack" };
 
-export function moveCards(pet: Pet, state: State): MoveCard[] {
+// when the Starter Kit was finished (all its slots filled), or null
+export function starterDoneAt(pet: Pet, state: State): string | null {
   const slots = packFor(pet.species).quest;
   const quest = state.cards.filter((c) => c.petId === pet.id && c.kind === "quest");
-  const complete = slots.every((s) => quest.some((c) => c.slotId === s.id));
-  const owned: MoveCard[] = [];
-  if (complete) owned.push({ mood: STARTER_MOVE, at: quest.reduce((a, c) => (c.createdAt > a ? c.createdAt : a), ""), from: "starter" });
-  const level = clarityOf(state, pet).level;
-  for (const m of MOVE_CARDS) {
-    if (m.mood === STARTER_MOVE || level < m.level) continue;
-    const u = pet.unlocks?.find((x) => x.mood === m.mood);
-    owned.push({ mood: m.mood, at: u?.at ?? pet.character?.at ?? pet.createdAt, from: "taught" });
-  }
-  return owned;
+  if (!slots.every((s) => quest.some((c) => c.slotId === s.id))) return null;
+  return quest.reduce((a, c) => (c.createdAt > a ? c.createdAt : a), "");
 }
+
+export function moveCards(pet: Pet, state: State): MoveCard[] {
+  const own: MoveCard[] = [...(pet.moveCards ?? [])];
+  const done = starterDoneAt(pet, state);
+  if (done && !own.some((m) => m.mood === STARTER_MOVE)) own.unshift({ mood: STARTER_MOVE, at: done, from: "starter" });
+  return own;
+}
+
+// the move a pack would drop as its bonus card: learned (clarity), drawn, and not pulled yet
+export function nextPull(pet: Pet, state: State): string | null {
+  const level = clarityOf(state, pet).level;
+  const have = moveCards(pet, state).map((m) => m.mood);
+  return MOVE_CARDS.find((m) => m.mood !== STARTER_MOVE && level >= m.level && !have.includes(m.mood) && pet.character?.moods[m.mood]?.length)?.mood ?? null;
+}
+
+// moves the pet has learned whose cards are still waiting in a pack
+export const waitingMoves = (pet: Pet, state: State) => {
+  const level = clarityOf(state, pet).level;
+  const have = moveCards(pet, state).map((m) => m.mood);
+  return MOVE_CARDS.filter((m) => m.mood !== STARTER_MOVE && level >= m.level && !have.includes(m.mood));
+};

@@ -1,41 +1,58 @@
 "use client";
 
-import Collection from "@/components/Collection";
 import Legend from "@/components/Legend";
 import MoveCard from "@/components/MoveCard";
-import { MOVE_CARDS, moveCards } from "@/lib/moves";
+import MyCards from "@/components/MyCards";
+import SeriesView from "@/components/SeriesView";
 import Shell, { PageHead, Rule } from "@/components/Shell";
 import StarterPack from "@/components/StarterPack";
+import { MOVE_CARDS, moveCards, starterDoneAt, waitingMoves } from "@/lib/moves";
+import { seriesProgress } from "@/lib/series";
 
-// Cards: every Memory Print the pet's AI keeps, each in its card: the soul portrait, the collection, the starter pack.
+// Cards: the soul portrait; themed series to collect over time (by who the pet is, not by which pack a card came
+// from); move cards, which drop as bonus cards from packs; all the owner's cards, theirs to sort, star and arrange;
+// and the Starter Kit while it is still being filled.
 export default function Cards() {
   return (
     <Shell>
       {({ pet, state, refresh, openCard }) => {
         const mine = state.cards.filter((c) => c.petId === pet.id);
-        const daily = mine.filter((c) => c.kind === "daily").sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        const memories = mine.filter((c) => c.kind !== "legendary");
         const legends = mine.filter((c) => c.rarity === 3).length;
         const moves = moveCards(pet, state);
+        const waiting = waitingMoves(pet, state).map((m) => m.mood);
+        const series = seriesProgress(state, pet);
+        const complete = series.filter((s) => s.filled === s.slots.length).length;
+        const starterDone = !!starterDoneAt(pet, state);
         return (
           <>
             <PageHead
               eyebrow="Cards"
               art="cards"
               title={`${pet.name}'s collection`}
-              sub={`${mine.length} cards · ${legends} legend${legends === 1 ? "" : "s"}`}
-              lead="Each card holds one Memory Print: a moment that really happened. Open any card to see what it keeps, add your words, or talk about it."
+              sub={`${memories.length} memory cards · ${moves.length} move card${moves.length === 1 ? "" : "s"} · ${legends} legend${legends === 1 ? "" : "s"}`}
+              lead="Each card holds one Memory Print: a moment that really happened. Fill the series over time, star your favourites and arrange them your way."
             />
             <Legend pet={pet} state={state} onChange={refresh} openCard={openCard} />
-            <Rule label="Move cards · Special" />
+
+            <Rule label={`Series · ${complete}/${series.length} complete`} />
             <p className="-mt-1 mb-4 text-[14px] text-[var(--ink2)]">
-              Each move {pet.name} learns is a card too. The Starter Kit always gives the first; teach {pet.name} with more moments and your own words for the rest. {moves.length}/{MOVE_CARDS.length} so far.
+              Series follow who {pet.name} is: favourite things, food, games, friends, places, the seasons and the hours of a day. A card can count in more than one. Keep sharing moments and they fill up; the seasons take a whole year.
+            </p>
+            <SeriesView pet={pet} state={state} openCard={openCard} />
+
+            <Rule label={`Move cards · ${moves.length}/${MOVE_CARDS.length}`} />
+            <p className="-mt-1 mb-4 text-[14px] text-[var(--ink2)]">
+              Each move {pet.name} learns is a Special card that drops as a bonus out of a pack. Finishing the Starter Kit always drops the first; teach {pet.name} with more moments and your own words for the rest.
             </p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {MOVE_CARDS.map((m) => <MoveCard key={m.mood} pet={pet} mood={m.mood} owned={moves.find((x) => x.mood === m.mood)} />)}
+              {MOVE_CARDS.map((m) => <MoveCard key={m.mood} pet={pet} mood={m.mood} owned={moves.find((x) => x.mood === m.mood)} waiting={waiting.includes(m.mood)} />)}
             </div>
-            <Rule label="From daily packs" />
-            <Collection pet={pet} cards={daily} openCard={openCard} />
-            <Rule label="Starter Kit" />
+
+            <Rule label="All my cards" />
+            <MyCards pet={pet} cards={memories} openCard={openCard} onChange={refresh} />
+
+            <Rule label={starterDone ? "Starter Kit · complete" : "Getting started · Starter Kit"} />
             <StarterPack pet={pet} state={state} onChange={refresh} openCard={openCard} />
           </>
         );

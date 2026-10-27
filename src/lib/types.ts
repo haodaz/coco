@@ -22,6 +22,7 @@ export type Pet = {
   // the pet as a game character: moods, each a short loop of frames (file names)
   character?: { style: string; moods: Record<string, string[]>; at: string } | null;
   unlocks?: { mood: string; at: string }[]; // moves learned after the first ones, as memories grew
+  moveCards?: { mood: string; at: string; from: "starter" | "pack" }[]; // move cards pulled so far (bonus cards from packs)
   likeness?: { file: string; level: number; from: "profile" | "imprints"; at: string } | null;
   createdAt: string;
 };
@@ -80,6 +81,8 @@ export type Card = {
   observation: string; // what this photo told us
   photoId: string;
   createdAt: string;
+  starred?: boolean; // the owner's favourites
+  order?: number; // the owner's own arrangement of the collection
 };
 
 // A conversation with the pet, kept so the owner can come back to it (the sidebar's "Recent").

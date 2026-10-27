@@ -9,6 +9,7 @@ import type { Card, Trace } from "@/lib/types";
 import { currentUserId, runAs, withUser } from "@/lib/session";
 import { overLimit } from "@/lib/limits";
 import { unlockMoves } from "@/lib/character";
+import { STARTER_MOVE, starterDoneAt } from "@/lib/moves";
 
 export const maxDuration = 300; // seconds; model calls and painting take a while
 
@@ -60,6 +61,7 @@ export const POST = withUser(async (req: Request) => {
     photoId: photo.id,
     createdAt: new Date().toISOString(),
   };
+  const wasDone = !!starterDoneAt(pet, s);
   // a slot holds one card: replacing the photo replaces the card
   s.cards = s.cards.filter((c) => !(c.petId === pet.id && c.slotId === slot.id));
   s.photos.push(photo);
@@ -67,9 +69,12 @@ export const POST = withUser(async (req: Request) => {
   s.cards.push(card);
   // a new imprint may raise clarity; the AI then repaints its picture of the pet
   await refreshLikeness(s, pet).catch(() => false);
+  // the card that finishes the Starter Kit always brings the first move card out with it
+  const bonus = !wasDone && starterDoneAt(pet, s) ? STARTER_MOVE : null;
+  if (bonus) pet.moveCards = [...(pet.moveCards ?? []), { mood: bonus, at: new Date().toISOString(), from: "starter" }];
   await save(s);
   // more memory may have unlocked new moves; draw them after answering (about a minute)
   const owner = currentUserId();
   after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
-  return NextResponse.json({ card, traces });
+  return NextResponse.json({ card, traces, bonus });
 });
