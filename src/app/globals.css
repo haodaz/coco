@@ -167,3 +167,9 @@ body {
   background: radial-gradient(closest-side, rgba(40,50,110,.22), transparent); }
 .char-shadow[data-mood="happy"] { animation: shadow-hop .9s cubic-bezier(.3,.7,.4,1) 2; }
 @keyframes shadow-hop { 45% { transform: scale(.8); opacity: .6; } }
+
+/* landing hero: cards drifting around the pet, and the status line's progress */
+.float-card { animation: float-card 6s ease-in-out infinite; }
+@keyframes float-card { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+.hero-progress { animation: hero-progress 3.4s linear forwards; }
+@keyframes hero-progress { from { width: 0; } to { width: 100%; } }

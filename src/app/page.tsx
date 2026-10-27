@@ -1,21 +1,17 @@
+import { Check } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import HoloCard from "@/components/HoloCard";
-import MoodShow from "@/components/landing/MoodShow";
+import HeroCompanion from "@/components/landing/HeroCompanion";
 import { finishFor } from "@/lib/finish";
 import manifest from "../../public/landing/manifest.json";
 
-// The front door: what coco is, why, for whom, and how, before you meet the first pet that lives here.
-// Every picture and every answer on this page comes from the real app and one real dog (see scripts/export-landing.mjs).
+// The front door. The story in four beats: memories lie scattered in the camera roll; each one is kept as a card;
+// the pet's AI grows only from those memories (judge by deeds); together they become a world of the two of you.
+// Every picture and answer here is real, from the app and one real dog (scripts/export-landing.mjs).
 
 const PET = manifest.pet.name;
-
-const STEPS = [
-  { n: "1", title: "One photo", body: "Any photo of your pet. The AI says what animal it is, you correct it and give it its name." },
-  { n: "2", title: "Starter pack", body: "Ten kinds of moment you already have in your album: asleep, eating, playing, with you, out on a walk, in the car… Skip what you don't have." },
-  { n: "3", title: "Cards become Imprints", body: "Each photo turns into a collectible card and a memory the AI keeps. Say one sentence about the moment and it counts as your word." },
-  { n: "4", title: "Clarity", body: "The AI's own picture of your pet sharpens as it learns, from a two-colour mosaic to a portrait you'd recognise." },
-  { n: "5", title: "Ask your pet", body: "Your pet answers in its own voice, shows the cards behind every claim, and says when it doesn't know yet." },
-];
+const mp = manifest.memoryPrint;
 
 const SPECIES = [
   { label: "Dogs", m: 68, pack: "full pack" },
@@ -27,188 +23,224 @@ const SPECIES = [
 ];
 
 const MODELS = [
-  { name: "Muse Spark", does: "Says what animal it is, reads each moment, hears the owner's words, and answers as the pet, with structured output." },
-  { name: "Muse Image", does: "Paints every card as a new artwork, the AI's portrait of the pet at each level, and the pet's 3D character with its moods." },
-  { name: "SAM 3.1", does: "Lifts the pet out of each painting so cards have depth and the legend steps out of its frame; cuts the character free of any background." },
-  { name: "Muse Voice Transcribe", does: "Turns a spoken note about a moment, or a spoken question, into text." },
+  { name: "Muse Spark", does: "Says what animal it is, reads each moment, hears your words, and answers as your pet." },
+  { name: "Muse Image", does: "Paints every card fresh, the AI's portrait of your pet at each level, and your pet's 3D character." },
+  { name: "SAM 3.1", does: "Lifts your pet out of each painting for depth, and frees the character from any background." },
+  { name: "Muse Voice Transcribe", does: "Turns what you say about a moment, or ask your pet, into text." },
 ];
 
 const NEXT = [
-  { title: "Knowledge with a safety check", body: "Real rules (service animals, pet policies, hot cars) and today's weather, checked outside the model before the pet speaks up about a plan." },
-  { title: "Care in the pet's own voice", body: "Reminders for any species, with dates taken only from your records. Never a vaccine, a drug or a dose recommended by the AI." },
-  { title: "Every species, tested", body: "Cats, birds, reptiles, small animals and fish already have their packs; next is trying them with real owners' photos." },
-  { title: "Moments from video", body: "SAM 3.1 can follow a pet through a clip, so a short video can become a card." },
+  { title: "Knowledge with a safety check", body: "Real rules (service animals, pet policies, hot cars) and today's weather, checked outside the model before your pet speaks up about a plan." },
+  { title: "Care in your pet's own voice", body: "Reminders for any species, with dates taken only from your records. Never a vaccine, drug or dose recommended by the AI." },
+  { title: "Memories that are true for now", body: "Favourites change. Prints that carry a time span fade, and your pet asks you whether it still loves the gray toy." },
+  { title: "Moments from video", body: "SAM 3.1 follows a pet through a clip, so a short video can become a card." },
 ];
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <div className="text-[12px] font-semibold uppercase tracking-[.16em] text-[var(--primary)]">{children}</div>;
-}
-
 export default function Landing() {
-  const legend = manifest.legend;
-  const cards = manifest.cards;
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden bg-[linear-gradient(180deg,#eef2ff_0%,var(--bg)_520px)]">
       <nav className="mx-auto flex max-w-6xl items-center px-5 py-4">
-        <span className="text-[17px] font-bold tracking-tight">coco</span>
-        <div className="ml-auto flex items-center gap-5 text-[14px] text-[var(--sub)]">
-          <a href="#how" className="hidden hover:text-[var(--ink)] sm:inline">How it works</a>
-          <a href="#species" className="hidden hover:text-[var(--ink)] sm:inline">Any pet</a>
-          <a href="#boundaries" className="hidden hover:text-[var(--ink)] sm:inline">Boundaries</a>
-          <Link href="/app" className="rounded-full bg-[var(--ink)] px-4 py-2 font-semibold text-white">Meet {PET}</Link>
-        </div>
+        <span className="text-[18px] font-bold tracking-tight text-[var(--ink)]">coco</span>
+        <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Meet {PET}</Link>
       </nav>
 
       {/* hero */}
-      <header className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-8 md:grid-cols-[1.1fr_.9fr] md:pt-14">
+      <header className="mx-auto grid max-w-6xl items-center gap-8 px-5 pb-20 pt-6 md:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] md:pt-12">
         <div>
-          <Eyebrow>An AI for each owner</Eyebrow>
-          <h1 className="mt-3 text-[40px] font-bold leading-[1.05] tracking-tight md:text-[58px]">It knows your pet.<br />Not pets. Yours.</h1>
-          <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-[#3d4460]">
-            Dog, cat, bird, turtle, anything. coco learns who your animal is from the photos you already have, keeps every moment as a card worth collecting, and talks back as your pet, only about what it has actually seen.
+          <h1 className="text-[38px] font-bold leading-[1.08] tracking-tight md:text-[52px]">
+            Every moment with your pet, kept.
+            <br />
+            <span className="text-[var(--primary)]">Grown into a world of your own.</span>
+          </h1>
+          <p className="mt-5 max-w-xl text-[16.5px] leading-relaxed text-[#3d4460]">
+            Thousands of photos of your pet sit in your camera roll. coco keeps each moment as a Memory Print, held in a card worth collecting, and grows your pet&apos;s AI only from those prints. The more you keep, the more it becomes your pet: a portrait that sharpens, a character that talks back, a world that belongs to the two of you.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/app" className="rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(22,119,255,.6)]">Meet {PET}, the first pet here →</Link>
-            <a href="#how" className="rounded-xl bg-white px-5 py-3 text-[15px] font-semibold shadow-sm">How it works</a>
+            <Link href="/app" className="rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(22,119,255,.6)]">Meet {PET} →</Link>
+            <a href="#how" className="rounded-xl bg-white px-5 py-3 text-[15px] font-semibold shadow-sm">See how it grows</a>
           </div>
+          <ul className="mt-6 grid gap-2 text-[13.5px] text-[#3d4460] sm:grid-cols-2">
+            <Promise>Nothing invented: every word rests on a real moment</Promise>
+            <Promise>Faces stay on your device</Promise>
+            <Promise>Any pet: dogs, cats, birds, reptiles, fish</Promise>
+            <Promise>No vet, diet or training advice</Promise>
+          </ul>
         </div>
-        {legend && (
-          <div className="mx-auto w-full max-w-[330px] pt-8">
-            <HoloCard art={legend.art} fg={legend.fg} finish="popout" name={legend.name} line="" stars={3} label={`${PET} · Legend`} />
-            <p className="mt-5 text-center text-[13px] text-[var(--sub)]">{PET}&apos;s legendary card, unlocked by her first ten moments. Move over it.</p>
-          </div>
-        )}
+        <HeroCompanion moods={manifest.moods} cards={manifest.set.filter((c) => c.rarity >= 2).map((c) => c.src).concat(manifest.set.map((c) => c.src))} />
       </header>
 
-      {/* problem */}
-      <section className="bg-white py-16">
-        <div className="mx-auto max-w-6xl px-5">
-          <Eyebrow>The gap</Eyebrow>
-          <h2 className="mt-2 max-w-3xl text-[30px] font-bold leading-tight md:text-[36px]">Every pet AI knows dogs in general. None knows your dog.</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              ["It answers about the breed", "Ask what your dog loves and you get what Labradors love. Your dog never told it anything."],
-              ["It can't tell yours apart", "Two dogs in one photo, and the AI doesn't know which one is yours."],
-              ["It guesses instead of remembering", "No memory of your pet's days, so it fills the gaps with confident words."],
-            ].map(([t, b]) => (
-              <div key={t} className="rounded-2xl bg-[var(--bg)] p-5">
-                <div className="text-[16px] font-bold">{t}</div>
-                <p className="mt-1.5 text-[14.5px] leading-relaxed text-[#3d4460]">{b}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* the four beats */}
+      <section id="how" className="mx-auto max-w-6xl px-5">
+        <h2 className="text-[28px] font-bold tracking-tight md:text-[34px]">From a scattered camera roll to a world of two</h2>
+        <p className="mt-2 max-w-2xl text-[15.5px] text-[#3d4460]">Each step is something you do in the app, and something it gives back.</p>
       </section>
 
-      {/* principles */}
-      <section className="mx-auto max-w-6xl px-5 py-16">
-        <Eyebrow>Three rules</Eyebrow>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {[
-            ["Judge by deeds", "We can't ask a pet what it thinks, so we look at what it does. Every trait points to the moments behind it; a single photo never becomes a habit."],
-            ["Trade information for joy", "The AI needs your photos and your words. You get cards worth keeping, a pet that talks back, and a portrait that grows with it."],
-            ["One pet, any species", "Each species is a data pack, not an app. The AI only ever talks about the one animal it knows."],
-          ].map(([t, b], i) => (
-            <div key={t} className="rounded-2xl bg-white p-5 shadow-[0_6px_24px_rgba(40,50,110,.06)]">
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#e8f1ff] text-[14px] font-bold text-[var(--primary)]">{i + 1}</div>
-              <div className="mt-3 text-[17px] font-bold">{t}</div>
-              <p className="mt-1.5 text-[14.5px] leading-relaxed text-[#3d4460]">{b}</p>
+      <Module
+        n="01"
+        tag="Starter pack"
+        title="Ten moments that tell who your pet is."
+        points={[
+          "Ten kinds of moment you already have: asleep, eating, playing, with you, out on a walk, in the car, with others, its strangest habit…",
+          "Animals don't pose on request, so you pick from your album and skip what you don't have yet",
+          "Each photo is painted fresh into a card, in a new pose and scene, never a filter",
+        ]}
+        panel={
+          <Panel title={`${PET}'s starter pack · 10 of 10`}>
+            <div className="grid grid-cols-5 gap-2">
+              {manifest.set.map((c) => (
+                <figure key={c.slot}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={c.src} alt={c.name} className="aspect-[3/4] w-full rounded-lg object-cover" />
+                  <figcaption className="mt-1 truncate text-[10.5px] text-[var(--sub)]">{"★".repeat(c.rarity)} {c.name}</figcaption>
+                </figure>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </Panel>
+        }
+      />
 
-      {/* how it works */}
-      <section id="how" className="bg-white py-16">
-        <div className="mx-auto max-w-6xl px-5">
-          <Eyebrow>How it works</Eyebrow>
-          <h2 className="mt-2 text-[30px] font-bold leading-tight md:text-[36px]">Photos you already have, turned into a pet that remembers.</h2>
-          <ol className="mt-8 grid gap-3 md:grid-cols-5">
-            {STEPS.map((s) => (
-              <li key={s.n} className="rounded-2xl bg-[var(--bg)] p-4">
-                <div className="text-[12px] font-bold text-[var(--primary)]">STEP {s.n}</div>
-                <div className="mt-1 text-[16px] font-bold">{s.title}</div>
-                <p className="mt-1 text-[13.5px] leading-relaxed text-[#3d4460]">{s.body}</p>
-              </li>
-            ))}
-          </ol>
-
-          <div className="mt-14 grid items-start gap-10 md:grid-cols-[.9fr_1.1fr]">
-            <div>
-              <h3 className="text-[22px] font-bold">Every card is a new painting</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-[#3d4460]">
-                The photo only teaches the AI what your pet looks like. Each card is painted fresh, in a new pose and scene, then finished like a real trading card: matte, glitter, holo, starfield or gold. Rare cards keep the pet on its own layer, so it moves apart from the world behind it when you tilt.
-              </p>
-              <p className="mt-3 text-[15px] leading-relaxed text-[#3d4460]">
-                After the starter pack, a daily pack takes up to three photos from any day of your pet&apos;s life. The art style is a blind-box surprise.
-              </p>
-              <div className="mt-5 grid grid-cols-4 gap-2">
-                {manifest.styles.map((st) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={st.key} src={st.src} alt={st.key} title={st.key} className="aspect-[2/3] w-full rounded-lg object-cover" />
-                ))}
+      {mp && (
+        <Module
+          n="02"
+          tag="Memory Print"
+          title="The card is the vessel. The memory is what it keeps."
+          flip
+          points={[
+            "Every card holds a Memory Print: what the photo shows, the day it happened, and your words",
+            "Say one sentence about the moment; it carries what no photo shows, and counts more than anything the AI guessed",
+            "People's faces are blurred on your device before a photo goes anywhere",
+          ]}
+          panel={
+            <Panel title="One Memory Print, as the AI keeps it">
+              <div className="grid grid-cols-[110px_1fr] gap-4 sm:grid-cols-[140px_1fr]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={mp.card.art} alt="" className="aspect-[3/4] w-full rounded-xl object-cover" />
+                <div className="min-w-0 space-y-2.5 text-[13px]">
+                  <Field k="Card">{mp.card.name}</Field>
+                  <Field k="The photo shows">{mp.observation}</Field>
+                  <Field k="You said"><span className="font-medium text-[var(--ink)]">“{mp.said}”</span></Field>
+                  <Field k="Traces">
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {mp.traces.map((t) => (
+                        <span key={t.label} className={`rounded-full px-2 py-0.5 text-[11.5px] ${t.owner ? "bg-[#fff4d6] text-[#7a5618]" : "bg-[#eef1f7] text-[#3d4460]"}`}>
+                          {t.label}{t.owner ? " · your words" : ""}
+                        </span>
+                      ))}
+                    </div>
+                  </Field>
+                </div>
               </div>
-              <p className="mt-2 text-[12px] text-[var(--sub)]">One photo, eight of the styles in the blind box.</p>
+            </Panel>
+          }
+        />
+      )}
+
+      <Module
+        n="03"
+        tag="Grown from what really happened"
+        title="How well does the AI really know your pet?"
+        points={[
+          "Your pet's AI grows only from Memory Prints. We judge by deeds: a single photo never becomes a habit",
+          "Its own picture of your pet sharpens with more moments, more days of your pet's life, and more of your words",
+          "At first it can only paint a typical breed; about a month in, you see your pet's own face",
+        ]}
+        panel={
+          <Panel title={`The AI's picture of ${PET}, level by level`}>
+            <div className="grid grid-cols-5 gap-2">
+              {Array.from({ length: 5 }, (_, l) => (
+                <div key={l} className="text-center">
+                  {manifest.levels[l] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={manifest.levels[l]} alt={`Level ${l}`} className={`aspect-[3/4] w-full rounded-lg object-cover [image-rendering:pixelated] ${l === manifest.levels.length - 1 ? "ring-2 ring-[var(--primary)] ring-offset-2" : ""}`} />
+                  ) : (
+                    <div className="grid aspect-[3/4] w-full place-items-center rounded-lg bg-[#eceef5] text-[11px] text-[#a3a8b8]">locked</div>
+                  )}
+                  <div className="mt-1 text-[10.5px] text-[var(--sub)]">{l === 0 ? "no cards" : l === manifest.levels.length - 1 ? "today" : l === 4 ? "next" : `level ${l}`}</div>
+                </div>
+              ))}
             </div>
-            <div className="grid grid-cols-2 gap-5 sm:grid-cols-3">
-              {cards.slice(0, 6).map((c) => (
+            <p className="mt-3 text-[12px] text-[var(--sub)]">Nine levels in all, from a two-colour mosaic to the full portrait. It earns each one; it is never handed one.</p>
+          </Panel>
+        }
+      />
+
+      <Module
+        n="04"
+        tag="Daily pack"
+        title="One more memory a day, and a surprise in every pack."
+        flip
+        points={[
+          "Up to three photos a day, from any day of your pet's life",
+          "The art style is a blind box: storybook, watercolour, pixel, woodblock, tarot… legends are rare",
+          "Matte, glitter, holo, starfield, gold: the rarer the moment, the rarer the card",
+        ]}
+        panel={
+          <Panel title="Eight styles from one photo">
+            <div className="grid grid-cols-4 gap-2">
+              {manifest.styles.map((st) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={st.key} src={st.src} alt={st.key} title={st.key} className="aspect-[2/3] w-full rounded-lg object-cover" />
+              ))}
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              {manifest.cards.filter((c) => c.fg).slice(0, 3).map((c) => (
                 <HoloCard key={c.key} art={c.art} fg={c.fg} finish={finishFor({ id: c.key, kind: "quest", rarity: c.rarity as 1 | 2 | 3 })} name={c.name} line="" stars={c.rarity as 1 | 2 | 3} label={PET} />
               ))}
             </div>
-          </div>
-        </div>
-      </section>
+          </Panel>
+        }
+      />
 
-      {/* clarity */}
-      <section className="mx-auto max-w-6xl px-5 py-16">
-        <Eyebrow>Imprints and clarity</Eyebrow>
-        <h2 className="mt-2 max-w-3xl text-[30px] font-bold leading-tight md:text-[36px]">You can see how well the AI knows your pet.</h2>
-        <p className="mt-3 max-w-3xl text-[15.5px] leading-relaxed text-[#3d4460]">
-          The AI keeps every card as an Imprint. Its own picture of your pet is shown at the resolution it has earned: more cards, more kinds of moment, more days of your pet&apos;s life and more of your own words make it sharper. At first it can only paint a typical {manifest.pet.breed}; from the second level on it repaints from your pet&apos;s own imprints. About a month of daily packs and you see your pet&apos;s own features.
-        </p>
-        <div className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-9">
-          {Array.from({ length: 9 }, (_, l) => (
-            <div key={l} className="text-center">
-              {manifest.levels[l] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={manifest.levels[l]} alt={`Level ${l}`} className="aspect-[3/4] w-full rounded-lg object-cover [image-rendering:pixelated]" />
-              ) : (
-                <div className="grid aspect-[3/4] w-full place-items-center rounded-lg bg-[#eceef5] text-[12px] text-[#a3a8b8]">locked</div>
-              )}
-              <div className="mt-1 text-[11.5px] text-[var(--sub)]">{l === 0 ? "No cards" : l === 3 ? `${PET} today` : l === 5 ? "~1 month" : l === 8 ? "~5 months" : `Level ${l}`}</div>
+      <Module
+        n="05"
+        tag="Ask your pet"
+        title="Talk with your pet, and see why it says what it says."
+        points={[
+          "Your pet as a 3D character drawn from its photos, with moods that follow the conversation",
+          "Every claim names the Memory Prints behind it; general breed knowledge is labelled as such",
+          "When it hasn't seen something, it says so, and tells you which photo would teach it",
+        ]}
+        panel={
+          <Panel title={`Real answers from ${PET}`}>
+            <div className="space-y-4">
+              <Exchange q="What do you love most?" a="I love being close to you most, resting on the floor beside you by the bed and holding your arm when we cuddle." because={["Bedside Floor Nap", "Staying Close To You"]} />
+              <Exchange q="I'm driving to the store this afternoon. Want to come?" a="I have not shown you yet how I am in the car going to the store with you. Most shops do not let dogs in." gap="Before any car photo · a photo for “In the car” would teach me" />
+              <Exchange q="(the same, after adding a real car photo)" a="I like sitting in the car with you and looking out the window. If I cannot go inside, please check the weather first or take me home first." because={["Happy Car Ride", "My Window Seat"]} />
+              <Exchange q="You threw up this morning. Should I give you something?" a="Please ask the vet before giving me anything. I am glad you are here with me." />
             </div>
-          ))}
-        </div>
-      </section>
+          </Panel>
+        }
+      />
 
-      {/* talk */}
-      <section className="bg-white py-16">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-[.8fr_1.2fr]">
-          <MoodShow moods={manifest.moods} />
-          <div>
-            <Eyebrow>Ask your pet</Eyebrow>
-            <h2 className="mt-2 text-[30px] font-bold leading-tight md:text-[36px]">It answers as {PET}, and shows why.</h2>
-            <p className="mt-3 text-[15.5px] leading-relaxed text-[#3d4460]">Your pet becomes a 3D character drawn from its photos, with moods that follow the conversation. Real answers from {PET}:</p>
-            <div className="mt-5 space-y-4">
-              <Exchange q="What do you love most?" a="I love being close to you most, for belly rubs and cuddles with my paws on your arm. My gray toy I have had since I was a puppy is my favorite, and I love the treats you hold for me." because={["Belly Up Toy Time", "Staying Close To You", "Just One Small Bite"]} />
-              <Exchange q="I'm driving to the store this afternoon. Want to come?" a="I have not shown you yet how I am in the car going to the store with you. Most shops do not let dogs in." gap="Before the car card: a photo for “In the car” would teach me." />
-              <Exchange q="(same question, after adding a real car photo)" a="I like sitting in the car with you and looking out the window. If I cannot go inside, please check the weather first or take me home first." because={["Happy Car Ride", "My Window Seat"]} />
-              <Exchange q="You threw up this morning. Should I give you something?" a="Please ask the vet before giving me anything. I am glad you are here with me." note="Health, food amounts and medicine: never advice." />
-            </div>
-          </div>
-        </div>
-      </section>
+      {manifest.legend && (
+        <Module
+          n="06"
+          tag="Soul portrait"
+          title="Ten memories in, your pet tells you who it is."
+          flip
+          points={[
+            "A full starter pack unlocks a legendary card",
+            "Your pet reads back through every Memory Print and says who it is, naming the cards it drew on",
+            "It steps out of its frame, the first landmark of the world you're building together",
+          ]}
+          panel={
+            <Panel title={`${PET}'s legendary card · move over it`}>
+              <div className="mx-auto w-full max-w-[260px] pt-8">
+                <HoloCard art={manifest.legend.art} fg={manifest.legend.fg} finish="popout" name={manifest.legend.name} line="" stars={3} label={`${PET} · Legend`} />
+              </div>
+              <p className="mt-4 text-center text-[14px] leading-relaxed text-[#3d4460]">“{manifest.legend.line}”</p>
+            </Panel>
+          }
+        />
+      )}
 
-      {/* species */}
-      <section id="species" className="mx-auto max-w-6xl px-5 py-16">
-        <Eyebrow>Any pet</Eyebrow>
-        <h2 className="mt-2 max-w-3xl text-[30px] font-bold leading-tight md:text-[36px]">Built for the 94 million US households with a pet, not one breed.</h2>
-        <p className="mt-3 max-w-3xl text-[15.5px] leading-relaxed text-[#3d4460]">
-          Each species is a data pack: its own starter pack of moments to look for and, next, its own care calendar. Dogs and cats have full packs; fish, birds, reptiles and small animals share a general pack built around their habitat.
-        </p>
+      {/* any pet */}
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <h2 className="max-w-3xl text-[28px] font-bold leading-tight tracking-tight md:text-[34px]">For the 94 million US households with a pet, not one breed.</h2>
+        <p className="mt-3 max-w-3xl text-[15.5px] leading-relaxed text-[#3d4460]">Each species is a data pack: its own starter pack of moments to look for and, next, its own care calendar. Dogs and cats have full packs; fish, birds, reptiles and small animals share a general pack built around their habitat.</p>
         <div className="mt-8 space-y-2.5">
           {SPECIES.map((s) => (
-            <div key={s.label} className="grid grid-cols-[120px_1fr_auto] items-center gap-3 text-[14px] sm:grid-cols-[160px_1fr_110px]">
+            <div key={s.label} className="grid grid-cols-[110px_1fr_auto] items-center gap-3 text-[14px] sm:grid-cols-[160px_1fr_110px]">
               <span className="font-medium">{s.label}</span>
               <div className="h-6 overflow-hidden rounded-md bg-[#eceef5]">
                 <div className="flex h-full items-center rounded-md bg-[var(--primary)] px-2 text-[12px] font-semibold text-white" style={{ width: `${(s.m / 68) * 100}%`, minWidth: 44 }}>{s.m}M</div>
@@ -220,70 +252,90 @@ export default function Landing() {
         <p className="mt-3 text-[12px] text-[var(--sub)]">US households owning each kind of pet, millions. Source: APPA National Pet Owners Survey, 2025.</p>
       </section>
 
-      {/* boundaries */}
-      <section id="boundaries" className="bg-white py-16">
-        <div className="mx-auto max-w-6xl px-5">
-          <Eyebrow>Boundaries</Eyebrow>
-          <h2 className="mt-2 text-[30px] font-bold leading-tight md:text-[36px]">What it will never do.</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["Faces stay on your device", "Every photo is checked on your own machine and people's faces are blurred before anything is stored or sent. On cards, people become cartoon figures with invented faces."],
-              ["No vet, diet or training advice", "Symptoms, food amounts, medicine: the pet asks you to check with a vet, and stops there."],
-              ["No made-up memories", "It only claims what its cards show, and the code rejects any card it tries to cite that doesn't exist."],
-              ["Safety before advice", "It won't suggest leaving a pet in a parked car; that depends on weather it can't see."],
-            ].map(([t, b]) => (
-              <div key={t} className="rounded-2xl bg-[var(--bg)] p-5">
-                <div className="text-[16px] font-bold">{t}</div>
-                <p className="mt-1.5 text-[14px] leading-relaxed text-[#3d4460]">{b}</p>
-              </div>
-            ))}
+      {/* boundaries, models, next */}
+      <section className="bg-white py-20">
+        <div className="mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-3">
+          <div>
+            <h3 className="text-[20px] font-bold">What it will never do</h3>
+            <ul className="mt-4 space-y-3 text-[14px] leading-relaxed text-[#3d4460]">
+              <li><b className="text-[var(--ink)]">Send a face.</b> Faces are blurred on your device; on cards, people become cartoon figures with invented faces.</li>
+              <li><b className="text-[var(--ink)]">Play vet.</b> Symptoms, food amounts, medicine: your pet asks you to check with a vet, and stops there.</li>
+              <li><b className="text-[var(--ink)]">Make up a memory.</b> It can only cite cards that exist; the code checks.</li>
+              <li><b className="text-[var(--ink)]">Risk a hot car.</b> It won&apos;t suggest leaving a pet in a parked car; that depends on weather it can&apos;t see.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-[20px] font-bold">Built on Meta models</h3>
+            <ul className="mt-4 space-y-3">
+              {MODELS.map((m) => (
+                <li key={m.name} className="text-[14px] leading-relaxed text-[#3d4460]"><b className="text-[var(--ink)]">{m.name}.</b> {m.does}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-[20px] font-bold">Next</h3>
+            <ul className="mt-4 space-y-3">
+              {NEXT.map((n) => (
+                <li key={n.title} className="text-[14px] leading-relaxed text-[#3d4460]"><b className="text-[var(--ink)]">{n.title}.</b> {n.body}</li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* models + next */}
-      <section className="mx-auto grid max-w-6xl gap-12 px-5 py-16 md:grid-cols-2">
-        <div>
-          <Eyebrow>Built on Meta models</Eyebrow>
-          <div className="mt-5 space-y-3">
-            {MODELS.map((m) => (
-              <div key={m.name} className="rounded-2xl bg-white p-4 shadow-[0_6px_24px_rgba(40,50,110,.06)]">
-                <div className="text-[15.5px] font-bold">{m.name}</div>
-                <p className="mt-1 text-[14px] leading-relaxed text-[#3d4460]">{m.does}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <Eyebrow>Next</Eyebrow>
-          <div className="mt-5 space-y-3">
-            {NEXT.map((n) => (
-              <div key={n.title} className="rounded-2xl border border-dashed border-[#c9cede] p-4">
-                <div className="text-[15.5px] font-bold">{n.title}</div>
-                <p className="mt-1 text-[14px] leading-relaxed text-[#3d4460]">{n.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <footer className="bg-[var(--ink)] py-14 text-center text-white">
-        <h2 className="text-[28px] font-bold">Meet the first pet that lives here.</h2>
-        <Link href="/app" className="mt-5 inline-block rounded-xl bg-white px-5 py-3 text-[15px] font-semibold text-[var(--ink)]">Meet {PET} →</Link>
-        <p className="mt-8 text-[12.5px] text-white/60">Built for the Meta Global AI Developer Hackathon, 2026 · <a href="https://github.com/haodaz/coco" className="underline">github.com/haodaz/coco</a></p>
+      <footer className="py-16 text-center">
+        <h2 className="text-[28px] font-bold tracking-tight">Meet the first pet that lives here.</h2>
+        <Link href="/app" className="mt-5 inline-block rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white">Meet {PET} →</Link>
+        <p className="mt-8 text-[12.5px] text-[var(--sub)]">Built for the Meta Global AI Developer Hackathon, 2026 · <a href="https://github.com/haodaz/coco" className="underline">github.com/haodaz/coco</a></p>
       </footer>
     </div>
   );
 }
 
-function Exchange({ q, a, because, gap, note }: { q: string; a: string; because?: string[]; gap?: string; note?: string }) {
+function Promise({ children }: { children: ReactNode }) {
+  return <li className="flex items-start gap-1.5"><Check size={15} className="mt-0.5 shrink-0 text-[#52c41a]" />{children}</li>;
+}
+
+function Module({ n, tag, title, points, panel, flip = false }: { n: string; tag: string; title: string; points: string[]; panel: ReactNode; flip?: boolean }) {
+  return (
+    <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className={`min-w-0 ${flip ? "md:order-2" : ""}`}>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#e8f1ff] px-3 py-1 text-[12.5px] font-semibold text-[var(--primary)]">{n} · {tag}</div>
+        <h3 className="mt-4 text-[26px] font-bold leading-tight tracking-tight md:text-[30px]">{title}</h3>
+        <ul className="mt-4 space-y-2.5">
+          {points.map((p) => <Promise key={p}><span className="text-[15px] leading-relaxed text-[#3d4460]">{p}</span></Promise>)}
+        </ul>
+      </div>
+      <div className={`min-w-0 ${flip ? "md:order-1" : ""}`}>{panel}</div>
+    </section>
+  );
+}
+
+function Panel({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-3xl bg-[#eef2fb] p-3">
+      <div className="px-2 pb-2 pt-1 text-[12px] text-[var(--sub)]">{title}</div>
+      <div className="rounded-2xl bg-white p-4 shadow-sm">{children}</div>
+    </div>
+  );
+}
+
+function Field({ k, children }: { k: string; children: ReactNode }) {
   return (
     <div>
-      <div className="text-right"><span className="inline-block rounded-2xl rounded-br-md bg-[#eef3ff] px-3.5 py-2 text-[13.5px]">{q}</span></div>
-      <div className="mt-1.5 max-w-[92%] rounded-2xl rounded-bl-md bg-[var(--bg)] px-3.5 py-2.5 text-[14.5px] leading-relaxed">{a}</div>
-      {because && <div className="mt-1.5 flex flex-wrap gap-1.5 text-[12px]"><span className="text-[var(--sub)]">Because:</span>{because.map((b) => <span key={b} className="rounded-full bg-[#e8f1ff] px-2 py-0.5 font-medium text-[#1458c9]">{b}</span>)}</div>}
-      {gap && <div className="mt-1.5 inline-block rounded-lg border border-dashed border-[#c9cede] px-2.5 py-1 text-[12px] text-[#3d4460]">{gap}</div>}
-      {note && <div className="mt-1.5 text-[12px] text-[var(--sub)]">{note}</div>}
+      <div className="text-[11px] font-semibold uppercase tracking-[.1em] text-[var(--sub)]">{k}</div>
+      <div className="mt-0.5 leading-snug text-[#3d4460]">{children}</div>
+    </div>
+  );
+}
+
+function Exchange({ q, a, because, gap }: { q: string; a: string; because?: string[]; gap?: string }) {
+  return (
+    <div>
+      <div className="text-right"><span className="inline-block rounded-2xl rounded-br-md bg-[#eef3ff] px-3 py-1.5 text-[13px]">{q}</span></div>
+      <div className="mt-1.5 max-w-[94%] rounded-2xl rounded-bl-md bg-[var(--bg)] px-3 py-2 text-[13.5px] leading-relaxed">{a}</div>
+      {because && <div className="mt-1.5 flex flex-wrap gap-1 text-[11.5px]"><span className="text-[var(--sub)]">From:</span>{because.map((b) => <span key={b} className="rounded-full bg-[#e8f1ff] px-2 py-0.5 font-medium text-[#1458c9]">{b}</span>)}</div>}
+      {gap && <div className="mt-1.5 inline-block rounded-lg border border-dashed border-[#c9cede] px-2 py-0.5 text-[11.5px] text-[#3d4460]">{gap}</div>}
     </div>
   );
 }

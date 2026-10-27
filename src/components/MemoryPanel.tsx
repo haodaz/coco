@@ -15,7 +15,7 @@ export type Memory = {
 };
 
 // How well the AI knows this pet: its own picture of the pet at the resolution it has earned,
-// what that picture rests on, and which senses its imprints have opened.
+// what that picture rests on, and which senses its Memory Prints have opened.
 export default function MemoryPanel({ pet, memory }: { pet: Pet; memory: Memory }) {
   const pct = memory.next ? Math.round(((memory.points - memory.floor) / (memory.next - memory.floor)) * 100) : 100;
   return (
@@ -32,7 +32,7 @@ export default function MemoryPanel({ pet, memory }: { pet: Pet; memory: Memory 
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--line)]"><div className="h-full rounded-full bg-[var(--primary)] transition-all" style={{ width: `${pct}%` }} /></div>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
-          <span><b>{memory.imprints}</b> <span className="text-[var(--sub)]">imprints</span></span>
+          <span><b>{memory.imprints}</b> <span className="text-[var(--sub)]">Memory Prints</span></span>
           <span><b>{memory.kinds}</b> <span className="text-[var(--sub)]">kinds of moment</span></span>
           <span><b>{memory.days}</b> <span className="text-[var(--sub)]">days of {pet.sex === "male" ? "his" : pet.sex === "female" ? "her" : "their"} life</span></span>
           <span><b>{memory.notes}</b> <span className="text-[var(--sub)]">notes from you</span></span>

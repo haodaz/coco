@@ -5,8 +5,8 @@
   },
   "legend": {
     "key": "legend",
-    "name": "The Gray Toy Keeper",
-    "line": "I am your big black dog who sleeps on the floor by your bed. I roll on my back with my old gray toy when I want a belly rub. I sit close and look up at you.",
+    "name": "The Belly-Up Toy Keeper",
+    "line": "I am a black dog girl. I sleep on the wood floor by your bed. I roll on my back with my toy for belly rubs.",
     "rarity": 3,
     "kind": "legendary",
     "style": "Legend",
@@ -37,7 +37,7 @@
     {
       "key": "card-play",
       "name": "Belly Up Toy Time",
-      "line": "I am on my back because I want a belly rub. I have my favorite gray toy from when I was a puppy.",
+      "line": "I always lie on my back like this when I want a belly rub. My gray toy is my favorite right now.",
       "rarity": 2,
       "kind": "quest",
       "style": "holographic foil",
@@ -161,5 +161,120 @@
       "key": "vinyl-toy",
       "src": "/landing/styles/vinyl-toy.jpg"
     }
-  ]
+  ],
+  "set": [
+    {
+      "slot": "sleep-1",
+      "name": "Bedside Floor Nap",
+      "rarity": 1,
+      "src": "/landing/set/sleep-1.jpg"
+    },
+    {
+      "slot": "sleep-2",
+      "name": "Floor Beside You",
+      "rarity": 1,
+      "src": "/landing/set/sleep-2.jpg"
+    },
+    {
+      "slot": "you-1",
+      "name": "Staying Close By",
+      "rarity": 2,
+      "src": "/landing/set/you-1.jpg"
+    },
+    {
+      "slot": "eat",
+      "name": "Just One Small Bite",
+      "rarity": 2,
+      "src": "/landing/set/eat.jpg"
+    },
+    {
+      "slot": "play",
+      "name": "Belly Up Toy Time",
+      "rarity": 2,
+      "src": "/landing/set/play.jpg"
+    },
+    {
+      "slot": "you-2",
+      "name": "Staying Close To You",
+      "rarity": 1,
+      "src": "/landing/set/you-2.jpg"
+    },
+    {
+      "slot": "walk",
+      "name": "Sunny Park Pause",
+      "rarity": 1,
+      "src": "/landing/set/walk.jpg"
+    },
+    {
+      "slot": "odd",
+      "name": "Borrowed Sweater Days",
+      "rarity": 3,
+      "src": "/landing/set/odd.jpg"
+    },
+    {
+      "slot": "social",
+      "name": "Sunny Bench By Water",
+      "rarity": 2,
+      "src": "/landing/set/social.jpg"
+    },
+    {
+      "slot": "car",
+      "name": "Happy Car Ride",
+      "rarity": 1,
+      "src": "/landing/set/car.jpg"
+    }
+  ],
+  "memoryPrint": {
+    "card": {
+      "key": "memory-print",
+      "name": "Belly Up Toy Time",
+      "line": "I always lie on my back like this when I want a belly rub. My gray toy is my favorite right now.",
+      "rarity": 2,
+      "kind": "quest",
+      "style": "holographic foil",
+      "art": "/landing/memory-print.jpg",
+      "fg": "/landing/memory-print-fg.png"
+    },
+    "observation": "Coco lies on her back on a light wood floor and holds a plush rope toy with her front paws.",
+    "said": "She always lies on her back like this when she wants a belly rub. The gray toy is her favorite right now; she picks a new favorite toy about every three months.",
+    "traces": [
+      {
+        "kind": "place",
+        "label": "wood floor",
+        "detail": null,
+        "owner": false
+      },
+      {
+        "kind": "activity",
+        "label": "lying on back holding a toy",
+        "detail": null,
+        "owner": false
+      },
+      {
+        "kind": "object",
+        "label": "plush rope toy",
+        "detail": "gray character toy with rope handles",
+        "owner": false
+      },
+      {
+        "kind": "activity",
+        "label": "wants a belly rub",
+        "detail": "always when she wants a belly rub",
+        "owner": true
+      },
+      {
+        "kind": "object",
+        "label": "gray toy",
+        "detail": "is her favorite right now",
+        "owner": true
+      },
+      {
+        "kind": "time",
+        "label": "about every three months",
+        "detail": "she picks a new favorite toy about every three months",
+        "owner": true
+      }
+    ],
+    "day": null
+  }
 }

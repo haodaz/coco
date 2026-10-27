@@ -6,7 +6,8 @@ import sharp from "sharp";
 const port = process.argv[2] ?? "3030";
 const s = JSON.parse(fs.readFileSync("data/state.json", "utf8"));
 const pet = s.pets[0];
-const OUT = "public/landing";
+const FINAL = "public/landing";
+const OUT = "public/landing.next"; // built aside, swapped in at the end, so the running site never loses its manifest
 const UP = "data/uploads";
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(`${OUT}/char`, { recursive: true });
@@ -43,6 +44,7 @@ for (const [mood, frames] of Object.entries(pet.character.moods)) {
 const levels = [];
 for (let l = 0; l <= 3; l++) {
   const r = await fetch(`http://localhost:${port}/api/likeness/${pet.id}?level=${l}`);
+  if (!r.ok || r.headers.get("content-type") !== "image/png") throw new Error(`level ${l}: the dev server answered ${r.status} ${r.headers.get("content-type")}; is it running on port ${port}?`);
   fs.writeFileSync(`${OUT}/level-${l}.png`, Buffer.from(await r.arrayBuffer()));
   levels.push(`/landing/level-${l}.png`);
 }
@@ -51,6 +53,25 @@ for (const f of fs.readdirSync("data/styles").filter((f) => f.endsWith(".jpg") &
   await sharp(`data/styles/${f}`).resize(480, 720, { fit: "cover" }).jpeg({ quality: 82 }).toFile(`${OUT}/styles/${f}`);
   styles.push({ key: f.replace(".jpg", ""), src: `/landing/styles/${f}` });
 }
-const manifest = { pet: { name: pet.name, breed: pet.breed }, legend: legend ? await card(legend, "legend") : null, cards, moods, levels, styles };
+// the whole starter set, small
+fs.mkdirSync(`${OUT}/set`, { recursive: true });
+const set = [];
+for (const c of s.cards.filter((x) => x.petId === pet.id && x.kind === "quest")) {
+  await sharp(file(c.art)).resize(240, 320, { fit: "cover" }).jpeg({ quality: 78 }).toFile(`${OUT}/set/${c.slotId}.jpg`);
+  set.push({ slot: c.slotId, name: c.name, rarity: c.rarity, src: `/landing/set/${c.slotId}.jpg` });
+}
+// one Memory Print in full: what the photo showed, what the owner said, the traces, the day
+const mp = s.cards.find((x) => x.petId === pet.id && x.note?.text);
+const mpPhoto = mp && s.photos.find((p) => p.id === mp.photoId);
+const memoryPrint = mp && {
+  card: await card(mp, "memory-print"),
+  observation: mp.observation,
+  said: mp.note.text,
+  traces: s.traces.filter((t) => (t.source.type === "photo" && t.source.photoId === mp.photoId) || (t.source.type === "note" && t.source.noteId === mp.id)).map((t) => ({ kind: t.kind, label: t.label, detail: t.detail, owner: t.source.type === "note" })),
+  day: mpPhoto?.takenAt?.slice(0, 10) ?? null,
+};
+const manifest = { pet: { name: pet.name, breed: pet.breed }, legend: legend ? await card(legend, "legend") : null, cards, moods, levels, styles, set, memoryPrint };
 fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify(manifest, null, 2));
+fs.rmSync(FINAL, { recursive: true, force: true });
+fs.renameSync(OUT, FINAL);
 console.log("cards", cards.length, "moods", Object.keys(moods).length, "levels", levels.length, "styles", styles.length);
