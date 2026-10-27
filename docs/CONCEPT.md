@@ -50,8 +50,8 @@ Muse Spark (reading moments, answering, structured output, actions), Muse Image 
 ## Next
 
 1. The 3-minute demo video.
-2. A real playdate with a second real pet.
-3. The knowledge layer with a weather check before the pet speaks up about a plan.
+2. A real playdate with a second real pet (a friend's pet, filmed for the video).
+3. Place: the co-world learns where the two of you live (home area, live weather and air, local rules, pet services). Every fact has a source and a date, and code runs the checks before the pet speaks up about a plan.
 4. Care reminders in the pet's own voice, dates only from records.
 5. Own email sender for sign-in links before inviting more people.
 6. Moments from short videos (SAM 3.1 video tracking).

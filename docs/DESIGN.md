@@ -241,3 +241,21 @@ Every Memory Print is something that already happened; what grows from them is f
 ## The name: coco, a co-world (Elodie, 2026-10-27)
 
 coco is not one dog's name. co- means together (co-pilot, co-author, coexist), as in *companion*: from Latin com (with) + panis (bread), the one you share your bread with. coco is co + co: the owner and the pet. Each user's space is their **co-world**, made only of the moments they share (Memory Prints). Coco, the demo dog, is simply the first pet with a co-world. In the app, "Home" stays plain; titles say "your co-world with <pet>".
+
+## Place: the co-world knows where the two of you live (Elodie, 2026-10-27)
+
+The knowledge layer is wider than one weather check. To speak up well about a plan, the twin has to know the place around the pet, not only the pet:
+
+| Layer | What it knows | Where it comes from | How long it stays true |
+|---|---|---|---|
+| Home | City or neighbourhood (never a street address), home type, yard or not, building pet rules | The owner, once, editable | Until the owner changes it |
+| Environment | Weather now and today, heat and cold, air quality, daylight | Live data (Open-Meteo, no key) at the time of asking | Minutes to hours |
+| Rules | Leash and licence rules, park and beach rules, transit and airline pet rules, housing rules, hot-car laws | Official pages, quoted with link and the date checked | Re-checked after a set time |
+| Services | Dog parks, groomers, boarding and sitters, pet-friendly cafés and shops, clinics (names and hours only) | Maps data (OpenStreetMap) plus the owner's own favourites | Re-checked after a set time |
+
+Rules for this layer, same spirit as the cards:
+- **Nothing invented here either.** Every fact about a place carries its source and the date it was checked; no source, the twin says it doesn't know and how to find out.
+- **Place facts are true for now.** They expire and get re-checked, like the time-limited Memory Prints.
+- **Checks happen outside the model.** Weather limits and rule lookups are code; the model only words the result.
+- **Coarse location.** Area-level only; the exact address never leaves the owner's device.
+- **Services are listings, not advice.** A clinic's name and hours, never a diagnosis or a recommendation for treatment.
