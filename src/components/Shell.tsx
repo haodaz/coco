@@ -56,7 +56,7 @@ export default function Shell({ children }: { children: (ctx: Ctx) => ReactNode 
             );
           })}
           {state.admin && (
-            <Link href="/app/admin" className={`ml-auto rounded-full px-3 py-1.5 text-[13px] ${path.startsWith("/app/admin") ? "bg-white shadow-sm" : "text-[var(--sub)] hover:text-[var(--ink)]"}`}>Usage</Link>
+            <Link href="/app/admin" className={`ml-auto rounded-full px-3 py-1.5 text-[13px] ${path.startsWith("/app/admin") ? "bg-white shadow-sm" : "text-[var(--sub)] hover:text-[var(--ink)]"}`}>Admin</Link>
           )}
           {state.signedIn && (
             <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AdminAccounts from "@/components/AdminAccounts";
 import Shell from "@/components/Shell";
 
 type Row = { calls: number; tokens: number };
@@ -36,7 +37,6 @@ function UsageView() {
   const pct = Math.min(100, Math.round((u.paintingsToday / u.paintingCap) * 100));
   return (
     <div className="space-y-5">
-      <h1 className="text-[24px] font-bold">Usage</h1>
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <div className="text-[14px]"><b>{u.paintingsToday}</b> of {u.paintingCap} paintings today (site-wide cap) · {u.accounts} accounts</div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--line)]"><div className={`h-full rounded-full ${pct > 80 ? "bg-[#ff4d4f]" : "bg-[var(--primary)]"}`} style={{ width: `${pct}%` }} /></div>
@@ -51,6 +51,20 @@ function UsageView() {
   );
 }
 
+function Admin() {
+  const [tab, setTab] = useState<"usage" | "accounts">("accounts");
+  return (
+    <div>
+      <div className="mb-5 flex gap-1">
+        {(["accounts", "usage"] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium capitalize ${tab === t ? "bg-white shadow-sm" : "text-[var(--sub)]"}`}>{t}</button>
+        ))}
+      </div>
+      {tab === "usage" ? <UsageView /> : <AdminAccounts />}
+    </div>
+  );
+}
+
 export default function AdminPage() {
-  return <Shell>{() => <UsageView />}</Shell>;
+  return <Shell>{() => <Admin />}</Shell>;
 }

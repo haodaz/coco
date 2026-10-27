@@ -80,7 +80,7 @@ function SignIn() {
             {withPassword ? "Email me a link instead" : "Use a password instead"}
           </button>
           {(state === "error" || failed) && <p className="mt-3 text-[13px] text-[#cf1322]">{message || "That link didn't work. Ask for a new one."}</p>}
-          <p className="mt-5 text-[12.5px] leading-relaxed text-[var(--sub)]">Your pet&apos;s photos and memories are private to your account; people&apos;s faces are blurred on your device before anything is uploaded.</p>
+          <p className="mt-5 text-[12.5px] leading-relaxed text-[var(--sub)]">Your pet&apos;s photos and memories belong to your account and are never shown to other users; people&apos;s faces are blurred on your device before anything is uploaded. To keep the site safe, the coco team may review what is shared and take down anything that doesn&apos;t belong.</p>
         </form>
       )}
     </main>
