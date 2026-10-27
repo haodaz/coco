@@ -1,10 +1,11 @@
 "use client";
 
-import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MapPin, Menu, MessageCircle, MessageCirclePlus, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
+import { BookHeart, Gift, HeartHandshake, House, Layers, LogOut, MapPin, Menu, MessageCircle, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import CardModal from "@/components/CardModal";
+import PetFace from "@/components/PetFace";
 import Scene from "@/components/Scene";
 import UnlockToast from "@/components/UnlockToast";
 import type { Memory } from "@/components/MemoryPanel";
@@ -83,7 +84,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const TABS: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean; talk?: boolean }[] = [
     NAV[0],
     { ...NAV[1], label: "Pack" },
-    { href: "/app/chat", label: "Talk", icon: MessageCircle, on: chat, talk: true },
+    { href: "/app/chat", label: pet.name.length <= 6 ? `Talk to ${pet.name}` : "Talk", icon: MessageCircle, on: chat, talk: true },
     NAV[2],
     NAV[3],
   ];
@@ -148,7 +149,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
 
         <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4 pt-3">
           <Link href="/app/chat" className="ws-hide-sm mb-3 flex items-center gap-2.5 rounded-xl border border-[var(--line)] bg-white px-3 py-2.5 text-[14.5px] font-bold hover:border-[var(--gold)]">
-            <MessageCirclePlus size={17} strokeWidth={1.7} className="text-[var(--gold)]" />
+            <PetFace pet={pet} className="h-7 w-7 shrink-0" ring="ring-2 ring-[#e2d8ff]" />
             Talk with {pet.name}
           </Link>
           <nav className="ws-nav grid gap-0.5">
@@ -209,7 +210,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
           {TABS.map((t) => (
             <Link key={t.href} href={t.href} className={`${t.on ? "on" : ""} ${t.talk ? "talk" : ""}`}>
               <span className="ic">
-                <t.icon size={t.talk ? 22 : 20} strokeWidth={t.talk ? 2 : 1.7} />
+                {t.talk ? <PetFace pet={pet} pop className="h-full w-full" /> : <t.icon size={20} strokeWidth={1.7} />}
                 {t.badge && t.href === "/app/pack" && <b>{t.badge}</b>}
               </span>
               {t.label}

@@ -218,8 +218,9 @@ body {
   .ws-tabs a.on { color: var(--gold); }
   .ws-tabs .ic { position: relative; display: grid; place-items: center; height: 26px; }
   .ws-tabs .ic b { position: absolute; top: -4px; right: -10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px; background: var(--gold); color: #fff; font-size: 10px; line-height: 16px; text-align: center; }
-  .ws-tabs a.talk .ic { height: 44px; width: 44px; margin-top: -18px; border-radius: 99px; color: #fff; background: linear-gradient(150deg, #2b3a8f, #5b3fb0 50%, #c2418f); box-shadow: 0 8px 18px -6px rgba(91,63,176,.6), 0 0 0 4px var(--paper); }
-  .ws-tabs a.talk { color: var(--ink2); }
+  /* Talk is the pet itself: its face in a ring of the pack's colours, ears over the top */
+  .ws-tabs a.talk .ic { height: 48px; width: 48px; margin-top: -22px; border-radius: 99px; padding: 2.5px; background: linear-gradient(150deg, #2b3a8f, #5b3fb0 50%, #c2418f); box-shadow: 0 8px 18px -6px rgba(91,63,176,.6), 0 0 0 4px var(--paper); }
+  .ws-tabs a.talk { color: var(--ink2); white-space: nowrap; }
   .ws-head { min-height: 0; margin-bottom: 18px; }
   .ws-head-art { position: relative; top: 0; width: 48%; margin: -10px auto -6px; }
   .ws-head { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
