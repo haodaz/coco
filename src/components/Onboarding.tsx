@@ -5,6 +5,7 @@ import { appendPhoto } from "@/lib/prepare";
 import { PACKS } from "@/lib/species";
 import type { Credential, Pet, Species } from "@/lib/types";
 import { call } from "@/lib/api";
+import { CocoLogo } from "@/components/Brand";
 
 // The way in: first what the owner gets, then a few easy questions, then one photo. Each step can be left.
 // The answers wait in this browser (localStorage) until the photo has been read, then fill in the profile.
@@ -56,7 +57,7 @@ function Steps({ at }: { at: number }) {
 export function OnboardingTop({ at }: { at: number }) {
   return (
     <div className="mx-auto flex max-w-xl items-center gap-4 pb-2">
-      <span className="serif text-[22px] font-bold tracking-tight">coco</span>
+      <CocoLogo size={20} />
       <Steps at={at} />
       <span className="ml-auto"><Leave /></span>
     </div>

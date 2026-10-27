@@ -6,6 +6,7 @@ import Character from "@/components/Character";
 import PlaydateView from "@/components/PlaydateView";
 import type { Playdate } from "@/lib/types";
 import { PageLoading } from "@/components/Loading";
+import { CocoLogo } from "@/components/Brand";
 
 type Info = { pet: { name: string; species: string; breed: string | null }; label: string; moods: Record<string, string[]> };
 
@@ -43,7 +44,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   return (
     <main className="ws block min-h-screen">
       <div className="mx-auto max-w-5xl px-5 py-8">
-        <Link href="/" className="serif text-[22px] font-bold">coco</Link>
+        <Link href="/"><CocoLogo size={20} /></Link>
         {!result ? (
           <div className="mt-8 grid items-center gap-8 md:grid-cols-[minmax(0,300px)_1fr]">
             <div className="relative mx-auto aspect-[3/4] w-full max-w-[260px]">{info.moods.idle?.length ? <Character moods={info.moods} mood={busy ? "thinking" : "happy"} className="h-full w-full" /> : null}</div>

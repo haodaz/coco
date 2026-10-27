@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import CardBack from "@/components/CardBack";
 import HoloCard from "@/components/HoloCard";
+import PackArt from "@/components/PackArt";
+import { petArt } from "@/components/PetFace";
 import { finishFor } from "@/lib/finish";
 import { appendPhoto } from "@/lib/prepare";
 import { packFor, type QuestSlot } from "@/lib/species";
@@ -17,9 +19,10 @@ export default function StarterPack({ pet, state, onChange, openCard }: { pet: P
   return (
     <section>
       <header className="flex flex-wrap items-center gap-4">
-        <div>
-          <h2 className="serif text-[24px] font-bold leading-tight">Starter pack</h2>
-          <p className="text-[14px] text-[var(--ink2)]">Ten moments from photos you already have. Each one turns a card over. Skip any you don&apos;t have yet.</p>
+        <PackArt kind="starter" art={petArt(pet)} className="w-16 shrink-0 -rotate-6" />
+        <div className="min-w-0 flex-1">
+          <h2 className="serif text-[24px] font-bold leading-tight">Starter Kit</h2>
+          <p className="text-[14px] text-[var(--ink2)]">Ten moments from photos you already have. Each one turns a card over; skip any you don&apos;t have yet. Finish it for {pet.name}&apos;s soul portrait and a first move card.</p>
         </div>
         <div className="ml-auto text-right">
           <div className="text-[22px] font-bold">{done}<span className="text-[var(--sub)]">/{slots.length}</span></div>

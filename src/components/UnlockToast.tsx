@@ -1,49 +1,71 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Character, { type Mood } from "@/components/Character";
-import { moveOf } from "@/lib/moves";
-import type { Pet } from "@/lib/types";
+import MoveCard from "@/components/MoveCard";
+import PackArt from "@/components/PackArt";
+import { petArt } from "@/components/PetFace";
+import { moveCards } from "@/lib/moves";
+import type { Pet, State } from "@/lib/types";
 
-// When the pet's memory grows enough to learn a new move, tell the owner once, with the move playing.
-export default function UnlockToast({ pet }: { pet: Pet }) {
-  const key = `coco-seen-moves-${pet.id}`;
-  const [seen, setSeen] = useState<string | null>(null);
+// When the pet learns a move (the Starter Kit's first, or one taught later), a Special pack arrives:
+// tap to tear it open, and the move card comes out playing. Each move card is shown once (remembered in this browser).
+export default function UnlockToast({ pet, state }: { pet: Pet; state: State }) {
+  const key = `coco-move-cards-${pet.id}`;
+  const [seen, setSeen] = useState<string[] | null>(null);
+  const [step, setStep] = useState<"pack" | "tear" | "cards">("pack");
   useEffect(() => {
     try {
-      setSeen(localStorage.getItem(key) ?? "");
+      setSeen(JSON.parse(localStorage.getItem(key) ?? "[]"));
     } catch {
-      setSeen("");
+      setSeen([]);
     }
   }, [key]);
   if (seen === null || !pet.character) return null;
-  const fresh = (pet.unlocks ?? []).filter((u) => u.at > seen && pet.character!.moods[u.mood]?.length);
+  const owned = moveCards(pet, state);
+  const fresh = owned.filter((m) => !seen.includes(m.mood) && pet.character!.moods[m.mood]?.length);
   if (!fresh.length) return null;
   const close = () => {
-    const latest = fresh.reduce((a, u) => (u.at > a ? u.at : a), seen);
+    const all = [...new Set([...seen, ...fresh.map((m) => m.mood)])];
     try {
-      localStorage.setItem(key, latest);
+      localStorage.setItem(key, JSON.stringify(all));
     } catch {}
-    setSeen(latest);
+    setSeen(all);
+    setStep("pack");
+  };
+  const open = () => {
+    setStep("tear");
+    setTimeout(() => setStep("cards"), 650);
   };
   const her = pet.sex === "male" ? "his" : pet.sex === "female" ? "her" : "their";
+  const why = fresh.some((m) => m.from === "starter") ? `You finished the Starter Kit.` : `${pet.name} remembers more of ${her} life with you now.`;
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-[rgba(30,24,16,.45)] p-4 backdrop-blur-sm" onClick={close}>
-      <div className="w-full max-w-md rounded-[26px] bg-[var(--paper)] p-6 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">New move unlocked</div>
-        <div className="mt-3 flex justify-center gap-4">
-          {fresh.map((u) => (
-            <div key={u.mood} className="w-36">
-              <div className="relative mx-auto aspect-[3/4] w-full"><Character moods={pet.character!.moods} mood={u.mood as Mood} version={pet.character!.at} className="h-full w-full" /></div>
-              <div className="serif mt-1 text-[19px] font-bold">{moveOf(u.mood)?.name ?? u.mood}</div>
-              <div className="text-[12.5px] text-[var(--ink2)]">{moveOf(u.mood)?.when}</div>
+    <div className="fixed inset-0 z-[60] grid place-items-center overflow-y-auto bg-[rgba(20,16,40,.55)] p-4 backdrop-blur-sm">
+      <div className={`w-full text-center ${fresh.length > 2 ? "max-w-xl" : "max-w-md"}`}>
+        {step !== "cards" ? (
+          <>
+            <div className="text-[11px] font-bold uppercase tracking-[.22em] text-[#f5d27a]">A Special pack arrived</div>
+            <div className="serif mt-1 text-[24px] font-bold text-white">{why}</div>
+            <button onClick={open} className={`mx-auto mt-5 block w-[min(230px,60vw)] ${step === "tear" ? "pack-tear" : "transition hover:-translate-y-1"}`}>
+              <PackArt kind="special" art={petArt(pet)} title={`${fresh.length} move card${fresh.length > 1 ? "s" : ""}`} sub="Tap to open" badge="Special" />
+            </button>
+            <button onClick={close} className="mt-4 text-[13px] text-white/70">Later</button>
+          </>
+        ) : (
+          <div className="rounded-[26px] bg-[var(--paper)] p-5 shadow-2xl">
+            <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">New move card{fresh.length > 1 ? "s" : ""}</div>
+            <div className={`mx-auto mt-4 grid gap-3 ${fresh.length > 2 ? "grid-cols-3" : fresh.length > 1 ? "grid-cols-2" : "max-w-[200px]"}`}>
+              {fresh.map((m, i) => (
+                <div key={m.mood} className="card-rise" style={{ animationDelay: `${i * 120}ms` }}>
+                  <MoveCard pet={pet} mood={m.mood} owned={m} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <p className="mt-4 text-[14px] leading-relaxed text-[var(--ink2)]">
-          {pet.name} remembers more of {her} life with you now. The more moments you share, the more {pet.name} can do.
-        </p>
-        <button onClick={close} className="mt-4 rounded-xl bg-[var(--ink)] px-5 py-2.5 text-[14px] font-semibold text-white">Lovely</button>
+            <p className="mt-4 text-[14px] leading-relaxed text-[var(--ink2)]">
+              {pet.name} can do this now, and you&apos;ll see it when you talk. The more you teach {pet.name}, the more moves {pet.name} learns.
+            </p>
+            <button onClick={close} className="mt-4 rounded-xl bg-[var(--ink)] px-5 py-2.5 text-[14px] font-semibold text-white">Add to my collection</button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState } from "react";
 import Character, { type Mood } from "@/components/Character";
 import { PageLoading } from "@/components/Loading";
+import { CocoLogo } from "@/components/Brand";
 
 type Info = { pet: { name: string; species: string; breed: string | null; sex: string | null }; label: string; topics: string[]; moods: Record<string, string[]>; cards: { id: string; name: string; line: string; art: string | null }[] };
 type Turn = { question: string; answer: string; mood: Mood; cards: { id: string; name: string; art: string | null }[]; basis: { cardId: string; how: string }[]; gap: { topic: string } | null };
@@ -48,7 +49,7 @@ export default function SitterPage({ params }: { params: Promise<{ token: string
     <main className="ws block">
       <div className="mx-auto flex h-[100dvh] max-w-3xl flex-col px-5">
         <header className="flex items-center gap-3 py-4">
-          <span className="serif text-[22px] font-bold">coco</span>
+          <CocoLogo size={20} />
           <span className="text-[12.5px] text-[var(--ink3)]">{info.label}</span>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto">

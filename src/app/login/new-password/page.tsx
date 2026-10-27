@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { browserClient } from "@/lib/supabase-browser";
+import { CocoLogo } from "@/components/Brand";
 
 // The reset link lands here (through /auth/callback, which signs the owner in): choose a new password.
 export default function NewPassword() {
@@ -32,7 +33,7 @@ export default function NewPassword() {
   return (
     <main className="ws block min-h-screen">
       <div className="mx-auto max-w-[420px] px-5 py-16">
-        <Link href="/" className="serif text-[26px] font-bold tracking-tight">coco</Link>
+        <Link href="/"><CocoLogo size={24} /></Link>
         <h1 className="serif mt-10 text-[34px] font-bold leading-[1.1] tracking-tight">Choose a new password</h1>
         {ready === false ? (
           <p className="mt-5 text-[15px] text-[var(--ink2)]">

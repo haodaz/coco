@@ -4,6 +4,8 @@ import { ImagePlus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { moodCoco, spotCoco } from "@/components/Companion";
 import HoloCard from "@/components/HoloCard";
+import PackArt from "@/components/PackArt";
+import { petArt } from "@/components/PetFace";
 import { PER_DAY } from "@/lib/daily";
 import { finishFor } from "@/lib/finish";
 import { appendPhoto } from "@/lib/prepare";
@@ -65,29 +67,22 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   return (
     <section>
 
-      <div data-coco-spot={phase === "reveal" ? undefined : "pack"} data-coco-side="right" className="mx-auto w-[min(270px,72vw)]">
+      <div data-coco-spot={phase === "reveal" ? undefined : "pack"} data-coco-side="right" className="mx-auto w-[min(250px,64vw)]">
       {phase === "idle" && (
-        <button
-          disabled={left <= 0}
-          onClick={() => setPhase("pick")}
-          className="pack pack-tall flex aspect-[5/7] w-full flex-col items-center justify-between px-5 pb-8 pt-10 text-center text-white transition hover:-translate-y-1 hover:rotate-[-1deg] disabled:opacity-50"
-        >
-          <span className="text-[11px] font-semibold uppercase tracking-[.24em] opacity-80">{pet.name} · booster</span>
-          <span>
-            <span className="serif block text-[64px] font-bold leading-none">{left > 0 ? left : "✓"}</span>
-            <span className="serif mt-2 block text-[22px] font-bold leading-tight">{left > 0 ? `Memory Print${left > 1 ? "s" : ""} waiting` : "Come back tomorrow"}</span>
-          </span>
-          <span className="text-[12.5px] leading-snug opacity-85">{left > 0 ? "Tap to open" : "A new pack arrives at midnight"}</span>
+        <button disabled={left <= 0} onClick={() => setPhase("pick")} className="block w-full transition hover:-translate-y-1 hover:rotate-[-1deg] disabled:opacity-60">
+          <PackArt
+            kind="booster"
+            art={petArt(pet)}
+            title={left > 0 ? `${left} Memory Print${left > 1 ? "s" : ""}` : "Come back tomorrow"}
+            sub={left > 0 ? "Tap to open" : "A new pack arrives at midnight"}
+            badge={left > 0 ? `${left} card${left > 1 ? "s" : ""}` : undefined}
+          />
         </button>
       )}
       <input ref={input} type="file" multiple accept="image/*,.heic,.heif" hidden onChange={(e) => { if (e.target.files?.length) add(e.target.files); e.target.value = ""; }} />
 
       {phase === "sealed" && (
-        <div className="pack pack-tall sealed flex aspect-[5/7] w-full flex-col items-center justify-between px-5 pb-8 pt-10 text-center text-white">
-          <span className="text-[11px] font-semibold uppercase tracking-[.24em] opacity-80">{pet.name} · booster</span>
-          <span className="serif block text-[26px] font-bold leading-tight">Painting your cards…</span>
-          <span className="text-[12px] opacity-80">about half a minute</span>
-        </div>
+        <PackArt kind="booster" art={petArt(pet)} title="Painting your cards…" sub="about half a minute" sealed />
       )}
 
       </div>

@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Scene from "@/components/Scene";
 import { browserClient } from "@/lib/supabase-browser";
+import { CocoLogo } from "@/components/Brand";
 
 // Sign in or create an account with email and password; a sign-in link by email and a password reset as the other ways in.
 type Mode = "signin" | "signup" | "link" | "forgot";
@@ -72,7 +73,7 @@ function SignIn() {
     <main className="ws block min-h-screen">
       <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-6 px-5 py-8 pt-[max(32px,env(safe-area-inset-top))] md:gap-10 md:py-10 md:grid-cols-[minmax(0,420px)_1fr]">
       <div>
-      <Link href="/" className="serif text-[26px] font-bold tracking-tight">coco</Link>
+      <Link href="/"><CocoLogo size={24} /></Link>
       <div className="mt-6 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)] md:mt-10">coco · co-world</div>
       <h1 className="serif mt-2 text-[38px] font-bold leading-[1.08] tracking-tight">Step into your co-world.</h1>
       <p className="serif mt-2 text-[17px] italic text-[var(--ink2)]">{mode === "signup" ? "Make an account, then start with one photo." : "Sign in to open today\u2019s pack."}</p>

@@ -3,7 +3,9 @@
 // Small compositions of cut-out 3D props (public/ws/assets, made by scripts/make-assets.mjs) that float gently,
 // one per page. Pieces are placed in percentages of the scene box so it scales with the page.
 
-type Piece = { src: string; style: React.CSSProperties; delay?: number; float?: boolean };
+import PackArt, { type PackKind } from "@/components/PackArt";
+
+type Piece = { src: string; style: React.CSSProperties; delay?: number; float?: boolean; pack?: PackKind };
 
 const A = (n: string) => `/ws/assets/${n}.png`;
 
@@ -14,7 +16,8 @@ const SCENES: Record<string, Piece[]> = {
   ],
   pack: [
     { src: A("box"), style: { right: "0%", bottom: "0%", width: "44%" }, delay: -2 },
-    { src: A("pack"), style: { left: "4%", top: "2%", width: "62%", rotate: "-14deg" }, delay: -0.5 },
+    { src: "", pack: "booster", style: { left: "14%", top: "0%", width: "34%", rotate: "-10deg" }, delay: -0.5 },
+    { src: "", pack: "starter", style: { left: "2%", top: "8%", width: "30%", rotate: "-22deg", zIndex: -1 }, delay: -1.6 },
   ],
   cards: [
     { src: A("fan"), style: { left: "0%", top: "6%", width: "84%", rotate: "-6deg" }, delay: -1 },
@@ -55,7 +58,12 @@ export default function Scene({ name, portrait, className = "" }: { name: keyof 
           <img src={A("frame")} alt="" className="relative w-full drop-shadow-[0_14px_20px_rgba(60,40,10,.25)]" />
         </div>
       )}
-      {pieces.map((p) => (
+      {pieces.map((p) =>
+        p.pack ? (
+          <div key={p.pack + JSON.stringify(p.style)} className="float-card absolute" style={{ ...p.style, animationDelay: `${p.delay ?? 0}s` }}>
+            <PackArt kind={p.pack} />
+          </div>
+        ) : (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           key={p.src + JSON.stringify(p.style)}
@@ -64,7 +72,8 @@ export default function Scene({ name, portrait, className = "" }: { name: keyof 
           className="float-card absolute drop-shadow-[0_14px_20px_rgba(60,40,10,.22)]"
           style={{ ...p.style, animationDelay: `${p.delay ?? 0}s` }}
         />
-      ))}
+        ),
+      )}
     </div>
   );
 }

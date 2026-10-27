@@ -7,6 +7,8 @@ import { useState } from "react";
 import HomeMobile from "@/components/HomeMobile";
 import HomePet from "@/components/HomePet";
 import HoloCard from "@/components/HoloCard";
+import PackArt from "@/components/PackArt";
+import { petArt } from "@/components/PetFace";
 import Shell, { PageHead, Rule } from "@/components/Shell";
 import { finishFor } from "@/lib/finish";
 import { rhythm } from "@/lib/rhythm";
@@ -79,8 +81,7 @@ export default function Home() {
               {/* today's pack */}
               {r.left ? (
                 <Link href="/app/pack" className="pack group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[22px] p-5 text-white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/ws/assets/pack.png" alt="" className="float-card absolute -right-6 -top-4 w-[70%] rotate-[14deg] drop-shadow-[0_18px_24px_rgba(20,10,60,.45)]" />
+                  <PackArt kind="booster" art={petArt(pet)} className="float-card absolute -right-2 -top-6 w-[46%] rotate-[10deg]" />
                   <div className="relative">
                     <div className="text-[11px] font-bold uppercase tracking-[.2em] opacity-85">Today&apos;s pack</div>
                     <div className="serif mt-1 text-[28px] font-bold leading-tight">{r.left} Memory Print{r.left > 1 ? "s" : ""} waiting</div>

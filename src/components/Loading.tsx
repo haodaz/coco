@@ -1,3 +1,5 @@
+import { CocoLogo } from "@/components/Brand";
+
 // What shows while the co-world loads: three cards from a pack, fanned and taking turns to lift,
 // in the pack's own colours. The workspace version keeps the sidebar's shape so nothing jumps when it arrives.
 
@@ -32,7 +34,7 @@ export function WorkspaceLoading() {
     <div className="ws">
       <aside className="ws-side">
         <div className="flex items-center gap-2 px-5 pb-3 pt-5">
-          <span className="serif text-[24px] font-bold tracking-tight">coco</span>
+          <CocoLogo size={22} />
           <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
         </div>
         <div className="ws-hide-sm mx-3 flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white p-2.5">

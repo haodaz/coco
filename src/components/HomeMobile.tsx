@@ -3,6 +3,8 @@
 import { ArrowRight, ChevronRight, Flame, Layers, Sparkles } from "lucide-react";
 import Link from "next/link";
 import HomePet from "@/components/HomePet";
+import PackArt from "@/components/PackArt";
+import { petArt } from "@/components/PetFace";
 import HoloCard from "@/components/HoloCard";
 import type { Memory } from "@/components/MemoryPanel";
 import { finishFor } from "@/lib/finish";
@@ -72,8 +74,7 @@ export default function HomeMobile({
             <div className="serif mt-0.5 text-[22px] font-bold leading-tight">{r.left} Memory Print{r.left > 1 ? "s" : ""} waiting</div>
             <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#3b2a8f]">Open it <ArrowRight size={14} /></div>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/ws/assets/pack.png" alt="" className="float-card -my-4 -mr-6 w-[38%] shrink-0 rotate-[12deg] drop-shadow-[0_14px_20px_rgba(20,10,60,.45)]" />
+          <PackArt kind="booster" art={petArt(pet)} className="float-card -my-6 -mr-1 w-[26%] shrink-0 rotate-[8deg]" />
         </Link>
       ) : (
         <section className="ws-card mt-5 p-4">

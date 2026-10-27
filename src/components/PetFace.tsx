@@ -2,6 +2,12 @@ import type { Pet } from "@/lib/types";
 
 // The pet's own face in a round frame: the head of its character (idle, first frame) or, before it has one,
 // its first photo. With `pop`, the ears and top of the head break out over the frame's top edge.
+// the pet's character, first idle frame (or null before it has one)
+export const petArt = (pet: Pet) => {
+  const f = pet.character?.moods.idle?.[0];
+  return f ? (f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(pet.character?.at ?? "")}`) : null;
+};
+
 export default function PetFace({ pet, className = "", ring = "", pop = false }: { pet: Pet; className?: string; ring?: string; pop?: boolean }) {
   const face = pet.character?.moods.idle?.[0];
   const src = face ? (face.startsWith("/") ? face : `/api/art/${face}?v=${encodeURIComponent(pet.character?.at ?? "")}`) : `/api/photos/${pet.avatarPhotoId}`;

@@ -13,6 +13,7 @@ import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
 import { rhythm } from "@/lib/rhythm";
 import type { Card, Pet, State } from "@/lib/types";
 import { WorkspaceLoading } from "@/components/Loading";
+import { CocoLogo } from "@/components/Brand";
 
 export type Loaded = State & { live: boolean; signedIn: boolean; admin: boolean; email: string | null; memory: Record<string, Memory> };
 export type Ctx = { state: Loaded; pet: Pet; memory: Memory | undefined; refresh: () => Promise<void>; openCard: (c: Card) => void };
@@ -94,7 +95,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
       <header className="ws-mtop">
         <button onClick={() => setMenu(true)} className="-ml-1.5 rounded-lg p-1.5 text-[var(--ink)]" aria-label="Open menu"><Menu size={21} /></button>
         <Link href="/app" className="flex items-baseline gap-1.5">
-          <span className="serif text-[21px] font-bold tracking-tight">coco</span>
+          <CocoLogo size={19} />
           <span className="text-[9px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
         </Link>
       </header>
@@ -102,7 +103,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
       <aside className={`ws-side ${menu ? "open" : ""}`}>
         <button onClick={() => setMenu(false)} className="ws-only-sm absolute right-3 top-4 rounded-lg p-1.5 text-[var(--ink2)]" aria-label="Close menu"><X size={19} /></button>
         <div className="flex items-center gap-2 px-5 pb-3 pt-5">
-          <Link href="/" className="serif text-[24px] font-bold tracking-tight">coco</Link>
+          <Link href="/"><CocoLogo size={22} /></Link>
           <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
         </div>
 
@@ -206,7 +207,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
         </nav>
       )}
       {card && <CardModal card={card} state={state} pet={pet} onClose={() => setCard(null)} onChanged={refresh} />}
-      <UnlockToast pet={pet} />
+      <UnlockToast pet={pet} state={state} />
     </div>
   );
 }

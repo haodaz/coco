@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Character, { type Mood } from "@/components/Character";
+import PackArt from "@/components/PackArt";
 
 // The hero's right side: the pet as a character, and around it a small scene that changes with each thing coco does,
 // so the banner shows the whole product, not one pose. The pictures are the demo pet's real cards and portraits;
@@ -70,7 +71,7 @@ export default function HeroCompanion({ moods, assets }: { moods: Record<string,
       mood: "happy",
       scene: (
         <>
-          <Prop className="left-[0%] top-[4%] -rotate-[14deg]">{prop("pack", "w-40")}</Prop>
+          <Prop className="left-[2%] top-[4%] -rotate-[12deg]"><PackArt kind="booster" art={moods.idle?.[0]} className="w-28" /></Prop>
           <Prop className="right-[0%] top-[18%]" delay={200}>{prop("box", "w-32")}</Prop>
           <Prop className="right-[14%] top-[0%] rotate-[10deg]" delay={500}>{card(c[7] ?? c[0] ?? "", "w-24")}</Prop>
         </>

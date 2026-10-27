@@ -5,6 +5,7 @@ import HoloCard from "@/components/HoloCard";
 import HeroCompanion from "@/components/landing/HeroCompanion";
 import { finishFor } from "@/lib/finish";
 import manifest from "../../public/landing/manifest.json";
+import { CocoLogo } from "@/components/Brand";
 
 // The front door. The story in four beats: memories lie scattered in the camera roll; each one is kept as a card;
 // the pet's AI grows only from those memories (judge by deeds); together they become a world of the two of you.
@@ -40,7 +41,7 @@ export default function Landing() {
   return (
     <div className="overflow-x-hidden bg-[linear-gradient(180deg,#f1edff_0%,var(--bg)_520px)]">
       <nav className="mx-auto flex max-w-6xl items-center px-5 py-4">
-        <span className="text-[18px] font-bold tracking-tight text-[var(--ink)]">coco</span>
+        <CocoLogo size={20} />
         <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Sign in</Link>
       </nav>
 
