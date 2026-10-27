@@ -84,7 +84,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
         <Link href="/app" className="ws-hide-sm mx-3 flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white p-2.5 pr-3">
           {/* the pet sits in its circle and pokes its head out over the top, breaking out of the paper */}
           <span className="relative mt-3 h-14 w-14 shrink-0">
-            <span className="absolute inset-0 overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_30%,#fff,#efe6d6)]" style={{ boxShadow: "0 0 0 2px #fff, 0 0 0 4px rgba(176,137,78,.45)" }}>
+            <span className="absolute inset-0 overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_30%,#fff,#ebe5fb)]" style={{ boxShadow: "0 0 0 2px #fff, 0 0 0 4px rgba(109,79,209,.45)" }}>
               {face ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={faceSrc} alt="" className="absolute -bottom-[83px] left-1/2 w-[234%] max-w-none -translate-x-1/2" />
@@ -119,7 +119,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
               <Link key={n.href} href={n.href} className={n.on ? "on" : ""}>
                 <span className="ic"><n.icon size={17} strokeWidth={1.7} /></span>
                 {n.label}
-                {n.badge && <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${n.href === "/app/pack" ? "bg-[var(--gold)] text-white" : "bg-[#f1ebe0] text-[var(--ink2)]"}`}>{n.badge}</span>}
+                {n.badge && <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${n.href === "/app/pack" ? "bg-[var(--gold)] text-white" : "bg-[#eeebf8] text-[var(--ink2)]"}`}>{n.badge}</span>}
               </Link>
             ))}
           </nav>
@@ -137,7 +137,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
 
         <div className="ws-hide-sm border-t border-[var(--line)] p-3">
           {r.streak > 0 && (
-            <div className="mb-2 flex items-center gap-2 rounded-xl bg-[#fff6e5] px-3 py-2 text-[12.5px] text-[#8a5a12]">
+            <div className="mb-2 flex items-center gap-2 rounded-xl bg-[#f3eefe] px-3 py-2 text-[12.5px] text-[#5b3fb0]">
               <Sparkles size={14} />
               <span><b>{r.streak}</b> day{r.streak > 1 ? "s" : ""} in a row with a new memory</span>
             </div>

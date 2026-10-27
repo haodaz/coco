@@ -38,7 +38,7 @@ const NEXT = [
 
 export default function Landing() {
   return (
-    <div className="overflow-x-hidden bg-[linear-gradient(180deg,#eef2ff_0%,var(--bg)_520px)]">
+    <div className="overflow-x-hidden bg-[linear-gradient(180deg,#f1edff_0%,var(--bg)_520px)]">
       <nav className="mx-auto flex max-w-6xl items-center px-5 py-4">
         <span className="text-[18px] font-bold tracking-tight text-[var(--ink)]">coco</span>
         <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Meet {PET}</Link>
@@ -122,7 +122,7 @@ export default function Landing() {
                   <Field k="Traces">
                     <div className="mt-1 flex flex-wrap gap-1">
                       {mp.traces.map((t) => (
-                        <span key={t.label} className={`rounded-full px-2 py-0.5 text-[11.5px] ${t.owner ? "bg-[#fff4d6] text-[#7a5618]" : "bg-[#eef1f7] text-[#3d4460]"}`}>
+                        <span key={t.label} className={`rounded-full px-2 py-0.5 text-[11.5px] ${t.owner ? "bg-[#efe9ff] text-[#5b3fb0]" : "bg-[#eef1f7] text-[#3d4460]"}`}>
                           {t.label}{t.owner ? " · your words" : ""}
                         </span>
                       ))}
@@ -349,7 +349,7 @@ function Module({ n, tag, title, points, panel, flip = false }: { n: string; tag
   return (
     <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className={`min-w-0 ${flip ? "md:order-2" : ""}`}>
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#e8f1ff] px-3 py-1 text-[12.5px] font-semibold text-[var(--primary)]">{n} · {tag}</div>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#efe9ff] px-3 py-1 text-[12.5px] font-semibold text-[var(--primary)]">{n} · {tag}</div>
         <h3 className="mt-4 text-[26px] font-bold leading-tight tracking-tight md:text-[30px]">{title}</h3>
         <ul className="mt-4 space-y-2.5">
           {points.map((p) => <Promise key={p}><span className="text-[15px] leading-relaxed text-[#3d4460]">{p}</span></Promise>)}
@@ -362,7 +362,7 @@ function Module({ n, tag, title, points, panel, flip = false }: { n: string; tag
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-3xl bg-[#eef2fb] p-3">
+    <div className="rounded-3xl bg-[#f1eefa] p-3">
       <div className="px-2 pb-2 pt-1 text-[12px] text-[var(--sub)]">{title}</div>
       <div className="rounded-2xl bg-white p-4 shadow-sm">{children}</div>
     </div>
@@ -381,9 +381,9 @@ function Field({ k, children }: { k: string; children: ReactNode }) {
 function Exchange({ q, a, because, gap }: { q: string; a: string; because?: string[]; gap?: string }) {
   return (
     <div>
-      <div className="text-right"><span className="inline-block rounded-2xl rounded-br-md bg-[#eef3ff] px-3 py-1.5 text-[13px]">{q}</span></div>
+      <div className="text-right"><span className="inline-block rounded-2xl rounded-br-md bg-[#efeafc] px-3 py-1.5 text-[13px]">{q}</span></div>
       <div className="mt-1.5 max-w-[94%] rounded-2xl rounded-bl-md bg-[var(--bg)] px-3 py-2 text-[13.5px] leading-relaxed">{a}</div>
-      {because && <div className="mt-1.5 flex flex-wrap gap-1 text-[11.5px]"><span className="text-[var(--sub)]">From:</span>{because.map((b) => <span key={b} className="rounded-full bg-[#e8f1ff] px-2 py-0.5 font-medium text-[#1458c9]">{b}</span>)}</div>}
+      {because && <div className="mt-1.5 flex flex-wrap gap-1 text-[11.5px]"><span className="text-[var(--sub)]">From:</span>{because.map((b) => <span key={b} className="rounded-full bg-[#efe9ff] px-2 py-0.5 font-medium text-[#5b3fb0]">{b}</span>)}</div>}
       {gap && <div className="mt-1.5 inline-block rounded-lg border border-dashed border-[#c9cede] px-2 py-0.5 text-[11.5px] text-[#3d4460]">{gap}</div>}
     </div>
   );

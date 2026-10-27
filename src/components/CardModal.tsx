@@ -46,7 +46,7 @@ export function CardDetail({ card, state, pet, onClose, onChanged, compact = fal
             {traces.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {traces.map((t) => (
-                  <span key={t.id} className={`rounded-full px-2.5 py-1 text-[12px] ${t.source.type === "note" ? "bg-[#fff1d6] text-[#7a5618]" : "bg-[#f1ebe0] text-[var(--ink2)]"}`} title={t.detail ?? undefined}>
+                  <span key={t.id} className={`rounded-full px-2.5 py-1 text-[12px] ${t.source.type === "note" ? "bg-[#efe9ff] text-[#5b3fb0]" : "bg-[#eeebf8] text-[var(--ink2)]"}`} title={t.detail ?? undefined}>
                     {t.label}{t.source.type === "note" ? " · your words" : ""}
                   </span>
                 ))}

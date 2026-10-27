@@ -16,8 +16,8 @@ export default function PlaydateView({ p, petName, myFace, otherFace, cards = []
       <div className="space-y-3">
         {p.transcript.map((t, i) => (
           <div key={i} className={`flex items-end gap-2 ${t.who === "me" ? "" : "flex-row-reverse"}`}>
-            <span className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#efe6d6] ring-2 ring-white">{face(t.who === "me" ? myFace : otherFace)}</span>
-            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[14.5px] leading-relaxed ${t.who === "me" ? "rounded-bl-md border border-[var(--line)] bg-white" : "rounded-br-md bg-[#efe6d6]"}`}>
+            <span className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#ebe5fb] ring-2 ring-white">{face(t.who === "me" ? myFace : otherFace)}</span>
+            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[14.5px] leading-relaxed ${t.who === "me" ? "rounded-bl-md border border-[var(--line)] bg-white" : "rounded-br-md bg-[#ebe5fb]"}`}>
               <div className="text-[11px] font-bold text-[var(--ink3)]">{t.who === "me" ? petName : p.other.name}</div>
               {t.line}
             </div>
@@ -50,7 +50,7 @@ export default function PlaydateView({ p, petName, myFace, otherFace, cards = []
             ))}
           </ul>
         )}
-        {p.report.cautions.length > 0 && <div className="mt-3 rounded-xl bg-[#fff6e5] px-3 py-2 text-[13px] text-[#8a5a12]"><b>Watch for:</b> {p.report.cautions.join(" ")}</div>}
+        {p.report.cautions.length > 0 && <div className="mt-3 rounded-xl bg-[#f3eefe] px-3 py-2 text-[13px] text-[#5b3fb0]"><b>Watch for:</b> {p.report.cautions.join(" ")}</div>}
         {p.report.firstMeeting.length > 0 && (
           <div className="mt-3 text-[12.5px] text-[var(--ink2)]">
             <b>For a first meeting (general advice):</b> {p.report.firstMeeting.join(" ")}

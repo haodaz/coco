@@ -105,7 +105,7 @@ export default function Home() {
                 <div className="mt-3 flex gap-1.5">
                   {week.map((d) => (
                     <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
-                      <span className={`h-6 w-full rounded-md ${d.kept ? "bg-[var(--gold)]" : "bg-[#f1ebe0]"}`} />
+                      <span className={`h-6 w-full rounded-md ${d.kept ? "bg-[var(--gold)]" : "bg-[#eeebf8]"}`} />
                       <span className="text-[10.5px] text-[var(--ink3)]">{d.label}</span>
                     </div>
                   ))}

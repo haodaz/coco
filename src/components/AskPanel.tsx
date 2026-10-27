@@ -130,7 +130,7 @@ export default function AskPanel({
             <div className="mx-auto max-w-3xl space-y-6 pb-24 pt-2">
               {turns.map((t, i) => (
                 <div key={i}>
-                  <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#efe6d6] px-4 py-2 text-left text-[14.5px]">{t.question}</span></div>
+                  <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#ebe5fb] px-4 py-2 text-left text-[14.5px]">{t.question}</span></div>
                   <div className="mt-2 max-w-[92%] rounded-2xl rounded-bl-md border border-[var(--line)] bg-white px-4 py-3 text-[16px] leading-relaxed">
                     {t.answer}
                     {t.basis.length > 0 && (
@@ -153,7 +153,7 @@ export default function AskPanel({
                     {t.general.length > 0 && <div className="mt-2 text-[12px] text-[var(--ink3)]"><b>General knowledge, not a memory:</b> {t.general.join(" ")}</div>}
                     {t.gap && <div className="mt-3 rounded-xl border border-dashed border-[var(--line)] px-3 py-2 text-[12.5px] text-[var(--ink2)]">I haven&apos;t shown you <b>{t.gap.topic}</b> yet. A photo for <b>{t.gap.suggest}</b> would teach me.</div>}
                     {t.action && (
-                      <button onClick={() => setPanel(t.action!)} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#fff1d6] px-3 py-1 text-[12.5px] font-medium text-[#7a5618] hover:bg-[#ffe8b8]">
+                      <button onClick={() => setPanel(t.action!)} className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#efe9ff] px-3 py-1 text-[12.5px] font-medium text-[#5b3fb0] hover:bg-[#e2d8ff]">
                         <PanelRightOpen size={14} /> I opened {LABEL[t.action.type]}
                       </button>
                     )}
@@ -162,7 +162,7 @@ export default function AskPanel({
               ))}
               {pending && (
                 <div>
-                  <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#efe6d6] px-4 py-2 text-[14.5px]">{pending}</span></div>
+                  <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#ebe5fb] px-4 py-2 text-[14.5px]">{pending}</span></div>
                   <div className="mt-2 inline-block animate-pulse rounded-2xl rounded-bl-md border border-[var(--line)] bg-white px-4 py-3 text-[15px] text-[var(--ink3)]">{waiting === "busy" ? "Looking through our moments…" : "Thinking…"}</div>
                 </div>
               )}
@@ -175,7 +175,7 @@ export default function AskPanel({
         <div className="relative mx-auto w-full max-w-3xl pt-2">
           <form data-coco-spot="composer" data-coco-x="0.03" onSubmit={(e) => { e.preventDefault(); ask(q); }} className="relative flex items-center gap-2 rounded-2xl border border-[var(--line)] bg-white px-2 py-1.5 shadow-[0_10px_30px_-12px_rgba(35,32,27,.25)] focus-within:border-[var(--gold)]">
             <input value={q} onFocus={() => spotCoco("composer")} onBlur={() => spotCoco(null)} onChange={(e) => { setQ(e.target.value); spotCoco("composer"); }} placeholder={recording ? "Listening… tap the square to stop" : `Say something to ${pet.name}`} className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] outline-none" />
-            <button type="button" onClick={toggle} disabled={!!pending} title={recording ? "Stop" : "Say it"} className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${recording ? "animate-pulse bg-[#ff4d4f] text-white" : "bg-[#f1ebe0] text-[var(--ink2)]"}`}>
+            <button type="button" onClick={toggle} disabled={!!pending} title={recording ? "Stop" : "Say it"} className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${recording ? "animate-pulse bg-[#ff4d4f] text-white" : "bg-[#eeebf8] text-[var(--ink2)]"}`}>
               {recording ? <Square size={14} /> : <Mic size={16} />}
             </button>
             <button disabled={!!pending || !q.trim()} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-40">Send</button>

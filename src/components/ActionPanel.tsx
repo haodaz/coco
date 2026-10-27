@@ -65,7 +65,7 @@ export default function ActionPanel({ action, pet, state, memory, admin, onClose
         <div className="mt-1 text-center text-[13px] text-[var(--ink2)]">Clarity {memory.level}/{memory.maxLevel} · {memory.next ? `${memory.next - memory.points} more to sharpen` : "fully clear"}</div>
         <div className="mx-auto mt-2 h-1.5 w-56 overflow-hidden rounded-full bg-[var(--line)]"><div className="h-full rounded-full bg-[var(--gold)]" style={{ width: `${memory.next ? Math.round(((memory.points - memory.floor) / (memory.next - memory.floor)) * 100) : 100}%` }} /></div>
         <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-          {memory.senses.map((s) => <span key={s.pattern} className={`rounded-full px-2.5 py-1 text-[12px] ${s.imprints ? "bg-[#fff1d6] text-[#7a5618]" : "bg-[#f1ebe0] text-[var(--ink3)]"}`}>{s.label}{s.imprints ? ` · ${s.imprints}` : ""}</span>)}
+          {memory.senses.map((s) => <span key={s.pattern} className={`rounded-full px-2.5 py-1 text-[12px] ${s.imprints ? "bg-[#efe9ff] text-[#5b3fb0]" : "bg-[#eeebf8] text-[var(--ink3)]"}`}>{s.label}{s.imprints ? ` · ${s.imprints}` : ""}</span>)}
         </div>
       </div>
     );

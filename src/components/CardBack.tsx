@@ -12,7 +12,7 @@ const THEME: Record<Pattern, { bg: string; fg: string; accent: string }> = {
   circles: { bg: "#5b3a7a", fg: "#e6d4ff", accent: "#c79bff" },
   mystery: { bg: "#2a2a33", fg: "#d8d8e8", accent: "#f5c542" },
   leaf: { bg: "#2f5d34", fg: "#d4f0cf", accent: "#9be08f" },
-  sun: { bg: "#8a5a12", fg: "#ffeac2", accent: "#ffc94a" },
+  sun: { bg: "#5b3fb0", fg: "#ffeac2", accent: "#ffc94a" },
   waves: { bg: "#174a63", fg: "#c8ecff", accent: "#5fd0ff" },
   nest: { bg: "#5e4630", fg: "#f2e2cf", accent: "#e0b07a" },
 };

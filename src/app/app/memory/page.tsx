@@ -34,7 +34,7 @@ export default function MemoryPage() {
                       {open && drawn && pet.character ? (
                         <Character moods={pet.character.moods} mood={m.mood as Mood} version={pet.character.at} className="h-full w-full" interactive />
                       ) : (
-                        <div className="grid h-full place-items-center rounded-xl bg-[#efe8da] text-[var(--ink3)]">{open ? <span className="text-[11.5px]">Drawing…</span> : <Lock size={18} />}</div>
+                        <div className="grid h-full place-items-center rounded-xl bg-[#ece9f6] text-[var(--ink3)]">{open ? <span className="text-[11.5px]">Drawing…</span> : <Lock size={18} />}</div>
                       )}
                     </div>
                     <div className="serif mt-2 text-[15px] font-bold leading-tight">{m.name}</div>
@@ -53,7 +53,7 @@ export default function MemoryPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={`/api/likeness/${pet.id}?level=${l}&p=${memory.points}`} alt="" className={`aspect-[3/4] w-full rounded-lg object-cover [image-rendering:pixelated] ${l === memory.level ? "ring-2 ring-[var(--gold)] ring-offset-2" : ""}`} />
                     ) : (
-                      <div className="grid aspect-[3/4] w-full place-items-center rounded-lg bg-[#efe8da] text-[var(--ink3)]"><Lock size={16} /></div>
+                      <div className="grid aspect-[3/4] w-full place-items-center rounded-lg bg-[#ece9f6] text-[var(--ink3)]"><Lock size={16} /></div>
                     )}
                     <div className="mt-1 text-[11.5px] text-[var(--ink3)]">Level {l}</div>
                   </div>

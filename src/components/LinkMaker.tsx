@@ -32,7 +32,7 @@ export default function LinkMaker({ kind, pet, title, blurb, onMade }: { kind: S
         {kinds.map((k) => {
           const on = topics.includes(k);
           return (
-            <button key={k} onClick={() => setTopics(on ? topics.filter((t) => t !== k) : [...topics, k])} className={`rounded-full px-3 py-1 text-[12.5px] ${on ? "bg-[#fff1d6] font-medium text-[#7a5618] ring-1 ring-[var(--gold)]" : "bg-[#f1ebe0] text-[var(--ink3)]"}`}>
+            <button key={k} onClick={() => setTopics(on ? topics.filter((t) => t !== k) : [...topics, k])} className={`rounded-full px-3 py-1 text-[12.5px] ${on ? "bg-[#efe9ff] font-medium text-[#5b3fb0] ring-1 ring-[var(--gold)]" : "bg-[#eeebf8] text-[var(--ink3)]"}`}>
               {SENSES[k]}
             </button>
           );

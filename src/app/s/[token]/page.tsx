@@ -74,7 +74,7 @@ export default function SitterPage({ params }: { params: Promise<{ token: string
             <div className="space-y-6 pb-24 pt-2">
               {turns.map((t, i) => (
                 <div key={i}>
-                  <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#efe6d6] px-4 py-2 text-left text-[14.5px]">{t.question}</span></div>
+                  <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#ebe5fb] px-4 py-2 text-left text-[14.5px]">{t.question}</span></div>
                   <div className="mt-2 max-w-[92%] rounded-2xl rounded-bl-md border border-[var(--line)] bg-white px-4 py-3 text-[16px] leading-relaxed">
                     {t.answer}
                     {t.cards.length > 0 && (
@@ -93,7 +93,7 @@ export default function SitterPage({ params }: { params: Promise<{ token: string
               ))}
               {pending && (
                 <div>
-                  <div className="text-right"><span className="inline-block rounded-2xl rounded-br-md bg-[#efe6d6] px-4 py-2 text-[14.5px]">{pending}</span></div>
+                  <div className="text-right"><span className="inline-block rounded-2xl rounded-br-md bg-[#ebe5fb] px-4 py-2 text-[14.5px]">{pending}</span></div>
                   <div className="mt-2 inline-block animate-pulse rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-[var(--ink3)]">…</div>
                 </div>
               )}

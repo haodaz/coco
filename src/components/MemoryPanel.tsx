@@ -40,7 +40,7 @@ export default function MemoryPanel({ pet, memory }: { pet: Pet; memory: Memory 
         <div className="mt-4 text-[11.5px] font-semibold uppercase tracking-[.14em] text-[var(--ink2)]">What I can talk about</div>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {memory.senses.map((s) => (
-            <span key={s.pattern} className={`rounded-full px-2.5 py-1 text-[12px] ${s.imprints ? "bg-[#fff1d6] font-medium text-[#7a5618]" : "bg-[#f2f3f7] text-[#a3a8b8]"}`}>
+            <span key={s.pattern} className={`rounded-full px-2.5 py-1 text-[12px] ${s.imprints ? "bg-[#efe9ff] font-medium text-[#5b3fb0]" : "bg-[#f2f3f7] text-[#a3a8b8]"}`}>
               {s.label}{s.imprints ? ` · ${s.imprints}` : ""}
             </span>
           ))}

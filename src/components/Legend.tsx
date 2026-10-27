@@ -46,7 +46,7 @@ export default function Legend({ pet, state, onChange, openCard }: { pet: Pet; s
         <h2 className="serif mt-1 text-[30px] font-bold leading-tight">{legend.name}</h2>
         <p className="serif mt-3 text-[18px] italic leading-relaxed">“{legend.line}”</p>
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {legend.observation.split(" · ").map((e) => <span key={e} className="rounded-full bg-[#fff4d6] px-3 py-1 text-[12.5px] font-medium text-[#7a5618]">{e}</span>)}
+          {legend.observation.split(" · ").map((e) => <span key={e} className="rounded-full bg-[#efe9ff] px-3 py-1 text-[12.5px] font-medium text-[#5b3fb0]">{e}</span>)}
         </div>
         {basis.length > 0 && (
           <div className="mt-5">

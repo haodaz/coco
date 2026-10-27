@@ -38,7 +38,7 @@ export default function Scene({ name, portrait, className = "" }: { name: keyof 
   return (
     <div className={`relative aspect-[5/4] w-full ${className}`} aria-hidden>
       {/* a soft warm glow behind the props */}
-      <div className="absolute inset-[6%] rounded-full bg-[radial-gradient(closest-side,rgba(255,214,150,.45),rgba(255,214,150,0))]" />
+      <div className="absolute inset-[6%] rounded-full bg-[radial-gradient(closest-side,rgba(190,165,255,.45),rgba(190,165,255,0))]" />
       {name === "memory" && (
         <div className="float-card absolute left-[4%] top-[2%] w-[48%]" style={{ rotate: "-5deg" }}>
           {/* the pet's own pixel portrait sits inside the golden frame */}
