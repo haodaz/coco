@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import exifr from "exifr";
 import sharp from "sharp";
+import { blurFaces } from "./faces";
 import { UPLOADS, newId } from "./store";
 import type { Photo } from "./types";
 
@@ -25,11 +26,14 @@ export async function storePhoto(file: File, petId: string, slotId: string | nul
     buf = Buffer.from(await convert({ buffer: buf, format: "JPEG", quality: 0.9 }));
   }
   buf = await sharp(buf).rotate().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 86 }).toBuffer();
+  // faces are blurred here, before the photo is stored or sent anywhere; the original is not kept
+  const { jpeg, faces } = await blurFaces(buf);
+  buf = jpeg;
   await fs.mkdir(UPLOADS, { recursive: true });
   const id = newId("ph");
   const name = `${id}.jpg`;
   await fs.writeFile(path.join(UPLOADS, name), buf);
-  return { id, petId, file: name, originalName: file.name, takenAt, uploadedAt: new Date().toISOString(), slotId };
+  return { id, petId, file: name, originalName: file.name, takenAt, uploadedAt: new Date().toISOString(), slotId, facesBlurred: faces };
 }
 
 export async function readPhoto(file: string) {

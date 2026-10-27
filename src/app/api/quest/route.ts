@@ -23,9 +23,11 @@ export async function POST(req: Request) {
 
   const photo = await storePhoto(file, pet.id, slot.id);
   const b64 = await photoBase64(photo.file);
+  const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);
+  const ref = avatar ? await photoBase64(avatar.file) : null; // which animal is the pet, when there are several
   // the reading tells the painter which moment to paint; the painting itself is a new picture in the slot's style
-  const reading = await readQuestPhoto(b64, slot, pet.name || "me", pet.sex);
-  const art = await paintCard(b64, pet, slot.style, reading.observation);
+  const reading = await readQuestPhoto(b64, slot, pet.name || "me", pet.sex, ref);
+  const art = await paintCard(b64, pet, slot.style, reading.observation, ref);
   // rare cards and up get a depth layer; a failed cutout just leaves the card flat
   const fg = art && reading.rarity >= 2 ? await depthLayer(art, samPhrase(pet.species)).catch(() => null) : null;
 

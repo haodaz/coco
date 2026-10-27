@@ -31,6 +31,7 @@ export type Photo = {
   takenAt: string | null; // from the file when we can read it
   uploadedAt: string;
   slotId: string | null; // which quest slot it filled, if any
+  facesBlurred?: number; // people's faces blurred on this machine before anything else saw the photo
 };
 
 // One observation from a photo or a note, always with its source.

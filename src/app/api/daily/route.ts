@@ -23,14 +23,16 @@ export async function POST(req: Request) {
 
   const kinds = [...new Set(packFor(pet.species).quest.map((q) => q.pattern))].map((p) => ({ pattern: p, label: SENSES[p] }));
   const before = clarityOf(s, pet);
+  const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);
+  const ref = avatar ? await photoBase64(avatar.file) : null; // which animal is the pet, when there are several
   const made = await Promise.all(
     files.map(async (file) => {
       const photo = await storePhoto(file, pet.id, null);
       const b64 = await photoBase64(photo.file);
-      const reading = await readMomentPhoto(b64, kinds, pet.name || "me", pet.sex);
+      const reading = await readMomentPhoto(b64, kinds, pet.name || "me", pet.sex, ref);
       const style = drawStyle();
       const rarity = Math.max(reading.rarity, style.tier) as 1 | 2 | 3;
-      const art = await paintCard(b64, pet, style.prompt, reading.observation);
+      const art = await paintCard(b64, pet, style.prompt, reading.observation, ref);
       const fg = art && rarity >= 2 ? await depthLayer(art, samPhrase(pet.species)).catch(() => null) : null;
       const traces: Trace[] = reading.traces.map((t) => ({ id: newId("tr"), petId: pet.id, ...t, source: { type: "photo", photoId: photo.id }, at: photo.takenAt }));
       const card: Card = {

@@ -32,14 +32,14 @@ async function post(route: string, body: unknown) {
 }
 
 // Muse Spark with an optional image and a JSON schema; returns the parsed object.
-async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string | null, name: string, schema: object, budget = 6000): Promise<T> {
+async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string | string[] | null, name: string, schema: object, budget = 6000): Promise<T> {
   const t0 = Date.now();
   const j = await post("/chat/completions", {
     model: SPARK,
     max_tokens: budget, // reasoning tokens count toward this, so leave room
     messages: [
       { role: "system", content: system },
-      { role: "user", content: imageB64 ? [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageB64}` } }] : prompt },
+      { role: "user", content: imageB64 ? [{ type: "text", text: prompt }, ...[imageB64].flat().map((b) => ({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${b}` } }))] : prompt },
     ],
     response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
   });
@@ -50,6 +50,11 @@ async function sparkJson<T>(feature: string, system: string, prompt: string, ima
   if (!content) throw new Error(`Meta API ${feature}: empty answer (finish_reason ${j.choices?.[0]?.finish_reason})`);
   return JSON.parse(content) as T;
 }
+
+// When a photo may hold more than one animal, a reference photo of the pet goes along so the model knows which one it is.
+const refLine = (petName: string) =>
+  `If a second image is given, it is a reference photo of ${petName}. Other animals may be in the photo; ${petName} is the one that matches the reference, the others are companions with their own looks.`;
+const withRef = async (imageB64: string, refB64?: string | null) => (refB64 ? [await forModel(imageB64), await forModel(refB64)] : await forModel(imageB64));
 
 // Smaller copy for the model: enough detail, fewer image tokens.
 async function forModel(imageB64: string) {
@@ -108,20 +113,21 @@ export async function identify(imageB64: string): Promise<Identification> {
 }
 
 // One quest photo → traces + a card. The pet's line may only describe what the photo shows.
-export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName: string, sex: Pet["sex"] = null): Promise<PhotoReading> {
+export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName: string, sex: Pet["sex"] = null, refB64: string | null = null): Promise<PhotoReading> {
   const pronoun = sex === "female" ? "she/her" : sex === "male" ? "he/him" : "they/them";
   if (!LIVE) return mockReading(slot, petName);
   const r = await sparkJson<PhotoReading>(
     "quest-photo",
     [
       `You read one photo of a pet called ${petName} for a collectible card. The card slot is "${slot.title}": ${slot.why}`,
+      refLine(petName),
       "Traces: only things visible in the photo (place, activity, companion, object, time of day). Never guess what is not shown. Do not describe people's faces or identities; a person is just 'owner' or 'a person'.",
       `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only; one photo cannot show a habit, so never say always, usually or every time. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
       "rarity: 1 ordinary moment, 2 a moment with real character, 3 something truly unusual. Most photos are 1.",
       "Never mention health, weight, food amounts, medicine or training advice. No exclamation marks.",
     ].join("\n"),
     "Read this photo.",
-    await forModel(imageB64),
+    await withRef(imageB64, refB64),
     "photo_reading",
     {
       type: "object",
@@ -151,7 +157,7 @@ export async function readQuestPhoto(imageB64: string, slot: QuestSlot, petName:
 // Card art: Muse Image paints a new picture of the pet. The photo only teaches it what the pet looks like;
 // pose, scene and framing are new, so the card is an artwork, not a filtered photo.
 // Returns the stored file name, or null in practice mode (the card then shows the photo itself).
-export async function paintCard(imageB64: string, pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">, style: string, scene: string): Promise<string | null> {
+export async function paintCard(imageB64: string, pet: Pick<Pet, "species" | "breed" | "sex" | "appearance">, style: string, scene: string, refB64: string | null = null): Promise<string | null> {
   if (!LIVE) return null;
   const t0 = Date.now();
   const j = await post("/images/edits", {
@@ -160,10 +166,11 @@ export async function paintCard(imageB64: string, pet: Pick<Pet, "species" | "br
     prompt: [
       `Create a completely new artwork of this specific animal: ${describePet(pet)}.`,
       "Use the photo only to learn what it looks like; do not copy the photo's pose, background or framing.",
+      refB64 ? "The second image is a reference photo of this animal, to tell it apart from any other animals in the scene; other animals keep their own looks." : "",
       `Scene: ${scene}. Style: ${style}.`,
-      "Keep it recognisable: same coat, colours, markings, eye colour, ear shape and face. No people, no text, no border.",
+      "Keep it recognisable: same coat, colours, markings, eye colour, ear shape and face. If the moment includes people, draw each one as a simple stylised cartoon figure with a plain friendly cartoon face of your own invention. Their faces in the photo are blurred on purpose for privacy: never draw the blur, never try to recover a real face. Otherwise no people. No text, no border.",
     ].join(" "),
-    images: [{ image_url: `data:image/jpeg;base64,${await forModel(imageB64)}` }],
+    images: [await forModel(imageB64), ...(refB64 ? [await forModel(refB64)] : [])].map((b) => ({ image_url: `data:image/jpeg;base64,${b}` })),
   });
   await logUsage("card-art", IMAGE, Date.now() - t0, j.usage);
   const d = j.data?.[0];
@@ -414,7 +421,7 @@ export async function askPet(question: string, profile: object, imprints: object
 export type MomentReading = PhotoReading & { pattern: Pattern };
 
 // A photo from a daily pack: no slot, so the model also says which kind of moment it is.
-export async function readMomentPhoto(imageB64: string, kinds: { pattern: Pattern; label: string }[], petName: string, sex: Pet["sex"] = null): Promise<MomentReading> {
+export async function readMomentPhoto(imageB64: string, kinds: { pattern: Pattern; label: string }[], petName: string, sex: Pet["sex"] = null, refB64: string | null = null): Promise<MomentReading> {
   if (!LIVE) {
     const pattern = kinds[Math.floor(Math.random() * kinds.length)].pattern;
     return { ...mockReading({ id: "daily", title: "", why: "", pattern, style: "", minRarity: 1 }, petName), pattern };
@@ -424,6 +431,7 @@ export async function readMomentPhoto(imageB64: string, kinds: { pattern: Patter
     "daily-photo",
     [
       `You read one photo of a pet called ${petName} for a collectible card.`,
+      refLine(petName),
       `pattern: which kind of moment this is, one of: ${kinds.map((k) => `${k.pattern} (${k.label})`).join(", ")}.`,
       "Traces: only things visible in the photo (place, activity, companion, object, time of day). Never guess what is not shown. Do not describe people's faces or identities; a person is just 'owner' or 'a person'.",
       `cardName: a short, warm title (2-5 words). line: one or two short sentences in ${petName}'s own first-person voice, plain everyday words, about this moment only; one photo cannot show a habit, so never say always, usually or every time. observation: one plain sentence in third person of what the photo shows, calling the pet ${petName} (pronouns ${pronoun}), never 'the dog' or 'it'.`,
@@ -431,7 +439,7 @@ export async function readMomentPhoto(imageB64: string, kinds: { pattern: Patter
       "Never mention health, weight, food amounts, medicine or training advice. No exclamation marks.",
     ].join("\n"),
     "Read this photo.",
-    await forModel(imageB64),
+    await withRef(imageB64, refB64),
     "moment_reading",
     {
       type: "object",
