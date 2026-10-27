@@ -44,7 +44,7 @@ export const POST = withUser(async (req: Request) => {
       const art = await paint().catch(() => paint()).catch(() => undefined);
       if (art === undefined) return false;
       const layers = art && rarity >= 2 ? await depthLayers(art, samPhrase(pet.species)) : { fg: null, plate: null };
-      Object.assign(card, { style: style.label, rarity, art: art ? `/api/art/${art}` : null, fg: layers.fg ? `/api/art/${layers.fg}` : null, plate: layers.plate ? `/api/art/${layers.plate}` : null, sealed: false, openedAt: now });
+      Object.assign(card, { style: style.label, rarity, art: art ? `/api/art/${art}` : null, fg: layers.fg ? `/api/art/${layers.fg}` : null, plate: layers.plate ? `/api/art/${layers.plate}` : null, layersV: layers.plate ? 2 : undefined, sealed: false, openedAt: now });
       return true;
     }),
   );

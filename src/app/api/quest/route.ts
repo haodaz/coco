@@ -59,6 +59,7 @@ export const POST = withUser(async (req: Request) => {
     art: art ? `/api/art/${art}` : null,
     fg: layers.fg ? `/api/art/${layers.fg}` : null,
     plate: layers.plate ? `/api/art/${layers.plate}` : null,
+    layersV: layers.plate ? 2 : undefined,
     line: reading.line,
     observation: reading.observation,
     scene: reading.scene,

@@ -18,7 +18,7 @@ export default function PackPage() {
           <>
             <PageHead
               eyebrow={t("Today")}
-              art="pack"
+              art="home"
               title={left ? t(left > 1 ? "{n} tasks for today" : "{n} task for today", { n: left }) : t("Today's tasks are done.")}
               sub={`${points} M pt`}
               lead={`${t("Every memory you share teaches {name} right away and earns M pt; M pt open packs that paint your memories into M Prints.", { name: pet.name })} ${r.streak ? t(r.streak > 1 ? "{n} days in a row so far." : "{n} day in a row so far.", { n: r.streak }) : ""}`}

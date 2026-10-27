@@ -48,6 +48,7 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: 
     art: `/api/art/${art}`,
     fg: fg ? `/api/art/${fg}` : null,
     plate: plate ? `/api/art/${plate}` : null,
+    layersV: plate ? 2 : undefined,
     line: soul.line,
     observation: soul.essence.join(" · "),
     basis,

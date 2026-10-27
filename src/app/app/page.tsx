@@ -9,7 +9,7 @@ import HomePet from "@/components/HomePet";
 import HoloCard from "@/components/HoloCard";
 import PackArt from "@/components/PackArt";
 import { petArt } from "@/components/PetFace";
-import Shell, { PageHead, Rule } from "@/components/Shell";
+import Shell, { Rule } from "@/components/Shell";
 import { finishFor } from "@/lib/finish";
 import { balance, PACK_COST, sealedPrints, tasksFor } from "@/lib/points";
 import { rhythm } from "@/lib/rhythm";
@@ -49,13 +49,16 @@ export default function Home() {
               <HomeMobile pet={pet} greeting={tr(greeting())} line={line} r={r} today={t} memory={memory} cardCount={cards.filter((c) => !c.sealed).length} recent={recent} threads={threads} openCard={openCard} ask={go} />
             </div>
             <div className="home-d">
-            <PageHead eyebrow={tr("Home")} art="home" title={tr(greeting())} sub={tr("Your cocoverse with {name}", { name: pet.name })} />
-
-            <div className="grid gap-5 sm:mt-16 lg:grid-cols-3">
-              {/* the pet, ready to talk */}
-              <section className="ws-card relative mt-10 flex flex-col gap-4 p-5 sm:mt-0 sm:min-h-[260px] sm:flex-row sm:items-end sm:pl-[268px] lg:col-span-2">
+            <div className="grid gap-5 pt-2 lg:grid-cols-3">
+              {/* the pet, ready to talk: the greeting sits in the card beside it, on a soft sky of the cocoverse */}
+              <section className="relative flex min-h-[300px] flex-col gap-4 overflow-visible rounded-[22px] p-5 pl-[268px] lg:col-span-2" style={{ background: "radial-gradient(70% 90% at 15% 100%, rgba(255,255,255,.75), transparent 60%), linear-gradient(135deg, #e9e2ff 0%, #f6e4f3 55%, #fdf0e3 100%)", boxShadow: "0 18px 40px -26px rgba(60,40,140,.45), inset 0 0 0 1px rgba(255,255,255,.7)" }}>
+                <div className="relative">
+                  <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{tr("Home")}</div>
+                  <h1 className="serif mt-1 text-[38px] font-bold leading-[1.05] tracking-tight">{tr(greeting())}</h1>
+                  <div className="serif mt-0.5 text-[16px] italic text-[var(--ink2)]">{tr("Your cocoverse with {name}", { name: pet.name })}</div>
+                </div>
                 {/* the pet stands on the card's floor and breaks out of its top edge */}
-                <div className="pointer-events-none relative mx-auto -mb-6 -mt-24 aspect-[768/1057] w-[240px] shrink-0 sm:absolute sm:-bottom-[26px] sm:-left-2 sm:mx-0 sm:mb-0 sm:mt-0 sm:w-[310px] [&>*]:pointer-events-auto">
+                <div className="pointer-events-none absolute -bottom-[26px] -left-2 aspect-[768/1057] w-[310px] [&>*]:pointer-events-auto">
                   {pet.character ? (
                     <HomePet moods={pet.character.moods} version={pet.character.at} eager={t.tasksLeft > 0} className="h-full w-full" />
                   ) : (
@@ -63,8 +66,8 @@ export default function Home() {
                     <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full rounded-2xl object-cover" />
                   )}
                 </div>
-                <div className="min-w-0 flex-1 pb-2">
-                  <div className="relative rounded-2xl rounded-bl-md bg-[var(--paper)] px-4 py-3">
+                <div className="mt-auto min-w-0 pb-1">
+                  <div className="relative rounded-2xl rounded-bl-md bg-white/90 px-4 py-3 shadow-[0_8px_20px_-14px_rgba(40,30,90,.4)]">
                     <div className="serif text-[19px] italic leading-snug">“{line}”</div>
                     <div className="mt-1 text-[12px] text-[var(--ink3)]">— {pet.name}</div>
                   </div>

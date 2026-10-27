@@ -30,7 +30,7 @@ function FixLayers() {
   }
   return (
     <section className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <div className="min-w-0 flex-1 text-[14px]"><b>{left} layered card{left === 1 ? "" : "s"}</b> still show the pet inside the scene behind it. Paint a clean scene for them (one image each) so they move without a ghost.</div>
+      <div className="min-w-0 flex-1 text-[14px]"><b>{left} layered card{left === 1 ? "" : "s"}</b> need their layers redone: a clean scene behind the pet (one painting, only if missing) and a pet layer with only the pet and what it wears and holds.</div>
       <button disabled={busy} onClick={run} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white disabled:opacity-50">{busy ? "Painting…" : "Fix card layers"}</button>
     </section>
   );

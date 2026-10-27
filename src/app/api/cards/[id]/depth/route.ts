@@ -17,6 +17,7 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ id: 
   const v = Date.now().toString(36);
   card.fg = fg ? `/api/art/${fg}?v=${v}` : null;
   card.plate = plate ? `/api/art/${plate}?v=${v}` : null;
+  card.layersV = plate ? 2 : undefined;
   await save(s);
   return NextResponse.json({ card });
 });

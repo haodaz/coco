@@ -282,3 +282,31 @@ body {
    and leave behind what it wears); the foil still shines around it */
 .hc[data-depth="1"] .hc-fg { transform: scale(1.08) translate(calc(var(--dx) * -10px), calc(var(--dy) * -10px)); filter: none; }
 .hc[data-finish="popout"][data-depth="1"] .hc-fg { transform: scale(1.12) translate(calc(var(--dx) * -16px), calc(var(--dy) * -16px)) translateZ(0); filter: none; }
+
+/* the soul portrait's card body: a little universe, an aurora drifting behind twinkling stars */
+.hc[data-finish="popout"] .hc-card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(60% 40% at 20% 85%, rgba(80, 230, 190, .38), transparent 70%),
+    radial-gradient(55% 38% at 80% 78%, rgba(160, 110, 255, .42), transparent 70%),
+    radial-gradient(70% 45% at 50% 100%, rgba(255, 120, 200, .30), transparent 70%);
+  background-size: 160% 160%;
+  animation: aurora 14s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+.hc[data-finish="popout"] .hc-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1.2px 1.2px at 28% 8%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 14%, #fff, transparent), radial-gradient(1.4px 1.4px at 62% 6%, #fff, transparent),
+    radial-gradient(1px 1px at 78% 16%, #fff, transparent), radial-gradient(1.2px 1.2px at 90% 9%, #fff, transparent),
+    radial-gradient(1px 1px at 8% 74%, #fff, transparent), radial-gradient(1.3px 1.3px at 22% 90%, #fff, transparent),
+    radial-gradient(1px 1px at 36% 80%, #fff, transparent), radial-gradient(1.2px 1.2px at 54% 94%, #fff, transparent),
+    radial-gradient(1px 1px at 70% 86%, #fff, transparent), radial-gradient(1.4px 1.4px at 86% 92%, #fff, transparent),
+    radial-gradient(1px 1px at 94% 72%, #fff, transparent), radial-gradient(1px 1px at 5% 40%, #fff, transparent),
+    radial-gradient(1px 1px at 96% 44%, #fff, transparent);
+  animation: twinkle 3.2s ease-in-out infinite alternate;
+}
+@keyframes aurora { 0% { background-position: 0% 50%; opacity: .8; } 50% { opacity: 1; } 100% { background-position: 100% 30%; opacity: .85; } }
+@keyframes twinkle { 0% { opacity: .35; } 40% { opacity: .9; } 70% { opacity: .5; } 100% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .hc[data-finish="popout"] .hc-card::before, .hc[data-finish="popout"] .hc-card::after { animation: none; } }

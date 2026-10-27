@@ -306,7 +306,7 @@ export async function cutout(imageB64: string, phrase: string): Promise<Buffer |
 // Depth layer for a card: the pet alone on a transparent PNG the same size as the art,
 // so the card can move pet and background apart. Returns the stored file name, or null.
 // what a pet wears or holds moves with it, so it is cut out together with the pet
-const WORN_AND_HELD = ["clothing", "collar", "bandana", "harness", "leash", "toy", "ball", "stick", "blanket", "the object in its mouth"];
+const WORN_AND_HELD = ["clothing", "collar", "bandana", "harness", "leash", "toy", "rope", "rope toy", "plush toy", "chew toy", "bone", "ball", "stick", "blanket", "the object in its mouth", "the object in its paws"];
 
 export async function depthLayer(artFile: string, phrase: string): Promise<string | null> {
   if (!LIVE) return null;
@@ -332,10 +332,95 @@ export async function cleanPlate(artFile: string, phrase: string): Promise<strin
   return putMedia(artFile.replace(/\?.*$/, "").replace(/\.(jpg|png)$/, "") + "-bg.jpg", fitted);
 }
 
-// Both layers of a card that moves in depth: the pet (with what it wears and holds) and the scene without it.
-// Without a clean scene the card still gets the pet layer, but the two are shown together, never apart.
+// The pet layer, cut by what the clean scene took away: compare the painting with its clean scene and keep the SAM
+// shapes (the pet, and what it wears or holds) that mostly lie where the two differ. Other animals and people, and
+// their things, are still in the clean scene, so they stay in the scene and never come loose.
+async function petLayerByDiff(art: Buffer, plate: Buffer, phrase: string): Promise<Buffer | null> {
+  const { width, height } = await sharp(art).metadata();
+  if (!width || !height) return null;
+  const a = await sharp(art).removeAlpha().raw().toBuffer();
+  const p = await sharp(plate).resize(width, height, { fit: "fill" }).removeAlpha().raw().toBuffer();
+  const diff = Buffer.alloc(width * height);
+  for (let i = 0; i < width * height; i++) diff[i] = Math.max(Math.abs(a[i * 3] - p[i * 3]), Math.abs(a[i * 3 + 1] - p[i * 3 + 1]), Math.abs(a[i * 3 + 2] - p[i * 3 + 2]));
+  // smooth out the painter's small re-rendering differences; what is left is what was taken away
+  const changed = await sharp(diff, { raw: { width, height, channels: 1 } }).blur(3).threshold(40).extractChannel(0).raw().toBuffer();
+  const jpeg = await sharp(art).jpeg({ quality: 92 }).toBuffer();
+  const [pets, ...extras] = await Promise.all([phrase, ...WORN_AND_HELD].map((ph) => samMasks(jpeg, ph, "depth-layer")));
+  const score = async (m: (typeof pets)[number]) => {
+    const one = await maskAlpha([m], width, height);
+    let inside = 0, hit = 0;
+    for (let i = 0; i < one.length; i++) if (one[i]) { inside++; if (changed[i]) hit++; }
+    return { m, one, inside, hit, share: inside ? hit / inside : 0 };
+  };
+  // one pet: the animal the clean scene took away (other animals may be re-drawn a little, but far less of them changes)
+  const scored = await Promise.all(pets.map(score));
+  const pet = scored.filter((x) => x.share >= 0.3).sort((x, y) => y.hit - x.hit)[0];
+  if (!pet) return null;
+  // what it wears and holds: taken away too, and touching the pet itself (not just near it)
+  const near = await sharp(pet.one, { raw: { width, height, channels: 1 } }).blur(12).threshold(8).extractChannel(0).raw().toBuffer();
+  const pick: Awaited<ReturnType<typeof samMasks>>[number][] = [pet.m];
+  for (const x of await Promise.all(extras.flat().map(score))) {
+    if (x.share < 0.5) continue;
+    let touch = 0;
+    for (let i = 0; i < x.one.length; i++) if (x.one[i] && near[i]) touch++;
+    if (touch / x.inside >= 0.05) pick.push(x.m);
+  }
+  if (!pick.length) return null;
+  const hard = await maskAlpha(pick, width, height);
+  // a shape can hold more than the pet (two dogs found as one): keep only what the clean scene took away (a little
+  // grown, for fur at the edge), then only the biggest connected piece (the pet, with what it wears and holds)
+  const grown = await sharp(changed, { raw: { width, height, channels: 1 } }).blur(4).threshold(10).extractChannel(0).raw().toBuffer();
+  for (let i = 0; i < hard.length; i++) if (!grown[i]) hard[i] = 0;
+  const keep = await largestPiece(hard, width, height);
+  const soft = await sharp(keep, { raw: { width, height, channels: 1 } }).blur(0.8).extractChannel(0).raw().toBuffer();
+  return sharp(a, { raw: { width, height, channels: 3 } }).joinChannel(soft, { raw: { width, height, channels: 1 } }).png().toBuffer();
+}
+
+// the biggest connected piece of a mask (found at a quarter of the size, then applied at full size), small holes closed
+async function largestPiece(mask: Buffer, width: number, height: number): Promise<Buffer> {
+  const w = Math.max(1, Math.round(width / 4)), h = Math.max(1, Math.round(height / 4));
+  const small = await sharp(mask, { raw: { width, height, channels: 1 } }).resize(w, h, { kernel: "nearest" }).extractChannel(0).raw().toBuffer();
+  const label = new Int32Array(w * h);
+  let best = 0, bestSize = 0, next = 0;
+  for (let start = 0; start < w * h; start++) {
+    if (!small[start] || label[start]) continue;
+    next++;
+    let size = 0;
+    const stack = [start];
+    label[start] = next;
+    while (stack.length) {
+      const i = stack.pop()!;
+      size++;
+      const x = i % w, y = (i / w) | 0;
+      for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) {
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const j = ny * w + nx;
+        if (small[j] && !label[j]) { label[j] = next; stack.push(j); }
+      }
+    }
+    if (size > bestSize) { bestSize = size; best = next; }
+  }
+  const pieceSmall = Buffer.alloc(w * h);
+  for (let i = 0; i < w * h; i++) if (label[i] === best) pieceSmall[i] = 255;
+  const piece = await sharp(pieceSmall, { raw: { width: w, height: h, channels: 1 } }).resize(width, height, { kernel: "nearest" }).blur(3).threshold(100).extractChannel(0).raw().toBuffer();
+  const out = Buffer.alloc(width * height);
+  for (let i = 0; i < out.length; i++) out[i] = mask[i] && piece[i] ? 255 : 0;
+  return out;
+}
+
+// Cut the pet layer again from a card's painting and its clean scene (no new painting).
+export async function recutPetLayer(artFile: string, plateFile: string, phrase: string): Promise<string | null> {
+  if (!LIVE) return null;
+  const png = await petLayerByDiff(await getMedia(artFile), await getMedia(plateFile), phrase);
+  if (!png) return null;
+  return putMedia(artFile.replace(/\?.*$/, "").replace(/\.(jpg|png)$/, "") + "-fg.png", png);
+}
+
+// Both layers of a card that moves in depth: first the scene without the pet, then the pet cut by what that scene
+// took away. Without a clean scene the card still gets a pet layer, but the two are shown together, never apart.
 export async function depthLayers(artFile: string, phrase: string): Promise<{ fg: string | null; plate: string | null }> {
-  const [fg, plate] = await Promise.all([depthLayer(artFile, phrase).catch(() => null), cleanPlate(artFile, phrase).catch(() => null)]);
+  const plate = await cleanPlate(artFile, phrase).catch(() => null);
+  const fg = plate ? await recutPetLayer(artFile, plate, phrase).catch(() => null) : await depthLayer(artFile, phrase).catch(() => null);
   return { fg, plate: fg ? plate : null };
 }
 
