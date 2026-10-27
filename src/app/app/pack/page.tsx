@@ -19,7 +19,7 @@ export default function PackPage() {
               art="pack"
               title={r.left ? "A new pack is waiting." : "Today's pack is open."}
               sub={r.left ? `Up to ${r.left} more Memory Print${r.left > 1 ? "s" : ""} today` : `The next one arrives in ${r.nextPackIn}`}
-              lead={`Choose photos from any day of ${pet.name}'s life. Each becomes a card in a style you won't know until it turns over, and one more memory ${pet.name}'s AI keeps. ${r.streak ? `${r.streak} day${r.streak > 1 ? "s" : ""} in a row so far.` : `Come back tomorrow and the days start to add up.`}`}
+              lead={`${r.left ? "Tap the pack to see what's inside. " : ""}${r.streak ? `${r.streak} day${r.streak > 1 ? "s" : ""} in a row so far.` : `Come back tomorrow and the days start to add up.`}`}
             />
             <DailyPack pet={pet} state={state} onChange={refresh} admin={state.admin} />
             {pet.character && <Companion moods={pet.character.moods} mood="idle" version={pet.character.at} home="pack" />}
