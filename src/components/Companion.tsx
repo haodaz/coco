@@ -41,6 +41,8 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
   }, []);
 
   const [forced, setForced] = useState<Mood | null>(null);
+  const [away, setAway] = useState(false); // its spot is off screen
+  const awayRef = useRef(false);
   useEffect(() => {
     const on = (e: Event) => setAsked((e as CustomEvent).detail ?? null);
     const onMood = (e: Event) => setForced((e as CustomEvent).detail ?? null);
@@ -60,6 +62,12 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
       const el = document.querySelector(`[data-coco-spot="${want}"]`) as HTMLElement | null;
       if (el) {
         const r = el.getBoundingClientRect();
+        // the spot has scrolled out of sight: step away instead of clinging to the top or bottom of the screen
+        const gone = r.bottom < 40 || r.top > window.innerHeight - 40;
+        if (gone !== awayRef.current) {
+          awayRef.current = gone;
+          setAway(gone);
+        }
         // on top of the spot (feet on its top edge), or beside it when the space above holds something to read
         const side = el.dataset.cocoSide; // "left" / "right": stand beside the spot instead of on it
         const offset = Number(el.dataset.cocoX ?? 0.08); // where along the top edge to sit, 0..1
@@ -86,8 +94,8 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
   if (!pos) return null;
   return (
     <div
-      className="pointer-events-none fixed z-[45] transition-[left,top] duration-[650ms] ease-[cubic-bezier(.3,.7,.3,1)]"
-      style={{ left: pos.x, top: pos.y, width: W, height: H }}
+      className="pointer-events-none fixed z-[45] transition-[left,top,opacity] duration-[650ms] ease-[cubic-bezier(.3,.7,.3,1)]"
+      style={{ left: pos.x, top: pos.y, width: W, height: H, opacity: away ? 0 : 1 }}
       aria-hidden
     >
       <div key={hop} className="companion-hop h-full w-full" style={{ ["--lean" as string]: faceLeft ? -7 : 7 }}>
