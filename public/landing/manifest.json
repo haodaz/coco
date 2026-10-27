@@ -1,0 +1,165 @@
+{
+  "pet": {
+    "name": "Coco",
+    "breed": "Labrador Retriever"
+  },
+  "legend": {
+    "key": "legend",
+    "name": "The Gray Toy Keeper",
+    "line": "I am your big black dog who sleeps on the floor by your bed. I roll on my back with my old gray toy when I want a belly rub. I sit close and look up at you.",
+    "rarity": 3,
+    "kind": "legendary",
+    "style": "Legend",
+    "art": "/landing/legend.jpg",
+    "fg": "/landing/legend-fg.png"
+  },
+  "cards": [
+    {
+      "key": "card-sleep-1",
+      "name": "Bedside Floor Nap",
+      "line": "I am stretched out on the cool floor by the bed. This is my spot for a nap.",
+      "rarity": 1,
+      "kind": "quest",
+      "style": "night watercolour",
+      "art": "/landing/card-sleep-1.jpg",
+      "fg": null
+    },
+    {
+      "key": "card-eat",
+      "name": "Just One Small Bite",
+      "line": "That looks so tasty. I am ready for my bite.",
+      "rarity": 2,
+      "kind": "quest",
+      "style": "warm gouache",
+      "art": "/landing/card-eat.jpg",
+      "fg": "/landing/card-eat-fg.png"
+    },
+    {
+      "key": "card-play",
+      "name": "Belly Up Toy Time",
+      "line": "I am on my back because I want a belly rub. I have my favorite gray toy from when I was a puppy.",
+      "rarity": 2,
+      "kind": "quest",
+      "style": "holographic foil",
+      "art": "/landing/card-play.jpg",
+      "fg": "/landing/card-play-fg.png"
+    },
+    {
+      "key": "card-social",
+      "name": "Sunny Bench By Water",
+      "line": "I am sitting on the bench by the water. I am next to my person and my small white friend.",
+      "rarity": 2,
+      "kind": "quest",
+      "style": "comic panel",
+      "art": "/landing/card-social.jpg",
+      "fg": "/landing/card-social-fg.png"
+    },
+    {
+      "key": "card-car",
+      "name": "Happy Car Ride",
+      "line": "I am sitting in the car with my tongue out.",
+      "rarity": 1,
+      "kind": "quest",
+      "style": "retro poster",
+      "art": "/landing/card-car.jpg",
+      "fg": null
+    },
+    {
+      "key": "card-odd",
+      "name": "Borrowed Sweater Days",
+      "line": "I always end up in a big sweater like this, with my paws lost in the sleeves.",
+      "rarity": 3,
+      "kind": "quest",
+      "style": "surreal collage",
+      "art": "/landing/card-odd.jpg",
+      "fg": "/landing/card-odd-fg.png"
+    },
+    {
+      "key": "card-walk",
+      "name": "Sunny Park Pause",
+      "line": "I am taking a little break on our walk. My tongue is out and I feel happy.",
+      "rarity": 1,
+      "kind": "quest",
+      "style": "picture book",
+      "art": "/landing/card-walk.jpg",
+      "fg": null
+    },
+    {
+      "key": "card-you-2",
+      "name": "Staying Close To You",
+      "line": "I am holding your arm with my paws. Please stay here with me.",
+      "rarity": 1,
+      "kind": "quest",
+      "style": "soft pastel",
+      "art": "/landing/card-you-2.jpg",
+      "fg": null
+    }
+  ],
+  "moods": {
+    "idle": [
+      "/landing/char/idle-0.png",
+      "/landing/char/idle-1.png"
+    ],
+    "close": [
+      "/landing/char/close-0.png",
+      "/landing/char/close-1.png"
+    ],
+    "happy": [
+      "/landing/char/happy-0.png",
+      "/landing/char/happy-1.png",
+      "/landing/char/happy-2.png"
+    ],
+    "busy": [
+      "/landing/char/busy-0.png",
+      "/landing/char/busy-1.png"
+    ],
+    "thinking": [
+      "/landing/char/thinking-0.png",
+      "/landing/char/thinking-1.png"
+    ],
+    "confused": [
+      "/landing/char/confused-0.png",
+      "/landing/char/confused-1.png"
+    ]
+  },
+  "levels": [
+    "/landing/level-0.png",
+    "/landing/level-1.png",
+    "/landing/level-2.png",
+    "/landing/level-3.png"
+  ],
+  "styles": [
+    {
+      "key": "naturalist",
+      "src": "/landing/styles/naturalist.jpg"
+    },
+    {
+      "key": "papercut",
+      "src": "/landing/styles/papercut.jpg"
+    },
+    {
+      "key": "pixel",
+      "src": "/landing/styles/pixel.jpg"
+    },
+    {
+      "key": "storybook",
+      "src": "/landing/styles/storybook.jpg"
+    },
+    {
+      "key": "tarot",
+      "src": "/landing/styles/tarot.jpg"
+    },
+    {
+      "key": "tcg-holo",
+      "src": "/landing/styles/tcg-holo.jpg"
+    },
+    {
+      "key": "ukiyo-e",
+      "src": "/landing/styles/ukiyo-e.jpg"
+    },
+    {
+      "key": "vinyl-toy",
+      "src": "/landing/styles/vinyl-toy.jpg"
+    }
+  ]
+}

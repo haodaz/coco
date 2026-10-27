@@ -21,7 +21,8 @@ photos you already have ──► cards (Imprints) ──► the AI's memory of 
 4. **Every card is an Imprint, a memory the AI keeps.** Say or type one sentence about the moment ("she always does this when the doorbell rings") and it becomes evidence marked as yours, stronger than anything the model guessed.
 5. **Clarity.** The AI's own picture of your pet is shown at the resolution it has earned: a two-colour mosaic at first, a recognisable pixel portrait after about a month, the full painting after a few months. The picture is repainted from your pet's imprints at each level, so it literally becomes your pet as the AI learns.
 6. **Daily booster pack.** Up to 3 photos a day, any day of your pet's life. Each art style is a blind-box surprise (9 styles, 3 tiers).
-7. **Ask your pet.** Your pet, as a 3D character with moods (happy, confused, thinking, close, busy), answers in its own voice, in your language. Every claim about itself points to the cards it rests on. General breed knowledge is labelled as such. If it has no memory of something, it says so and tells you which photo would teach it.
+7. **Soul portrait.** A full starter pack unlocks a legendary card: the pet reads back through all its imprints, says who it is (citing the cards), and steps out of the card's frame.
+8. **Ask your pet.** Your pet, as a 3D character with moods (happy, confused, thinking, close, busy), answers in its own voice, in your language. Every claim about itself points to the cards it rests on. General breed knowledge is labelled as such. If it has no memory of something, it says so and tells you which photo would teach it.
 
 ## Meta models used
 
@@ -56,7 +57,7 @@ Put your key in `.env.local` as `MODEL_API_KEY`. Set `META_LIVE=1` to call the r
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000 for the landing page, or http://localhost:3000/app to start with your own pet.
 
 - **Practice mode** (default, `META_LIVE` not 1): sample answers, nothing is sent anywhere, nothing is billed. Good for clicking through the flow.
 - **Live mode**: a card takes about 20–40 s (reading, painting, depth). Bringing the character to life takes about two minutes the first time (one design, five moods, a few frames each).
@@ -67,9 +68,10 @@ Open http://localhost:3000.
 
 | Path | What |
 |---|---|
-| `src/app/page.tsx` | Home: your pet as a character, and the conversation |
-| `src/app/cards/` | Today's pack, the collection, the starter pack |
-| `src/app/memory/` | Clarity, what the pet can talk about, the road from mosaic to portrait |
+| `src/app/page.tsx` | Landing page: the idea, the rules, how it works, species coverage, boundaries (pictures and answers are real, exported by `scripts/export-landing.mjs`) |
+| `src/app/app/page.tsx` | The app: your pet as a character, and the conversation |
+| `src/app/app/cards/` | The soul portrait, today's pack, the collection, the starter pack |
+| `src/app/app/memory/` | Clarity, what the pet can talk about, the road from mosaic to portrait |
 | `src/app/lab/` | Card finish lab (tilt, light, depth, six finishes). It uses local test art and shows empty frames on a fresh clone |
 | `src/lib/meta.ts` | Every call to the Meta Model API |
 | `src/lib/memory.ts` | Imprints and clarity: points, levels, senses |

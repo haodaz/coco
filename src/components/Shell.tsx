@@ -11,9 +11,9 @@ export type Loaded = State & { live: boolean; memory: Record<string, Memory> };
 export type Ctx = { state: Loaded; pet: Pet; memory: Memory | undefined; refresh: () => Promise<void> };
 
 const TABS = [
-  { href: "/", label: (name: string) => name },
-  { href: "/cards", label: () => "Cards" },
-  { href: "/memory", label: () => "Memory" },
+  { href: "/app", label: (name: string) => name },
+  { href: "/app/cards", label: () => "Cards" },
+  { href: "/app/memory", label: () => "Memory" },
 ];
 
 // Every page: load the state, run onboarding until there is a named pet, then show the tabs and the page.
@@ -42,9 +42,9 @@ export default function Shell({ children }: { children: (ctx: Ctx) => ReactNode 
     <>
       <nav className="sticky top-0 z-30 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_88%,transparent)] backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-2.5">
-          <span className="mr-3 text-[15px] font-bold tracking-tight">coco</span>
+          <Link href="/" className="mr-3 text-[15px] font-bold tracking-tight">coco</Link>
           {TABS.map((t) => {
-            const on = t.href === "/" ? path === "/" : path.startsWith(t.href);
+            const on = t.href === "/app" ? path === "/app" : path.startsWith(t.href);
             return (
               <Link key={t.href} href={t.href} className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium transition ${on ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--sub)] hover:text-[var(--ink)]"}`}>
                 {t.label(pet.name)}

@@ -1,0 +1,21 @@
+"use client";
+
+import AskPanel from "@/components/AskPanel";
+import Shell from "@/components/Shell";
+
+// Home is the pet itself: its character, and a conversation with it.
+export default function Home() {
+  return (
+    <Shell>
+      {({ pet, refresh }) => (
+        <AskPanel
+          pet={pet}
+          onBringToLife={async () => {
+            await fetch(`/api/pets/${pet.id}/character`, { method: "POST" });
+            await refresh();
+          }}
+        />
+      )}
+    </Shell>
+  );
+}

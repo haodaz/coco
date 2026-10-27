@@ -44,7 +44,7 @@ export default function Character({ moods, mood, version = "", className = "" }:
         {/* every frame stays loaded and stacked, so switching never flickers */}
         {frames.map((f, i) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={f} src={`/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} className="absolute inset-0 h-full w-full object-contain" style={{ opacity: i === show ? 1 : 0 }} />
+          <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} className="absolute inset-0 h-full w-full object-contain" style={{ opacity: i === show ? 1 : 0 }} />
         ))}
       </div>
     </div>

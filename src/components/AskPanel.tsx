@@ -86,7 +86,7 @@ export default function AskPanel({ pet, onBringToLife }: { pet: Pet; onBringToLi
               <div className="text-[11px] font-semibold uppercase tracking-[.12em] text-[var(--sub)]">I remember this from</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {latest.cards.map((c, k) => (
-                  <a key={c.id} href={`/cards#card-${c.id}`} className="flex max-w-[260px] items-center gap-2 rounded-xl border border-[var(--line)] bg-white p-1.5 pr-3 hover:border-[var(--primary)]">
+                  <a key={c.id} href={`/app/cards#card-${c.id}`} className="flex max-w-[260px] items-center gap-2 rounded-xl border border-[var(--line)] bg-white p-1.5 pr-3 hover:border-[var(--primary)]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={c.art ?? `/api/photos/${c.photoId}`} alt="" className="h-11 w-8 shrink-0 rounded-md object-cover" />
                     <span className="min-w-0 text-[12px] leading-snug"><b className="block truncate">{c.name}</b><span className="text-[var(--sub)]">{latest.basis[k]?.how}</span></span>
