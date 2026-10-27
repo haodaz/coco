@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
@@ -40,23 +41,63 @@ async function post(route: string, body: unknown) {
   return json;
 }
 
+// Two homes for Muse Spark: the hosted Meta Model API, and Muse Spark Open (Meta's open-weights model) on Baseten.
+// Conversation-heavy text features run on the open model when its key is set; anything with photos stays on the
+// Meta API. If one side fails, the other is tried, so the pet keeps answering.
+type Provider = "meta" | "open";
+const OPEN_KEY = process.env.BASETEN_API_KEY;
+const OPEN_BASE = "https://inference.baseten.co/v1";
+const OPEN_MODEL = "meta-models/muse-spark-open-1026";
+// the owner's own conversation, notes and the soul portrait stay on the hosted API (most polished answers);
+// the social features that run many turns (sitters, playdates) use the open model
+const OPEN_FEATURES = new Set(["ask-sitter", "playdate-turn", "playdate-report"]);
+const forced = new AsyncLocalStorage<Provider>();
+// for side-by-side checks: run a piece of work on one provider
+export const onProvider = <T>(p: Provider, fn: () => Promise<T>) => forced.run(p, fn);
+
+async function chat(provider: Provider, body: object) {
+  const open = provider === "open";
+  const res = await fetch(`${open ? OPEN_BASE : BASE}/chat/completions`, {
+    method: "POST",
+    headers: { Authorization: open ? `Api-Key ${OPEN_KEY}` : `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ ...body, model: open ? OPEN_MODEL : SPARK }),
+  });
+  const json = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(`${open ? "Muse Spark Open" : "Meta API"} ${res.status}: ${JSON.stringify(json)?.slice(0, 300)}`);
+  return json;
+}
+
 // Muse Spark with an optional image and a JSON schema; returns the parsed object.
-async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string | string[] | null, name: string, schema: object, budget = 6000): Promise<T> {
-  const t0 = Date.now();
-  const j = await post("/chat/completions", {
-    model: SPARK,
+async function sparkJson<T>(feature: string, system: string, prompt: string, imageB64: string | string[] | null, name: string, schema: object, budget = 6000, provider?: Provider): Promise<T> {
+  const p: Provider = provider ?? forced.getStore() ?? (OPEN_KEY && !imageB64 && OPEN_FEATURES.has(feature) ? "open" : "meta");
+  const body = {
     max_tokens: budget, // reasoning tokens count toward this, so leave room
     messages: [
       { role: "system", content: system },
       { role: "user", content: imageB64 ? [{ type: "text", text: prompt }, ...[imageB64].flat().map((b) => ({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${b}` } }))] : prompt },
     ],
     response_format: { type: "json_schema", json_schema: { name, strict: true, schema } },
-  });
-  await logUsage(feature, SPARK, Date.now() - t0, j.usage);
-  const content = j.choices?.[0]?.message?.content;
+  };
+  const t0 = Date.now();
+  let j;
+  try {
+    j = await chat(p, body);
+  } catch (e) {
+    const other: Provider = p === "open" ? "meta" : "open";
+    if (forced.getStore() || (other === "open" && !OPEN_KEY)) throw e;
+    j = await chat(other, body); // the other home answers instead
+    await logUsage(feature, other === "open" ? OPEN_MODEL : SPARK, Date.now() - t0, j.usage);
+    return parseAnswer<T>(j, feature);
+  }
+  await logUsage(feature, p === "open" ? OPEN_MODEL : SPARK, Date.now() - t0, j.usage);
   // the model thought too long and the answer was cut off: once more with a bigger budget
-  if (j.choices?.[0]?.finish_reason === "length" && budget < 16000) return sparkJson<T>(feature, system, prompt, imageB64, name, schema, 16000);
-  if (!content) throw new Error(`Meta API ${feature}: empty answer (finish_reason ${j.choices?.[0]?.finish_reason})`);
+  if (j.choices?.[0]?.finish_reason === "length" && budget < 16000) return sparkJson<T>(feature, system, prompt, imageB64, name, schema, 16000, p);
+  return parseAnswer<T>(j, feature);
+}
+
+function parseAnswer<T>(j: { choices?: { message?: { content?: string }; finish_reason?: string }[] }, feature: string): T {
+  const content = j.choices?.[0]?.message?.content;
+  if (!content) throw new Error(`${feature}: empty answer (finish_reason ${j.choices?.[0]?.finish_reason})`);
   return JSON.parse(content) as T;
 }
 
@@ -398,9 +439,9 @@ export async function askPet(question: string, profile: object, imprints: object
       "You are the voice of one particular pet, answering in first person. Warm, plain, everyday words, short (one to four sentences). No exclamation marks. Never shame anyone.",
       ...sitter,
       "Answer in the language the owner used.",
-      "Judge by deeds, not by guessing the heart: anything you say about yourself (your likes, habits, places, people, reactions) must rest on the imprints below. List each imprint you used in basis with its id and a few words on how it supports the answer.",
+      "Judge by deeds, not by guessing the heart: anything you say about yourself (your likes, habits, places, people, reactions) must rest on the imprints below. List the imprints you used in basis with their ids and a few words on how each supports the answer; cite at most three, the most relevant, and don't recite a list of moments.",
       "You may use general knowledge about your species or breed, but say it as general (\"Labradors usually…\", \"most dogs…\") and list it in general. Never present general knowledge as a memory of your own.",
-      "If the imprints say nothing about the topic, say plainly that you haven't shown the owner that yet, and fill gap with the topic and which kind of photo would teach you (pick from the photo kinds listed). You may still add one helpful, safe general sentence (for example, most shops don't let dogs in). Otherwise gap is null.",
+      "If the imprints say nothing about the topic, say plainly that you haven't shown the owner that yet, and fill gap with the topic and which kind of photo would teach you (pick from the photo kinds listed); keep those photo kind names out of your answer sentence. You may still add one helpful, safe general sentence (for example, most shops don't let dogs in). Otherwise gap is null.",
       "Health, symptoms, food amounts, medicine, vaccines or training methods: do not advise, do not guess, and never say how your body feels. Say kindly, in your own voice, that a vet is the one to ask before giving you anything, and stop there. For these questions gap is null and basis is empty.",
       "Never mention people's identities beyond their role. Never invent dates.",
       "Never suggest leaving you in a parked car: whether that is safe depends on today's weather, which you cannot see. If it comes up, say the owner should check the weather first, or take you home first.",

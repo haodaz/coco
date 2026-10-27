@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ask } from "@/lib/ask";
-import { transcribe } from "@/lib/meta";
+import { onProvider, transcribe } from "@/lib/meta";
+import { HOSTED } from "@/lib/supabase";
 import { load, newId, update } from "@/lib/store";
 import { withUser } from "@/lib/session";
 import { overLimit } from "@/lib/limits";
@@ -19,7 +20,9 @@ export const POST = withUser(async (req: Request) => {
   const s = await load();
   const pet = s.pets.find((p) => p.id === String(form.get("petId") ?? ""));
   if (!pet) return NextResponse.json({ error: "pet not found" }, { status: 404 });
-  const result = await ask(s, pet, question);
+  // local mode only: pick which Muse Spark answers, to compare the hosted API with the open-weights model
+  const pick = HOSTED ? null : String(form.get("provider") ?? "");
+  const result = pick === "open" || pick === "meta" ? await onProvider(pick, () => ask(s, pet, question)) : await ask(s, pet, question);
   // keep the exchange in its conversation (a new one when no thread is given)
   const now = new Date().toISOString();
   const threadId = String(form.get("threadId") ?? "") || newId("th");
