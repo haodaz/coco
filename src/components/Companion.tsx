@@ -90,7 +90,7 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
       style={{ left: pos.x, top: pos.y, width: W, height: H }}
       aria-hidden
     >
-      <div key={hop} className="companion-hop h-full w-full" style={{ transform: faceLeft ? "scaleX(-1)" : undefined }}>
+      <div key={hop} className="companion-hop h-full w-full" style={{ ["--lean" as string]: faceLeft ? -7 : 7 }}>
         <Character moods={moods} interactive mood={dozing && moods.rest?.length ? "rest" : forced ? forced : asked?.startsWith("card-") || asked?.startsWith("cite-") ? "close" : mood} version={version} className={`h-full w-full ${dozing && moods.rest?.length ? "companion-doze" : ""}`} />
       </div>
     </div>

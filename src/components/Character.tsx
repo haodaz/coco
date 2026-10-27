@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy" | "rest";
 
 // How each mood loops through its frames: [frame index, milliseconds] pairs.
 const TIMELINE: Record<Mood, [number, number][]> = {
   idle: [[0, 3600], [1, 160], [0, 2600], [1, 160]],
-  happy: [[0, 620], [1, 480], [0, 520], [2, 760]],
+  happy: [[0, 900], [2, 700]], // mouth a little more open; the wiggle itself is CSS, so nothing jumps side to side
   confused: [[0, 2200], [1, 150]],
   thinking: [[0, 1100], [1, 1100]],
   close: [[0, 1600], [1, 1800]],
@@ -47,6 +47,18 @@ export default function Character({ moods, mood: asked, version = "", className 
   }, [reacting]);
   const steps = TIMELINE[mood].filter(([f]) => f < frames.length);
   const show = steps[step]?.[0] ?? 0;
+  const visible = frames[show];
+  // every frame of every mood stays mounted and loaded; switching only changes opacity, so nothing flashes
+  const all = [...new Set(Object.values(moods).flat())];
+  // a tap on the same mood restarts its movement without remounting anything
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = body.current;
+    if (!el || !reacting) return;
+    el.style.animation = "none";
+    void el.offsetWidth;
+    el.style.animation = "";
+  }, [reacting]);
   return (
     <div
       className={`relative ${className} ${interactive ? "pointer-events-auto cursor-pointer" : ""}`}
@@ -54,11 +66,10 @@ export default function Character({ moods, mood: asked, version = "", className 
       title={interactive ? "Pat" : undefined}
     >
       <div className="char-shadow" data-mood={mood} />
-      <div key={`${mood}-${reacting}`} className="char absolute inset-0" data-mood={mood}>
-        {/* every frame stays loaded and stacked, so switching never flickers */}
-        {frames.map((f, i) => (
+      <div ref={body} className="char absolute inset-0" data-mood={mood}>
+        {all.map((f) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} className="absolute inset-0 h-full w-full object-contain transition-opacity duration-200 ease-out" style={{ opacity: i === show ? 1 : 0 }} />
+          <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} decoding="async" className="absolute inset-0 h-full w-full object-contain transition-opacity duration-200 ease-out" style={{ opacity: f === visible ? 1 : 0 }} />
         ))}
       </div>
       {reacting > 0 && (
