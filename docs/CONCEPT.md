@@ -54,5 +54,4 @@ Muse Spark (reading moments, answering, structured output, actions), Muse Image 
 2. A real playdate with a second real pet (a friend's pet, filmed for the video).
 3. Place, beyond the first version: rules outside the US, city leash and park rules, a check per destination.
 4. Care reminders in the pet's own voice, dates only from records.
-5. Own email sender for sign-in links before inviting more people.
-6. Moments from short videos (SAM 3.1 video tracking).
+5. Moments from short videos (SAM 3.1 video tracking).
