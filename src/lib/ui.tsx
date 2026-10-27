@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { matchLang } from "./i18n";
 import { ZH } from "./zh";
 
@@ -24,9 +24,12 @@ export const LangProvider = LangContext.Provider;
 // outside the workspace (sign-in) it follows the browser
 export function useT(): Ctx {
   const c = useContext(LangContext);
+  // read the browser's language after the first render, so the server's English render and the browser's first
+  // render match (no hydration mismatch), then switch
+  const [own, setOwn] = useState("en");
+  useEffect(() => setOwn(browserLang()), []);
   if (c) return c;
-  const lang = browserLang();
-  return { lang, t: (s, v) => translate(lang, s, v), setLang: () => {} };
+  return { lang: own, t: (s, v) => translate(own, s, v), setLang: () => {} };
 }
 
 // the same English word can need two Chinese words (Home the page vs Home the kind of moment): look up "Home (kind of moment)" first
