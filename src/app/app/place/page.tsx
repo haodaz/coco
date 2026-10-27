@@ -10,36 +10,36 @@ export default function PlacePage() {
   const { data, reload } = usePlace();
   return (
     <Shell>
-      {({ pet }) => {
+      {({ pet, t }) => {
         const place = data?.place ?? null;
         const now = data?.facts.filter((f) => f.kind === "weather" || f.kind === "check") ?? [];
         const rules = data?.facts.filter((f) => f.kind === "rule") ?? [];
         return (
           <div>
             <PageHead
-              eyebrow="Around us"
+              eyebrow={t("Around us")}
               art="place"
-              title={place ? `${pet.name} in ${place.name}` : `Where do you and ${pet.name} live?`}
+              title={place ? t("{name} in {place}", { name: pet.name, place: place.name }) : t("Where do you and {name} live?", { name: pet.name })}
               sub={place ? place.area : undefined}
-              lead={`Before ${pet.name} speaks up about a plan, like a trip to the shop or a wait in the car, it checks the weather and the rules here. Every fact shows where it comes from and when it was checked.`}
+              lead={t("Before {name} speaks up about a plan, like a trip to the shop or a wait in the car, it checks the weather and the rules here. Every fact shows where it comes from and when it was checked.", { name: pet.name })}
             />
             <div className="max-w-xl">
               <AreaPicker current={place?.area} onPicked={reload} />
             </div>
-            {!data && <div className="mt-10"><CocoLoader size="sm" label="Checking the weather and the rules…" /></div>}
+            {!data && <div className="mt-10"><CocoLoader size="sm" label={t("Checking the weather and the rules…")} /></div>}
             {place && (
               <>
-                <Rule label="Right now" />
+                <Rule label={t("Right now")} />
                 {now.length ? (
                   <div className="grid gap-3 md:grid-cols-3">{now.map((f) => <FactCard key={f.id} fact={f} />)}</div>
                 ) : (
-                  <p className="text-[14px] text-[var(--ink2)]">The weather service didn&apos;t answer. Try again in a minute.</p>
+                  <p className="text-[14px] text-[var(--ink2)]">{t("The weather service didn't answer. Try again in a minute.")}</p>
                 )}
-                <Rule label="Rules here" />
+                <Rule label={t("Rules here")} />
                 <div className="grid gap-3 md:grid-cols-3">{rules.map((f) => <FactCard key={f.id} fact={f} />)}</div>
-                <Rule label="Our home" />
+                <Rule label={t("Our home")} />
                 <div className="max-w-xl"><HomeForm place={place} onSaved={reload} /></div>
-                <Rule label="Pet places nearby" />
+                <Rule label={t("Pet places nearby")} />
                 <Services place={place} onChanged={reload} />
               </>
             )}

@@ -28,3 +28,10 @@ export function useT(): Ctx {
   const lang = browserLang();
   return { lang, t: (s, v) => translate(lang, s, v), setLang: () => {} };
 }
+
+// the same English word can need two Chinese words (Home the page vs Home the kind of moment): look up "Home (kind of moment)" first
+export function tIn(t: (s: string) => string, s: string, ctx: string) {
+  const k = `${s} (${ctx})`;
+  const w = t(k);
+  return w === k ? t(s) : w;
+}

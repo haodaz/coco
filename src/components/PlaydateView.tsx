@@ -1,11 +1,13 @@
 "use client";
 
 import type { Card, Playdate } from "@/lib/types";
+import { useT } from "@/lib/ui";
 
 const VERDICT: Record<string, string> = { "good match": "A good match", "worth a try": "Worth a try", "not yet": "Not yet", "not enough to tell": "Not enough to tell yet" };
 
 // Two twins' meeting, from this owner's side: what they said to each other, and the honest note that followed.
 export default function PlaydateView({ p, petName, myFace, otherFace, cards = [], openCard }: { p: Playdate; petName: string; myFace: string | null; otherFace: string | null; cards?: Card[]; openCard?: (c: Card) => void }) {
+  const { t: tr } = useT();
   const face = (src: string | null) =>
     src ? (
       // eslint-disable-next-line @next/next/no-img-element
@@ -25,8 +27,8 @@ export default function PlaydateView({ p, petName, myFace, otherFace, cards = []
         ))}
       </div>
       <div className="ws-card p-5">
-        <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">The twins&apos; note</div>
-        <div className="serif mt-1 text-[24px] font-bold">{VERDICT[p.report.verdict] ?? p.report.verdict}</div>
+        <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{tr("The twins' note")}</div>
+        <div className="serif mt-1 text-[24px] font-bold">{VERDICT[p.report.verdict] ? tr(VERDICT[p.report.verdict]) : p.report.verdict}</div>
         <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink2)]">{p.report.summary}</p>
         {p.report.reasons.length > 0 && (
           <ul className="mt-3 space-y-2 text-[13.5px]">
@@ -50,13 +52,13 @@ export default function PlaydateView({ p, petName, myFace, otherFace, cards = []
             ))}
           </ul>
         )}
-        {p.report.cautions.length > 0 && <div className="mt-3 rounded-xl bg-[#f3eefe] px-3 py-2 text-[13px] text-[#5b3fb0]"><b>Watch for:</b> {p.report.cautions.join(" ")}</div>}
+        {p.report.cautions.length > 0 && <div className="mt-3 rounded-xl bg-[#f3eefe] px-3 py-2 text-[13px] text-[#5b3fb0]"><b>{tr("Watch for:")}</b> {p.report.cautions.join(" ")}</div>}
         {p.report.firstMeeting.length > 0 && (
           <div className="mt-3 text-[12.5px] text-[var(--ink2)]">
-            <b>For a first meeting (general advice):</b> {p.report.firstMeeting.join(" ")}
+            <b>{tr("For a first meeting (general advice):")}</b> {p.report.firstMeeting.join(" ")}
           </div>
         )}
-        <p className="mt-3 text-[11.5px] text-[var(--ink3)]">Advice from the twins, not a promise. You decide in person.</p>
+        <p className="mt-3 text-[11.5px] text-[var(--ink3)]">{tr("Advice from the twins, not a promise. You decide in person.")}</p>
       </div>
     </div>
   );

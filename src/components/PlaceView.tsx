@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { call } from "@/lib/api";
 import { SERVICE_LABEL, type Area, type Place, type ServiceKind } from "@/lib/place";
 import type { Fact, PlaceFacts } from "@/lib/rules";
+import { tIn, useT } from "@/lib/ui";
 
 const ICON = { weather: CloudSun, check: ShieldCheck, rule: Gavel, home: House, services: Store } as const;
 const LEVEL = {
@@ -14,25 +15,29 @@ const LEVEL = {
 } as const;
 const LEVEL_WORD = { ok: "Fine", careful: "Careful", no: "No" } as const;
 
-export const when = (at: string) => {
+type T = (s: string, v?: Record<string, string | number>) => string;
+
+// how long ago something was checked, in the owner's language
+export const when = (at: string, t: T) => {
   const d = new Date(at);
   if (Number.isNaN(+d)) return at;
   const mins = (Date.now() - +d) / 60_000;
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${Math.round(mins)} min ago`;
-  if (mins < 60 * 24) return `${Math.round(mins / 60)} h ago`;
+  if (mins < 1) return t("just now");
+  if (mins < 60) return t("{n} min ago", { n: Math.round(mins) });
+  if (mins < 60 * 24) return t("{n} h ago", { n: Math.round(mins / 60) });
   return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 };
 
 // One fact about the place: what it says, where it comes from, when it was checked.
 export function FactCard({ fact }: { fact: Fact }) {
+  const { t } = useT();
   const Icon = ICON[fact.kind];
   return (
     <div className="ws-card p-3.5">
       <div className="flex items-center gap-2">
         <Icon size={15} className="shrink-0 text-[var(--gold)]" />
         <b className="text-[14px]">{fact.title}</b>
-        {fact.level && <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${LEVEL[fact.level]}`}>{LEVEL_WORD[fact.level]}</span>}
+        {fact.level && <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${LEVEL[fact.level]}`}>{t(LEVEL_WORD[fact.level])}</span>}
       </div>
       <p className="mt-1.5 text-[13.5px] leading-relaxed text-[var(--ink)]">{fact.text}</p>
       <div className="mt-2 flex flex-wrap items-center gap-x-2 text-[11.5px] text-[var(--ink3)]">
@@ -41,7 +46,7 @@ export function FactCard({ fact }: { fact: Fact }) {
         ) : (
           <span>{fact.source}</span>
         )}
-        <span>· checked {when(fact.at)}</span>
+        <span>· {t("checked {when}", { when: when(fact.at, t) })}</span>
       </div>
     </div>
   );
@@ -49,6 +54,7 @@ export function FactCard({ fact }: { fact: Fact }) {
 
 // Pick a town: type, choose from real places. Only the town's centre is kept.
 export function AreaPicker({ onPicked, current }: { onPicked: () => void; current?: string | null }) {
+  const { t: tr } = useT();
   const [q, setQ] = useState("");
   const [areas, setAreas] = useState<Area[]>([]);
   const [busy, setBusy] = useState(false);
@@ -74,7 +80,7 @@ export function AreaPicker({ onPicked, current }: { onPicked: () => void; curren
     <div>
       <label className="flex items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-3 py-2 focus-within:border-[var(--gold)]">
         <Search size={15} className="text-[var(--ink3)]" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={current ? "Moved? Type your town" : "Your town or neighbourhood"} className="min-w-0 flex-1 bg-transparent text-[14.5px] outline-none" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={current ? tr("Moved? Type your town") : tr("Your town or neighbourhood")} className="min-w-0 flex-1 bg-transparent text-[14.5px] outline-none" />
       </label>
       {areas.length > 0 && (
         <div className="mt-2 grid gap-1">
@@ -85,7 +91,7 @@ export function AreaPicker({ onPicked, current }: { onPicked: () => void; curren
           ))}
         </div>
       )}
-      <p className="mt-2 text-[12px] text-[var(--ink3)]">We keep the town, never your street address.</p>
+      <p className="mt-2 text-[12px] text-[var(--ink3)]">{tr("We keep the town, never your street address.")}</p>
     </div>
   );
 }
@@ -97,6 +103,7 @@ const HOME_TYPES: { v: NonNullable<Place["home"]["type"]>; label: string }[] = [
 ];
 
 export function HomeForm({ place, onSaved }: { place: Place; onSaved: () => void }) {
+  const { t: tr } = useT();
   const [rules, setRules] = useState(place.home.rules ?? "");
   const save = async (home: Partial<Place["home"]>) => {
     if (await call("/api/place", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ home }) })) onSaved();
@@ -105,27 +112,28 @@ export function HomeForm({ place, onSaved }: { place: Place; onSaved: () => void
   return (
     <div className="ws-card grid gap-4 p-4">
       <div>
-        <div className="text-[12px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">Home</div>
+        <div className="text-[12px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">{tIn(tr, "Home", "kind of home")}</div>
         <div className="mt-2 flex flex-wrap gap-2">
-          {HOME_TYPES.map((t) => <button key={t.v} onClick={() => save({ type: place.home.type === t.v ? null : t.v })} className={chip(place.home.type === t.v)}>{t.label}</button>)}
+          {HOME_TYPES.map((t) => <button key={t.v} onClick={() => save({ type: place.home.type === t.v ? null : t.v })} className={chip(place.home.type === t.v)}>{tr(t.label)}</button>)}
         </div>
       </div>
       <div>
-        <div className="text-[12px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">Yard</div>
+        <div className="text-[12px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">{tr("Yard")}</div>
         <div className="mt-2 flex gap-2">
-          <button onClick={() => save({ yard: place.home.yard === true ? null : true })} className={chip(place.home.yard === true)}>We have one</button>
-          <button onClick={() => save({ yard: place.home.yard === false ? null : false })} className={chip(place.home.yard === false)}>No yard</button>
+          <button onClick={() => save({ yard: place.home.yard === true ? null : true })} className={chip(place.home.yard === true)}>{tr("We have one")}</button>
+          <button onClick={() => save({ yard: place.home.yard === false ? null : false })} className={chip(place.home.yard === false)}>{tr("No yard")}</button>
         </div>
       </div>
       <div>
-        <div className="text-[12px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">Building or lease rules about pets</div>
-        <textarea value={rules} onChange={(e) => setRules(e.target.value)} onBlur={() => rules !== (place.home.rules ?? "") && save({ rules })} rows={2} maxLength={300} placeholder="For example: leash in the lobby, no pets on the roof deck" className="mt-2 w-full resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]" />
+        <div className="text-[12px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">{tr("Building or lease rules about pets")}</div>
+        <textarea value={rules} onChange={(e) => setRules(e.target.value)} onBlur={() => rules !== (place.home.rules ?? "") && save({ rules })} rows={2} maxLength={300} placeholder={tr("For example: leash in the lobby, no pets on the roof deck")} className="mt-2 w-full resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]" />
       </div>
     </div>
   );
 }
 
 export function Services({ place, onChanged }: { place: Place; onChanged: () => void }) {
+  const { t } = useT();
   const [busy, setBusy] = useState(false);
   const items = place.services?.items ?? [];
   const kinds = Object.keys(SERVICE_LABEL) as ServiceKind[];
@@ -139,9 +147,9 @@ export function Services({ place, onChanged }: { place: Place; onChanged: () => 
     <div>
       <div className="flex flex-wrap items-center gap-3">
         <p className="min-w-0 flex-1 text-[14px] text-[var(--ink2)]">
-          {place.services ? `${items.length} pet places within 5 km of ${place.name}, checked ${when(place.services.checkedAt)}.` : `Look up dog parks, groomers, boarding, pet shops and clinics around ${place.name}.`}
+          {place.services ? t(items.length === 1 ? "{n} pet place within 5 km of {place}, checked {when}." : "{n} pet places within 5 km of {place}, checked {when}.", { n: items.length, place: place.name, when: when(place.services.checkedAt, t) }) : t("Look up dog parks, groomers, boarding, pet shops and clinics around {place}.", { place: place.name })}
         </p>
-        <button disabled={busy} onClick={look} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white disabled:opacity-50">{busy ? "Looking around…" : place.services ? "Look again" : "Look around"}</button>
+        <button disabled={busy} onClick={look} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white disabled:opacity-50">{busy ? t("Looking around…") : place.services ? t("Look again") : t("Look around")}</button>
       </div>
       {items.length > 0 && (
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -150,7 +158,7 @@ export function Services({ place, onChanged }: { place: Place; onChanged: () => 
             if (!list.length) return null;
             return (
               <div key={k} className="ws-card p-3.5">
-                <b className="text-[14px]">{SERVICE_LABEL[k]}</b> <span className="text-[12px] text-[var(--ink3)]">· {list.length}</span>
+                <b className="text-[14px]">{t(SERVICE_LABEL[k])}</b> <span className="text-[12px] text-[var(--ink3)]">· {list.length}</span>
                 <ul className="mt-2 grid gap-1.5">
                   {list.slice(0, 5).map((s) => (
                     <li key={s.osm} className="text-[13px] leading-snug">
@@ -164,7 +172,7 @@ export function Services({ place, onChanged }: { place: Place; onChanged: () => 
           })}
         </div>
       )}
-      {place.services && <p className="mt-3 text-[11.5px] text-[var(--ink3)]">Listings from © OpenStreetMap contributors, not recommendations. Clinics are listed by name only; coco never gives medical advice.</p>}
+      {place.services && <p className="mt-3 text-[11.5px] text-[var(--ink3)]">{t("Listings from © OpenStreetMap contributors, not recommendations. Clinics are listed by name only; coco never gives medical advice.")}</p>}
     </div>
   );
 }
