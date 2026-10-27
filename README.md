@@ -1,6 +1,8 @@
 # coco
 
-**An AI for each owner that knows their one pet.** Dog, cat, bird, turtle, anything. It learns who *this* animal is from the photos you already have, keeps every moment as a collectible card, and talks back as your pet, only about what it has actually seen.
+**A co-world for you and your pet.** co- means together, as in *companion*, the one you share your bread with: coco is the two of you, you and them.
+
+An AI for each owner that knows their one pet. Dog, cat, bird, turtle, anything. It learns who *this* animal is from the photos you already have, keeps every moment as a collectible card, and talks back as your pet, only about what it has actually seen.
 
 Built for the **Meta Global AI Developer Hackathon** (Indie track, *Build for Your World*), Oct 26 – Nov 4, 2026. All code in this repository was written during the hackathon (see the commit history). First user: Coco, a black Labrador.
 

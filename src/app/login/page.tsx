@@ -43,8 +43,8 @@ function SignIn() {
       <div className="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-5 py-10 md:grid-cols-[minmax(0,420px)_1fr]">
       <div className="order-2 md:order-1">
       <Link href="/" className="serif text-[26px] font-bold tracking-tight">coco</Link>
-      <div className="mt-10 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Memory Prints</div>
-      <h1 className="serif mt-2 text-[38px] font-bold leading-[1.08] tracking-tight">Every moment with your pet, kept.</h1>
+      <div className="mt-10 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">coco · co-world</div>
+      <h1 className="serif mt-2 text-[38px] font-bold leading-[1.08] tracking-tight">Step into your co-world.</h1>
       <p className="serif mt-2 text-[17px] italic text-[var(--ink2)]">Sign in to open today&apos;s pack.</p>
       {state === "sent" ? (
         <p className="mt-7 text-[15px] leading-relaxed text-[var(--ink2)]">

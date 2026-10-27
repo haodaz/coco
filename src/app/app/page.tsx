@@ -39,7 +39,7 @@ export default function Home() {
         const go = (q: string) => router.push(`/app/chat?q=${encodeURIComponent(q)}`);
         return (
           <>
-            <PageHead eyebrow="Home" art="home" title={greeting()} sub={`${pet.name}'s world, today`} />
+            <PageHead eyebrow="Home" art="home" title={greeting()} sub={`Your co-world with ${pet.name}`} />
 
             <div className="grid gap-5 sm:mt-16 lg:grid-cols-3">
               {/* the pet, ready to talk */}

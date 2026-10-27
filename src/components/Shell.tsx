@@ -78,7 +78,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
       <aside className="ws-side">
         <div className="flex items-center gap-2 px-5 pb-3 pt-5">
           <Link href="/" className="serif text-[24px] font-bold tracking-tight">coco</Link>
-          <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">Memory Prints</span>
+          <span className="mt-1 text-[10px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">co-world</span>
         </div>
 
         <Link href="/app" className="ws-hide-sm mx-3 flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white p-2.5 pr-3">

@@ -237,3 +237,7 @@ Every Memory Print is something that already happened; what grows from them is f
 **Sitters.** Before someone looks after the pet, they talk with its twin through a link the owner makes. The owner chooses which kinds of moment the link shares; the twin answers in its own voice from those only, cites the cards, sends food amounts, medicine and house rules back to the owner, and every question lands in the owner's Recent. No sign-in for the sitter; 40 questions a day per link; the owner can switch a link off.
 
 **Playmates (agent to agent).** An owner sends a playdate invite; another owner opens it with their own pet. The two twins talk a few turns, each from its own moments of play, walks, trips and other animals only, then both owners get a note: a good match, worth a try, not yet, or not enough to tell. Every reason names whose cards it rests on; first-meeting tips are general advice; owners decide in person.
+
+## The name: coco, a co-world (Elodie, 2026-10-27)
+
+coco is not one dog's name. co- means together (co-pilot, co-author, coexist), as in *companion*: from Latin com (with) + panis (bread), the one you share your bread with. coco is co + co: the owner and the pet. Each user's space is their **co-world**, made only of the moments they share (Memory Prints). Coco, the demo dog, is simply the first pet with a co-world. In the app, "Home" stays plain; titles say "your co-world with <pet>".
