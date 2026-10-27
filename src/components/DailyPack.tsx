@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { moodCoco, spotCoco } from "@/components/Companion";
 import HoloCard from "@/components/HoloCard";
 import { PER_DAY } from "@/lib/daily";
 import { finishFor } from "@/lib/finish";
@@ -18,6 +19,12 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   const [fresh, setFresh] = useState<Card[]>([]);
   const [shown, setShown] = useState(0);
   const [levelUp, setLevelUp] = useState<[number, number] | null>(null);
+  // the companion comes to sit beside the pack: busy while it is painted, happy when the cards turn over
+  useEffect(() => {
+    spotCoco("pack");
+    moodCoco(phase === "sealed" ? "busy" : phase === "reveal" ? "happy" : null);
+  }, [phase]);
+  useEffect(() => () => { spotCoco(null); moodCoco(null); }, []);
 
   const daily = state.cards.filter((c) => c.petId === pet.id && c.kind === "daily").sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const today = new Date().toLocaleDateString("en-CA");
@@ -44,34 +51,35 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   return (
     <section>
 
+      <div data-coco-spot={phase === "reveal" ? undefined : "pack"} data-coco-side="right" className="mx-auto w-[min(270px,72vw)]">
       {phase === "idle" && (
         <button
           disabled={left <= 0}
           onClick={() => input.current?.click()}
-          className="pack mx-auto grid h-72 w-full max-w-md place-items-center rounded-[26px] text-center text-white transition hover:scale-[1.02] disabled:opacity-50"
+          className="pack pack-tall flex aspect-[5/7] w-full flex-col items-center justify-between px-5 pb-8 pt-10 text-center text-white transition hover:-translate-y-1 hover:rotate-[-1deg] disabled:opacity-50"
         >
+          <span className="text-[11px] font-semibold uppercase tracking-[.24em] opacity-80">{pet.name} · booster</span>
           <span>
-            <span className="block text-[12px] font-semibold uppercase tracking-[.2em] opacity-80">{pet.name} · booster</span>
-            <span className="serif mt-2 block text-[30px] font-bold">{left > 0 ? `${left} Memory Print${left > 1 ? "s" : ""} waiting` : "Come back tomorrow"}</span>
-            <span className="mt-2 block text-[13px] opacity-85">{left > 0 ? "Tap to choose photos from any day of your life together" : "A new pack arrives at midnight"}</span>
+            <span className="serif block text-[64px] font-bold leading-none">{left > 0 ? left : "✓"}</span>
+            <span className="serif mt-2 block text-[22px] font-bold leading-tight">{left > 0 ? `Memory Print${left > 1 ? "s" : ""} waiting` : "Come back tomorrow"}</span>
           </span>
+          <span className="text-[12.5px] leading-snug opacity-85">{left > 0 ? "Tap to choose photos from any day of your life together" : "A new pack arrives at midnight"}</span>
         </button>
       )}
       <input ref={input} type="file" multiple accept="image/*,.heic,.heif" hidden onChange={(e) => e.target.files?.length && open(e.target.files)} />
 
       {phase === "sealed" && (
-        <div className="pack sealed mx-auto grid h-72 w-full max-w-md place-items-center rounded-[26px] text-center text-white">
-          <span>
-            <span className="block text-[12px] font-semibold uppercase tracking-[.2em] opacity-80">{pet.name} · booster</span>
-            <span className="serif mt-2 block text-[26px] font-bold">Painting your cards…</span>
-            <span className="mt-1 block text-[12px] opacity-80">about half a minute</span>
-          </span>
+        <div className="pack pack-tall sealed flex aspect-[5/7] w-full flex-col items-center justify-between px-5 pb-8 pt-10 text-center text-white">
+          <span className="text-[11px] font-semibold uppercase tracking-[.24em] opacity-80">{pet.name} · booster</span>
+          <span className="serif block text-[26px] font-bold leading-tight">Painting your cards…</span>
+          <span className="text-[12px] opacity-80">about half a minute</span>
         </div>
       )}
 
+      </div>
       {phase === "reveal" && (
         <div className="mt-5 text-center">
-          <div className="mx-auto grid max-w-3xl grid-cols-2 gap-5 text-left sm:grid-cols-3">
+          <div data-coco-spot="pack" data-coco-side="right" className="mx-auto grid max-w-3xl grid-cols-2 gap-5 text-left sm:grid-cols-3">
             {fresh.map((c, i) => (
               <button key={c.id} onClick={() => i === shown && setShown(shown + 1)} className={`flip block aspect-[63/88] w-full ${i < shown ? "flipped" : ""} ${i === shown ? "ring-4 ring-[var(--gold)]/50 rounded-2xl animate-pulse" : ""}`}>
                 <div className="flip-inner">

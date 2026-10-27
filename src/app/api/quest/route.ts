@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { samPhrase } from "@/lib/finish";
 import { refreshLikeness } from "@/lib/likeness";
 import { depthLayer, paintCard, readQuestPhoto } from "@/lib/meta";
@@ -6,8 +6,9 @@ import { photoBase64, storePhoto, uploadMeta } from "@/lib/photos";
 import { packFor } from "@/lib/species";
 import { load, newId, save } from "@/lib/store";
 import type { Card, Trace } from "@/lib/types";
-import { withUser } from "@/lib/session";
+import { currentUserId, runAs, withUser } from "@/lib/session";
 import { overLimit } from "@/lib/limits";
+import { unlockMoves } from "@/lib/character";
 
 export const maxDuration = 300; // seconds; model calls and painting take a while
 
@@ -67,5 +68,8 @@ export const POST = withUser(async (req: Request) => {
   // a new imprint may raise clarity; the AI then repaints its picture of the pet
   await refreshLikeness(s, pet).catch(() => false);
   await save(s);
+  // more memory may have unlocked new moves; draw them after answering (about a minute)
+  const owner = currentUserId();
+  after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
   return NextResponse.json({ card, traces });
 });

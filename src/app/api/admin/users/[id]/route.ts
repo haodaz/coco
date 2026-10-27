@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { isAdmin, runAs, withUser } from "@/lib/session";
+import { unlockMoves } from "@/lib/character";
 import { load, update } from "@/lib/store";
 import { adminClient, HOSTED } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 // For admins: one account in full (pets, cards, photos, the owner's words) to review, and two actions:
 // take down a card (with its photo, traces and files), or suspend / restore the account.
@@ -46,6 +48,15 @@ export const POST = withUser(async (req: Request, ctx: { params: Promise<{ id: s
   if (action === "suspend" || action === "restore") {
     const { error } = await db.auth.admin.updateUserById(id, { ban_duration: action === "suspend" ? "876000h" : "none" });
     return error ? NextResponse.json({ error: error.message }, { status: 500 }) : NextResponse.json({ ok: true });
+  }
+
+  if (action === "add-moods") {
+    // draw the moves this account's pets have unlocked but don't have yet (characters made before a move existed)
+    await runAs(id, async () => {
+      const s = await load();
+      for (const p of s.pets) await unlockMoves(p.id);
+    });
+    return NextResponse.json({ ok: true });
   }
 
   if (action === "remove-card" && cardId) {

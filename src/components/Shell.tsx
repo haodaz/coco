@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
 import CardModal from "@/components/CardModal";
 import Scene from "@/components/Scene";
+import UnlockToast from "@/components/UnlockToast";
 import type { Memory } from "@/components/MemoryPanel";
 import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
 import { rhythm } from "@/lib/rhythm";
@@ -159,6 +160,7 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
         </div>
       </main>
       {card && <CardModal card={card} state={state} pet={pet} onClose={() => setCard(null)} onChanged={refresh} />}
+      <UnlockToast pet={pet} />
     </div>
   );
 }

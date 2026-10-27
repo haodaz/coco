@@ -1,15 +1,17 @@
 import sharp from "sharp";
 import { samPhrase } from "./finish";
 import { editImage, petLayer } from "./meta";
+import { clarityOf } from "./memory";
+import { unlockedMoods } from "./moves";
 import { photoBase64 } from "./photos";
 import { getMedia, putMedia } from "./media";
-import { newId } from "./store";
+import { load, newId, update } from "./store";
 import type { Pet, State } from "./types";
 
 // The pet as a character: one base design learned from its photos, then a set of moods drawn from that base,
 // each with a few frames that differ in one small thing (a blink, a tail wag) so they loop like a GIF.
 
-export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy";
+export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy" | "rest";
 
 const STYLE = "a polished 3D animated feature film style, soft studio lighting, slightly stylised proportions";
 
@@ -19,6 +21,7 @@ const MOODS: Record<Exclude<Mood, "idle">, string> = {
   thinking: "eyes looking up and to the side as if remembering something, mouth closed, calm",
   close: "leaning forward toward the viewer with the chin resting low, soft loving half-closed eyes, as if leaning on someone it loves",
   busy: "lying down, carefully pushing through a small pile of photo cards with one paw, focused look",
+  rest: "lying flat on its belly, chin resting on its front paws, eyes closed, dozing peacefully",
 };
 
 // Extra frames per mood: one small change each, nothing else moves.
@@ -29,6 +32,7 @@ const FRAMES: Record<Mood, string[]> = {
   thinking: ["the eyes look up to the other side"],
   close: ["the eyes are fully closed, content"],
   busy: ["the paw has moved a little further, pushing one card aside"],
+  rest: ["the ears have twitched slightly and the chest is a little rounder, a slow breath"],
 };
 
 // The whole body must be in the picture, with room around it, on a plain white backdrop that is easy to cut away.
@@ -55,7 +59,7 @@ export async function ground(files: string[]) {
   );
 }
 
-const ORDER: Mood[] = ["idle", "happy", "confused", "thinking", "close", "busy"];
+const ORDER: Mood[] = ["idle", "happy", "confused", "thinking", "close", "busy", "rest"];
 
 // Each frame is cut out with SAM onto a transparent canvas of the same size for every frame,
 // so the frames stay aligned and the character can stand anywhere on the page.
@@ -81,8 +85,10 @@ export async function makeCharacter(state: State, pet: Pet): Promise<NonNullable
     refs,
   );
   const baseB64 = base.toString("base64");
+  // a new pet starts simple: only the moves its memory has unlocked so far are drawn now
+  const open = unlockedMoods(clarityOf(state, pet).level);
   const moods = await Promise.all(
-    (Object.keys(MOODS) as (keyof typeof MOODS)[]).map(async (m) => [
+    (Object.keys(MOODS) as (keyof typeof MOODS)[]).filter((m) => open.includes(m)).map(async (m) => [
       m,
       await editImage("character", `The first image is a game character. Draw the exact same character: same style, same proportions, same colours, same size in the frame, now ${MOODS[m]}. ${FRAME} No text, no people.`, [baseB64, refs[0]]),
     ] as const),
@@ -90,7 +96,7 @@ export async function makeCharacter(state: State, pet: Pet): Promise<NonNullable
   const firsts = new Map<Mood, Buffer>([["idle", base], ...moods]);
   const out = {} as Record<Mood, string[]>;
   await Promise.all(
-    ORDER.map(async (m) => {
+    ORDER.filter((m) => firsts.has(m)).map(async (m) => {
       const first = firsts.get(m)!;
       const extra = await Promise.all(
         FRAMES[m].map((change) =>
@@ -102,4 +108,47 @@ export async function makeCharacter(state: State, pet: Pet): Promise<NonNullable
     }),
   );
   return { style: "3d", moods: out, at: new Date().toISOString() };
+}
+
+// Characters made before a mood existed get just the missing moods, drawn from their own idle frame.
+export async function addMissingMoods(pet: Pet, only?: string[]): Promise<NonNullable<Pet["character"]> | null> {
+  const c = pet.character;
+  if (!c?.moods.idle?.[0]) return null;
+  const missing = ORDER.filter((m) => m !== "idle" && !c.moods[m]?.length && (!only || only.includes(m))) as Exclude<Mood, "idle">[];
+  if (!missing.length) return c;
+  const base = await sharp(await getMedia(c.moods.idle[0])).flatten({ background: "#ffffff" }).jpeg({ quality: 92 }).toBuffer();
+  const baseB64 = base.toString("base64");
+  const moods = { ...c.moods };
+  await Promise.all(
+    missing.map(async (m) => {
+      const first = await editImage("character", `The image is a game character. Draw the exact same character: same style, same proportions, same colours, same size in the frame, now ${MOODS[m]}. ${FRAME} No text, no people.`, [baseB64]);
+      const extra = await Promise.all(
+        FRAMES[m].map((change) =>
+          editImage("character-frame", `Keep this image exactly the same: same character, same pose, same framing, same camera, same lighting, same background, same size and position. Change only one thing: ${change}. Nothing else moves.`, [first.toString("base64")]),
+        ),
+      );
+      moods[m] = await Promise.all([first, ...extra].map((f) => store(f, samPhrase(pet.species), ["toy", "clothing"])));
+      await ground(moods[m]);
+    }),
+  );
+  return { ...c, moods, at: new Date().toISOString() };
+}
+
+// After the memory grows: draw the moves the new clarity level unlocked, and remember when each was learned so the
+// owner can be told. Runs after the response (it takes a minute); safe to call any time.
+export async function unlockMoves(petId: string) {
+  const s = await load();
+  const pet = s.pets.find((p) => p.id === petId);
+  if (!pet?.character) return;
+  const want = unlockedMoods(clarityOf(s, pet).level).filter((m) => m !== "idle" && !pet.character!.moods[m]?.length);
+  if (!want.length) return;
+  const c = await addMissingMoods(pet, want);
+  if (!c) return;
+  const now = new Date().toISOString();
+  await update((f) => {
+    const p = f.pets.find((x) => x.id === petId);
+    if (!p) return;
+    p.character = c;
+    p.unlocks = [...(p.unlocks ?? []), ...want.filter((m) => c.moods[m]?.length).map((mood) => ({ mood, at: now }))];
+  });
 }

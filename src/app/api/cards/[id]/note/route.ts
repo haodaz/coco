@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { refreshLikeness } from "@/lib/likeness";
 import { readOwnerNote, transcribe } from "@/lib/meta";
 import { photoBase64 } from "@/lib/photos";
 import { load, newId, save } from "@/lib/store";
 import type { Trace } from "@/lib/types";
-import { withUser } from "@/lib/session";
+import { currentUserId, runAs, withUser } from "@/lib/session";
 import { overLimit } from "@/lib/limits";
+import { unlockMoves } from "@/lib/character";
 
 export const maxDuration = 120; // seconds; model calls and painting take a while
 
@@ -36,5 +37,8 @@ export const POST = withUser(async (req: Request, ctx: { params: Promise<{ id: s
   card.line = reading.line;
   await refreshLikeness(s, pet).catch(() => false);
   await save(s);
+  // more memory may have unlocked new moves; draw them after answering (about a minute)
+  const owner = currentUserId();
+  after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
   return NextResponse.json({ card, traces, text });
 });

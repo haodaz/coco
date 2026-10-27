@@ -19,6 +19,7 @@ export type Pet = {
   // the AI's own picture of the pet, repainted each time clarity rises; shown pixelated to match the level
   // the pet as a game character: moods, each a short loop of frames (file names)
   character?: { style: string; moods: Record<string, string[]>; at: string } | null;
+  unlocks?: { mood: string; at: string }[]; // moves learned after the first ones, as memories grew
   likeness?: { file: string; level: number; from: "profile" | "imprints"; at: string } | null;
   createdAt: string;
 };

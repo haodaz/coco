@@ -174,7 +174,7 @@ export default function AskPanel({
         {/* the composer, with the pet resting on its top edge once you're talking */}
         <div className="relative mx-auto w-full max-w-3xl pt-2">
           <form data-coco-spot="composer" data-coco-x="0.03" onSubmit={(e) => { e.preventDefault(); ask(q); }} className="relative flex items-center gap-2 rounded-2xl border border-[var(--line)] bg-white px-2 py-1.5 shadow-[0_10px_30px_-12px_rgba(35,32,27,.25)] focus-within:border-[var(--gold)]">
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={recording ? "Listening… tap the square to stop" : `Say something to ${pet.name}`} className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] outline-none" />
+            <input value={q} onFocus={() => spotCoco("composer")} onBlur={() => spotCoco(null)} onChange={(e) => { setQ(e.target.value); spotCoco("composer"); }} placeholder={recording ? "Listening… tap the square to stop" : `Say something to ${pet.name}`} className="min-w-0 flex-1 bg-transparent px-2 py-2 text-[15px] outline-none" />
             <button type="button" onClick={toggle} disabled={!!pending} title={recording ? "Stop" : "Say it"} className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${recording ? "animate-pulse bg-[#ff4d4f] text-white" : "bg-[#f1ebe0] text-[var(--ink2)]"}`}>
               {recording ? <Square size={14} /> : <Mic size={16} />}
             </button>

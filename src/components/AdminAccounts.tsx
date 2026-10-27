@@ -77,8 +77,15 @@ function AccountView({ id, back }: { id: string; back: () => void }) {
         </div>
         <button
           disabled={!!busy}
+          onClick={() => act({ action: "add-moods" }, "Draw the moves this account's pets have unlocked but are missing? About a minute.", "moods")}
+          className="ml-auto rounded-lg bg-[#fff1d6] px-3 py-1.5 text-[13px] font-semibold text-[#7a5618]"
+        >
+          {busy === "moods" ? "Drawing…" : "Update character"}
+        </button>
+        <button
+          disabled={!!busy}
           onClick={() => act({ action: a.banned ? "restore" : "suspend" }, a.banned ? `Restore ${a.email}? They can sign in again.` : `Suspend ${a.email}? They won't be able to sign in until restored. Their data stays.`, "account")}
-          className={`ml-auto rounded-lg px-3 py-1.5 text-[13px] font-semibold ${a.banned ? "bg-[#e8f1ff] text-[var(--primary)]" : "bg-[#fff1f0] text-[#cf1322]"}`}
+          className={`rounded-lg px-3 py-1.5 text-[13px] font-semibold ${a.banned ? "bg-[#e8f1ff] text-[var(--primary)]" : "bg-[#fff1f0] text-[#cf1322]"}`}
         >
           {a.banned ? "Restore account" : "Suspend account"}
         </button>

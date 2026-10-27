@@ -46,7 +46,7 @@ export default function Home() {
               <section className="ws-card relative flex flex-col gap-4 overflow-hidden p-5 sm:flex-row sm:items-end lg:col-span-2">
                 <div className="relative mx-auto aspect-[3/4] w-[180px] shrink-0 sm:mx-0">
                   {pet.character ? (
-                    <Character moods={pet.character.moods} mood={r.left ? "happy" : "idle"} version={pet.character.at} className="h-full w-full" />
+                    <Character moods={pet.character.moods} mood={r.left ? "happy" : "idle"} version={pet.character.at} className="h-full w-full" interactive />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full rounded-2xl object-cover" />

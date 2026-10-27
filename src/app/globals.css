@@ -217,3 +217,15 @@ body {
   85% { translate: 0 0; scale: 1.06 .94; }
   100% { translate: 0 0; scale: 1 1; }
 }
+/* dozing: lying low and breathing slowly */
+.companion-doze { animation: companion-doze 4.2s ease-in-out infinite; transform-origin: 50% 95%; }
+@keyframes companion-doze { 0%, 100% { scale: 1 .97; } 50% { scale: 1.015 1; } }
+/* a tap on the pet: a heart floats up */
+.pat-heart { animation: pat-heart 1.4s ease-out forwards; translate: -50% 0; }
+@keyframes pat-heart { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 20% { opacity: 1; transform: translateY(0) scale(1.15); } 100% { opacity: 0; transform: translateY(-46px) scale(1); } }
+
+/* a booster pack stands upright like the cards in it, with crimped foil at the top and bottom */
+.pack-tall { border-radius: 14px; }
+.pack-tall::before { opacity: .55;
+  -webkit-mask: linear-gradient(#000 0 6%, transparent 6% 94%, #000 94%); mask: linear-gradient(#000 0 6%, transparent 6% 94%, #000 94%);
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.28) 0 2px, transparent 2px 7px); }

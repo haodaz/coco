@@ -1,5 +1,6 @@
 "use client";
 
+import Companion from "@/components/Companion";
 import DailyPack from "@/components/DailyPack";
 import Shell, { PageHead } from "@/components/Shell";
 import { rhythm } from "@/lib/rhythm";
@@ -21,6 +22,7 @@ export default function PackPage() {
               lead={`Choose photos from any day of ${pet.name}'s life. Each becomes a card in a style you won't know until it turns over, and one more memory ${pet.name}'s AI keeps. ${r.streak ? `${r.streak} day${r.streak > 1 ? "s" : ""} in a row so far.` : `Come back tomorrow and the days start to add up.`}`}
             />
             <DailyPack pet={pet} state={state} onChange={refresh} admin={state.admin} />
+            {pet.character && <Companion moods={pet.character.moods} mood="idle" version={pet.character.at} home="pack" />}
             {r.today.length > 0 && !r.left && (
               <p className="mt-6 text-center text-[14px] text-[var(--ink2)]">Today you kept {r.today.length} memories of {pet.name}. You can find them in {her} cards.</p>
             )}

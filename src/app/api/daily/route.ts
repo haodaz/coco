@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { openedToday, PER_DAY } from "@/lib/daily";
 import { samPhrase } from "@/lib/finish";
 import { refreshLikeness } from "@/lib/likeness";
@@ -10,7 +10,8 @@ import { load, newId, save } from "@/lib/store";
 import { drawStyle } from "@/lib/styles";
 import type { Card, Trace } from "@/lib/types";
 import { overLimit } from "@/lib/limits";
-import { isAdmin, withUser } from "@/lib/session";
+import { currentUserId, isAdmin, runAs, withUser } from "@/lib/session";
+import { unlockMoves } from "@/lib/character";
 
 export const maxDuration = 300; // seconds; model calls and painting take a while
 
@@ -68,5 +69,8 @@ export const POST = withUser(async (req: Request) => {
   }
   await refreshLikeness(s, pet).catch(() => false);
   await save(s);
+  // more memory may have unlocked new moves; draw them after answering (about a minute)
+  const owner = currentUserId();
+  after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
   return NextResponse.json({ cards: made.map((m) => m.card), levelBefore: before.level, levelAfter: clarityOf(s, pet).level, left: isAdmin() ? PER_DAY : PER_DAY - openedToday(s, pet.id) });
 });
