@@ -85,6 +85,7 @@ async function sparkJson<T>(feature: string, system: string, prompt: string, ima
   } catch (e) {
     const other: Provider = p === "open" ? "meta" : "open";
     if (forced.getStore() || (other === "open" && !OPEN_KEY)) throw e;
+    console.warn(`[${feature}] ${p} failed, trying ${other}:`, (e as Error).message); // shows in the server logs
     j = await chat(other, body); // the other home answers instead
     await logUsage(feature, other === "open" ? OPEN_MODEL : SPARK, Date.now() - t0, j.usage);
     return parseAnswer<T>(j, feature);
