@@ -18,7 +18,8 @@ const DOZE_AFTER = 20_000;
 export default function Companion({ moods, mood, version = "", home }: { moods: Record<string, string[]>; mood: Mood; version?: string; home: string }) {
   const [asked, setAsked] = useState<string | null>(null);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
-  const [hop, setHop] = useState(0); // bumps on every move, restarting the hop animation
+  const [hop, setHop] = useState(0); // bumps on every move, restarting the walk
+  const [walk, setWalk] = useState(0); // ms the current walk takes (0 = standing)
   const [faceLeft, setFaceLeft] = useState(false);
   const last = useRef<{ x: number; y: number } | null>(null);
   const lastSpot = useRef<string | null>(null);
@@ -77,6 +78,9 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
         const p = last.current;
         if (want !== lastSpot.current) {
           if (p) setFaceLeft(x < p.x - 4);
+          // walk there: the farther, the longer, in little steps; a short move is just a hop
+          const dist = p ? Math.hypot(x - p.x, y - p.y) : 0;
+          setWalk(dist > 60 ? Math.round(Math.min(1700, Math.max(550, 420 + dist * 1.6))) : 0);
           setHop((h) => h + 1);
           lastSpot.current = want;
         }
@@ -94,11 +98,11 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
   if (!pos) return null;
   return (
     <div
-      className="pointer-events-none fixed z-[45] transition-[left,top,opacity] duration-[650ms] ease-[cubic-bezier(.3,.7,.3,1)]"
-      style={{ left: pos.x, top: pos.y, width: W, height: H, opacity: away ? 0 : 1 }}
+      className="pointer-events-none fixed z-[45] transition-[left,top,opacity] ease-[cubic-bezier(.45,.05,.4,1)]"
+      style={{ left: pos.x, top: pos.y, width: W, height: H, opacity: away ? 0 : 1, transitionDuration: `${walk || 650}ms` }}
       aria-hidden
     >
-      <div key={hop} className="companion-hop h-full w-full" style={{ ["--lean" as string]: faceLeft ? -7 : 7 }}>
+      <div key={hop} className={`h-full w-full ${walk ? "companion-walk" : "companion-hop"}`} style={{ ["--lean" as string]: faceLeft ? -7 : 7, ["--walk" as string]: `${walk}ms`, ["--steps" as string]: Math.max(2, Math.round(walk / 260)) }}>
         <Character moods={moods} interactive mood={dozing && moods.rest?.length ? "rest" : forced ? forced : asked?.startsWith("card-") || asked?.startsWith("cite-") ? "close" : mood} version={version} className={`h-full w-full ${dozing && moods.rest?.length ? "companion-doze" : ""}`} />
       </div>
     </div>

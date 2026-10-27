@@ -1,60 +1,55 @@
 import { after, NextResponse } from "next/server";
-import { unlockMoves } from "@/lib/character";
-import { samPhrase } from "@/lib/finish";
-import { refreshLikeness } from "@/lib/likeness";
-import { clarityOf } from "@/lib/memory";
-import { depthLayers, paintCard } from "@/lib/meta";
 import { nextPull } from "@/lib/moves";
-import { photoBase64 } from "@/lib/photos";
-import { balance, PACK_COST, PACK_SIZE, sealedPrints } from "@/lib/points";
-import { load, save } from "@/lib/store";
-import { drawStyle } from "@/lib/styles";
-import { overLimit } from "@/lib/limits";
+import { paintInPool, topUpPool } from "@/lib/painter";
+import { balance, PACK_COST, PACK_SIZE, packOpenable, poolReady, sealedPrints, stuckPainting } from "@/lib/points";
+import { load, update } from "@/lib/store";
+import type { Card } from "@/lib/types";
 import { currentUserId, isAdmin, runAs, withUser } from "@/lib/session";
 
-export const maxDuration = 300; // painting takes a while
+export const maxDuration = 300; // topping the pool up carries on after the answer
 
-// Open a Daily Booster with Memory Points: up to three shared memories (oldest first) are painted into cards, each in
-// a style drawn from the blind-box pool; a legend-tier style makes a legend. A move the pet has learned may drop out
-// as a bonus card.
+const shuffle = <T,>(xs: T[]) => xs.map((x) => ({ x, r: Math.random() })).sort((a, b) => a.r - b.r).map((o) => o.x);
+
+// Open a Daily Booster with M pt. Cards come from the pool, already painted in the background, so the pack opens at
+// once: new memories first, then new versions of old ones. A learned move may drop out as a bonus. If the pool is
+// still being painted, nothing is spent and the owner is told it will be ready soon.
 export const POST = withUser(async (req: Request) => {
-  const limited = await overLimit("quest", true); // the site-wide painting cap
-  if (limited && limited.status === 503) return limited;
   const { petId } = (await req.json()) as { petId?: string };
   const s = await load();
   const pet = s.pets.find((p) => p.id === petId);
   if (!pet) return NextResponse.json({ error: "pet not found" }, { status: 404 });
-  const prints = sealedPrints(s, pet.id).slice(0, PACK_SIZE);
-  if (!prints.length) return NextResponse.json({ error: "Share a memory first: a pack paints the memories you've shared." }, { status: 400 });
-  if (!isAdmin() && balance(s, pet.id) < PACK_COST) return NextResponse.json({ error: `A pack costs ${PACK_COST} M pt.` }, { status: 400 });
-
-  const before = clarityOf(s, pet).level;
-  const avatar = s.photos.find((p) => p.id === pet.avatarPhotoId);
-  const ref = avatar ? await photoBase64(avatar.file) : null;
-  const now = new Date().toISOString();
-  // each card is painted on its own; a painting that fails twice leaves that memory sealed for the next pack
-  const painted = await Promise.all(
-    prints.map(async (card) => {
-      const photo = s.photos.find((p) => p.id === card.photoId);
-      if (!photo) return false;
-      const style = drawStyle();
-      const rarity = Math.max(card.rarity, style.tier) as 1 | 2 | 3;
-      const b64 = await photoBase64(photo.file);
-      const paint = () => paintCard(b64, pet, style.prompt, card.scene || card.observation, ref);
-      const art = await paint().catch(() => paint()).catch(() => undefined);
-      if (art === undefined) return false;
-      const layers = art && rarity >= 2 ? await depthLayers(art, samPhrase(pet.species)) : { fg: null, plate: null };
-      Object.assign(card, { style: style.label, rarity, art: art ? `/api/art/${art}` : null, fg: layers.fg ? `/api/art/${layers.fg}` : null, plate: layers.plate ? `/api/art/${layers.plate}` : null, layersV: layers.plate ? 2 : undefined, sealed: false, openedAt: now });
-      return true;
-    }),
-  );
-  if (!painted.some(Boolean)) return NextResponse.json({ error: "The painter is busy right now. Try again in a minute; your M pt weren't spent." }, { status: 503 });
-  if (!isAdmin()) (s.points ??= []).push({ petId: pet.id, at: now, delta: -PACK_COST, why: "pack" });
-  const bonus = nextPull(pet, s);
-  if (bonus) pet.moveCards = [...(pet.moveCards ?? []), { mood: bonus, at: now, from: "pack" }];
-  await refreshLikeness(s, pet).catch(() => false);
-  await save(s);
+  const admin = isAdmin();
+  if (!admin && balance(s, pet.id) < PACK_COST) return NextResponse.json({ error: `A pack costs ${PACK_COST} M pt.` }, { status: 400 });
   const owner = currentUserId();
-  after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
-  return NextResponse.json({ cards: prints.filter((_, i) => painted[i]), bonus, levelBefore: before, levelAfter: clarityOf(s, pet).level, balance: balance(s, pet.id) });
+
+  if (!packOpenable(s, pet.id)) {
+    // paint what is waiting (a painting that failed earlier is tried again), or make new versions if the pool is empty
+    const stuck = sealedPrints(s, pet.id).filter((c) => !c.art && (!c.painting || stuckPainting(c))).map((c) => c.id);
+    after(() => runAs(owner, async () => {
+      if (stuck.length) {
+        const at = new Date().toISOString();
+        await update((f) => { for (const c of f.cards) if (stuck.includes(c.id)) c.painting = at; });
+        await paintInPool(pet.id, stuck);
+      }
+      await topUpPool(pet.id, admin);
+    }).catch(() => {}));
+    return NextResponse.json({ status: "painting" });
+  }
+
+  const pool = poolReady(s, pet.id);
+  const picked = [...shuffle(pool.filter((c) => !c.versionOf)), ...shuffle(pool.filter((c) => c.versionOf))].slice(0, PACK_SIZE).map((c) => c.id);
+  const now = new Date().toISOString();
+  let cards: Card[] = [];
+  let bonus: string | null = null;
+  await update((f) => {
+    const p = f.pets.find((x) => x.id === pet.id)!;
+    for (const c of f.cards) if (picked.includes(c.id)) Object.assign(c, { sealed: false, openedAt: now });
+    cards = f.cards.filter((c) => picked.includes(c.id));
+    if (!admin) (f.points ??= []).push({ petId: pet.id, at: now, delta: -PACK_COST, why: "pack" });
+    bonus = nextPull(p, f);
+    if (bonus) p.moveCards = [...(p.moveCards ?? []), { mood: bonus, at: now, from: "pack" }];
+  });
+  // get the next pack ready in the background
+  after(() => runAs(owner, () => topUpPool(pet.id, admin)).catch(() => {}));
+  return NextResponse.json({ status: "opened", cards, bonus });
 });

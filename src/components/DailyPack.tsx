@@ -12,12 +12,13 @@ import { finishFor } from "@/lib/finish";
 import Link from "next/link";
 import { moveOf, starterDoneAt } from "@/lib/moves";
 import { packFor } from "@/lib/species";
-import { balance, FREE_PER_DAY, PACK_COST, sealedPrints, sharesToday, TASK_POINTS, tasksFor, type Task } from "@/lib/points";
+import { balance, FREE_PER_DAY, PACK_COST, packOpenable, poolPainting, poolReady, sharesToday, TASK_POINTS, tasksFor, type Task } from "@/lib/points";
 import { appendPhoto } from "@/lib/prepare";
 import type { Card, Pet, State } from "@/lib/types";
 import { useT } from "@/lib/ui";
 
-type Result = { url: string; text: string; earned: number };
+// a shared memory, what the pet learned from it, and the owner's story about it (asked for after the reading)
+type Result = { url: string; text: string; earned: number; cardId: string; story: string; state: "ask" | "sending" | "saved" | "skipped"; line?: string };
 
 // Today: teach the pet and earn Memory Points (today's tasks ask for what it knows least; three free shares a day),
 // then spend points to open a Daily Booster, which paints shared memories into cards and may drop a move card.
@@ -29,7 +30,6 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
   const [levelUp, setLevelUp] = useState<[number, number] | null>(null);
   const [busy, setBusy] = useState<string | null>(null); // the task id being answered, or "free"
   const [results, setResults] = useState<Result[]>([]);
-  const [words, setWords] = useState("");
   const input = useRef<HTMLInputElement>(null);
   const forTask = useRef<Task | null>(null);
   const { t } = useT();
@@ -37,13 +37,18 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
     spotCoco("pack");
     moodCoco(phase === "sealed" || busy ? "busy" : phase === "reveal" ? "happy" : null);
   }, [phase, busy]);
+  // the pool: memories painted in the background, sealed until a pack opens them (the workspace checks back while painting)
+  const ready = poolReady(state, pet.id).length;
+  const painting = poolPainting(state, pet.id).length;
   useEffect(() => () => { spotCoco(null); moodCoco(null); }, []);
 
   const points = balance(state, pet.id);
-  const waiting = sealedPrints(state, pet.id).length;
-  const freeLeft = admin ? FREE_PER_DAY : Math.max(0, FREE_PER_DAY - sharesToday(state, pet.id));
+  const waiting = ready + painting;
+  const freeLeft = Math.max(0, FREE_PER_DAY - sharesToday(state, pet.id)); // shown as it really is, also for admins
+  const canShare = admin || freeLeft > 0;
   const tasks = tasksFor(state, pet);
-  const canOpen = waiting > 0 && (admin || points >= PACK_COST);
+  const openable = packOpenable(state, pet.id);
+  const canOpen = (admin || points >= PACK_COST) && (openable || !painting); // with M pt but an empty pool, opening starts new versions
   // the Starter Kit is the base pack: free, each photo painted straight away; points start after it
   const starterLeft = starterDoneAt(pet, state) ? 0 : packFor(pet.species).quest.filter((q) => !state.cards.some((c) => c.petId === pet.id && c.slotId === q.id)).length;
 
@@ -59,7 +64,6 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
     await appendPhoto(fd, "photo", f);
     fd.append("petId", pet.id);
     if (task) fd.append("task", task.id);
-    if (!task && words.trim()) fd.append("words", words.trim());
     const r = await call<{ card: Card; earned: number; matched: boolean; task: string | null }>("/api/share", { method: "POST", body: fd });
     setBusy(null);
     if (!r) return URL.revokeObjectURL(url);
@@ -69,18 +73,32 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       : task
         ? `${t("This one doesn't look like “{task}” to {name}.", { task: t(task.label), name: pet.name })} ${t(r.earned ? "Kept as a free share." : "Kept as a memory.")} ${learned}`
         : learned;
-    setResults((x) => [{ url, text, earned: r.earned }, ...x]);
-    if (!task) setWords("");
+    setResults((x) => [{ url, text, earned: r.earned, cardId: r.card.id, story: "", state: "ask" }, ...x]);
     await onChange();
   }
+  // the story behind the photo, after the pet has said what it saw: the owner's words outrank the reading
+  async function tell(i: number) {
+    const r = results[i];
+    if (!r.story.trim()) return;
+    setResults((x) => x.map((y, k) => (k === i ? { ...y, state: "sending" } : y)));
+    const fd = new FormData();
+    fd.append("text", r.story.trim());
+    const out = await call<{ card: Card }>(`/api/cards/${r.cardId}/note`, { method: "POST", body: fd });
+    setResults((x) => x.map((y, k) => (k === i ? { ...y, state: out ? "saved" : "ask", line: out?.card.line } : y)));
+    if (out) await onChange();
+  }
+  // the pool is painted ahead of time, so a pack opens at once; if it is still painting, nothing is spent
   async function open() {
     setPhase("sealed");
-    const r = await call<{ cards: Card[]; bonus: string | null; levelBefore: number; levelAfter: number }>("/api/pack", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ petId: pet.id }) });
-    if (!r) return setPhase("idle");
+    const r = await call<{ status: "opened" | "painting"; cards?: Card[]; bonus?: string | null }>("/api/pack", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ petId: pet.id }) });
+    if (!r || r.status !== "opened" || !r.cards) {
+      setPhase("idle");
+      return onChange();
+    }
     setFresh(r.cards);
-    setBonus(r.bonus);
+    setBonus(r.bonus ?? null);
     setShown(0);
-    setLevelUp(r.levelAfter > r.levelBefore ? [r.levelBefore, r.levelAfter] : null);
+    setLevelUp(null);
     setPhase("reveal");
   }
   async function done() {
@@ -142,18 +160,23 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       {/* points and the pack */}
       <div className="ws-card flex flex-col items-center gap-5 p-5 sm:flex-row sm:items-center">
         <div data-coco-spot="pack" data-coco-side="left" className="w-[min(170px,44vw)] shrink-0">
-          <PackArt kind="booster" art={petArt(pet)} title={phase === "sealed" ? t("Painting…") : waiting ? t(Math.min(waiting, 3) === 1 ? "{n} memory" : "{n} memories", { n: Math.min(waiting, 3) }) : t("Empty for now")} sub={phase === "sealed" ? t("about half a minute") : undefined} badge={`${PACK_COST} M pt`} sealed={phase === "sealed"} />
+          <PackArt kind="booster" art={petArt(pet)} title={painting && !openable ? t("Painting…") : ready ? t(Math.min(ready, 3) === 1 ? "{n} card ready" : "{n} cards ready", { n: Math.min(ready, 3) }) : t("Empty for now")} sub={painting && !openable ? t("you can leave this page") : undefined} badge={`${PACK_COST} M pt`} sealed={(painting > 0 && !openable) || phase === "sealed"} />
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-left">
           <div className="text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]">{t("M pt · Memory points")}</div>
           <div className="serif text-[52px] font-bold leading-none">{points}</div>
           <p className="mt-2 text-[14px] leading-relaxed text-[var(--ink2)]">
-            {waiting ? t(waiting === 1 ? "{n} shared memory is waiting to become an M Print." : "{n} shared memories are waiting to become M Prints.", { n: waiting }) : t("Share a memory below; a pack paints your shared memories into M Prints.")} {t("A Daily Booster costs {n} M pt and paints up to three, each in a style you won't know until it turns over.", { n: PACK_COST })}
+            {painting && !openable
+              ? t("Painting {n} of your memories into cards. You can leave this page; we'll let you know when they're ready.", { n: painting })
+              : ready
+                ? t(ready === 1 ? "{n} card is painted and waiting in your pack." : "{n} cards are painted and waiting in your pack.", { n: ready })
+                : t("Share a memory below; it's painted into a card right away and waits here for a pack.")}{" "}
+            {t("A Daily Booster costs {n} M pt and opens up to three, each in a style you won't know until it turns over. With more M pt than memories, we paint new versions of your memories.", { n: PACK_COST })}
           </p>
           <button disabled={!canOpen || phase === "sealed"} onClick={open} className="pack mt-3 rounded-xl px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-40">
-            {phase === "sealed" ? t("Painting your cards…") : t("Open a pack · {n} M pt", { n: PACK_COST })}
+            {phase === "sealed" ? t("Opening…") : painting && !openable ? t("Painting…") : t("Open a pack · {n} M pt", { n: PACK_COST })}
           </button>
-          {!canOpen && phase !== "sealed" && <div className="mt-1.5 text-[12.5px] text-[var(--ink3)]">{!waiting ? t("Nothing to paint yet.") : t("{n} more M pt to go.", { n: PACK_COST - points })}</div>}
+          {!canOpen && phase !== "sealed" && !painting && <div className="mt-1.5 text-[12.5px] text-[var(--ink3)]">{t("{n} more M pt to go.", { n: PACK_COST - points })}</div>}
         </div>
       </div>
 
@@ -186,12 +209,11 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       <div className="ws-card p-4">
         <div className="flex flex-wrap items-baseline gap-2">
           <h3 className="serif text-[20px] font-bold">{t("Share any moment")}</h3>
-          <span className="text-[13px] text-[var(--ink2)]">{t("+1 M pt each · {a} of {b} left today", { a: freeLeft, b: FREE_PER_DAY })}</span>
+          <span className="text-[13px] text-[var(--ink2)]">{freeLeft || !admin ? t("+1 M pt each · {a} of {b} left today", { a: freeLeft, b: FREE_PER_DAY }) : t("Admin: no daily limit")}</span>
         </div>
-        <p className="mt-1 text-[13.5px] text-[var(--ink2)]">{t("Any day of your life together. Add a few words if you like; your words teach {name} what no photo shows.", { name: pet.name })}</p>
-        <textarea value={words} onChange={(e) => setWords(e.target.value)} rows={2} maxLength={500} placeholder={t("Anything to tell {name} about it? (optional)", { name: pet.name })} className="mt-3 w-full resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]" />
-        <button disabled={!!busy || freeLeft <= 0} onClick={() => choose(null)} className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-[var(--ink)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-40">
-          <ImagePlus size={15} /> {busy === "free" ? t("Reading…") : freeLeft > 0 ? t("Choose a photo · +1 M pt") : t("Come back tomorrow")}
+        <p className="mt-1 text-[13.5px] text-[var(--ink2)]">{t("Any day of your life together. {name} reads the photo first; then you can tell the story behind it.", { name: pet.name })}</p>
+        <button disabled={!!busy || !canShare} onClick={() => choose(null)} className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[var(--ink)] px-4 py-2.5 text-[14px] font-semibold text-white disabled:opacity-40">
+          <ImagePlus size={15} /> {busy === "free" ? t("Reading…") : canShare ? t(freeLeft > 0 ? "Choose a photo · +1 M pt" : "Choose a photo") : t("Come back tomorrow")}
         </button>
         <p className="mt-2 text-[12px] text-[var(--ink3)]">{t("People's faces are blurred on your device before anything is uploaded.")}</p>
       </div>
@@ -200,11 +222,25 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
       {results.length > 0 && (
         <div className="grid gap-2">
           {results.map((r, i) => (
-            <div key={i} className="flex items-center gap-3 rounded-2xl bg-white p-2.5 pr-4 shadow-[0_6px_18px_-12px_rgba(40,30,90,.4)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={r.url} alt="" className="h-14 w-11 shrink-0 rounded-lg object-cover" onError={(e) => (e.currentTarget.style.visibility = "hidden")} />
-              <div className="min-w-0 flex-1 text-[13.5px] leading-snug">{r.text}</div>
-              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[12.5px] font-bold ${r.earned ? "bg-[#efe9ff] text-[#5b3fb0]" : "bg-[#eeebf8] text-[var(--ink3)]"}`}>{r.earned ? <><Sparkles size={12} className="-mt-0.5 mr-0.5 inline" />+{r.earned}</> : "+0"}</span>
+            <div key={r.cardId} className="rounded-2xl bg-white p-3 shadow-[0_6px_18px_-12px_rgba(40,30,90,.4)]">
+              <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={r.url} alt="" className="h-14 w-11 shrink-0 rounded-lg object-cover" onError={(e) => (e.currentTarget.style.visibility = "hidden")} />
+                <div className="min-w-0 flex-1 text-[13.5px] leading-snug">{r.text}</div>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[12.5px] font-bold ${r.earned ? "bg-[#efe9ff] text-[#5b3fb0]" : "bg-[#eeebf8] text-[var(--ink3)]"}`}>{r.earned ? <><Sparkles size={12} className="-mt-0.5 mr-0.5 inline" />+{r.earned}</> : "+0"}</span>
+              </div>
+              {r.state === "saved" ? (
+                <div className="mt-2.5 rounded-xl bg-[#f6f2ff] px-3 py-2 text-[13px] leading-snug"><b className="text-[#5b3fb0]">{t("{name} will remember:", { name: pet.name })}</b> “{r.line}”</div>
+              ) : r.state !== "skipped" ? (
+                <div className="mt-2.5">
+                  <div className="text-[13px] font-semibold">{t("Do you remember the story behind this photo?")}</div>
+                  <div className="mt-1.5 flex items-end gap-2">
+                    <textarea value={r.story} onChange={(e) => setResults((x) => x.map((y, k) => (k === i ? { ...y, story: e.target.value } : y)))} rows={2} maxLength={500} placeholder={t("What happened, what {name} was like that day… (optional)", { name: pet.name })} className="min-w-0 flex-1 resize-none rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]" />
+                    <button disabled={!r.story.trim() || r.state === "sending"} onClick={() => tell(i)} className="shrink-0 rounded-xl bg-[var(--ink)] px-3.5 py-2.5 text-[13.5px] font-semibold text-white disabled:opacity-40">{t(r.state === "sending" ? "Saving…" : "Send")}</button>
+                  </div>
+                  <button onClick={() => setResults((x) => x.map((y, k) => (k === i ? { ...y, state: "skipped" } : y)))} className="mt-1 text-[12.5px] text-[var(--ink3)]">{t("Not now")}</button>
+                </div>
+              ) : null}
             </div>
           ))}
         </div>

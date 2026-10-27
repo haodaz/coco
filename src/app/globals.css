@@ -310,3 +310,16 @@ body {
 @keyframes aurora { 0% { background-position: 0% 50%; opacity: .8; } 50% { opacity: 1; } 100% { background-position: 100% 30%; opacity: .85; } }
 @keyframes twinkle { 0% { opacity: .35; } 40% { opacity: .9; } 70% { opacity: .5; } 100% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .hc[data-finish="popout"] .hc-card::before, .hc[data-finish="popout"] .hc-card::after { animation: none; } }
+
+/* walking: little bouncing steps with a sway from side to side for as long as the trip takes, leaning the way it goes,
+   then a small squash on arrival */
+.companion-walk { transform-origin: 50% 95%; animation: companion-step calc(var(--walk) / var(--steps)) ease-in-out var(--steps), companion-arrive .35s ease-out var(--walk) 1; }
+@keyframes companion-step {
+  0% { translate: 0 0; rotate: calc(var(--lean, 0) * .6deg); scale: 1 1; }
+  25% { translate: 0 -9px; rotate: calc(var(--lean, 0) * .6deg + 3deg); scale: .98 1.03; }
+  50% { translate: 0 0; rotate: calc(var(--lean, 0) * .6deg); scale: 1.03 .97; }
+  75% { translate: 0 -9px; rotate: calc(var(--lean, 0) * .6deg - 3deg); scale: .98 1.03; }
+  100% { translate: 0 0; rotate: calc(var(--lean, 0) * .6deg); scale: 1 1; }
+}
+@keyframes companion-arrive { 0% { scale: 1.05 .94; } 100% { scale: 1 1; } }
+@media (prefers-reduced-motion: reduce) { .companion-walk { animation: none; } }

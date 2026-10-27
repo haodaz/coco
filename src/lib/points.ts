@@ -19,6 +19,16 @@ const entries = (state: State, petId: string) => (state.points ?? []).filter((p)
 export const balance = (state: State, petId: string) => entries(state, petId).reduce((n, p) => n + p.delta, 0);
 export const sharesToday = (state: State, petId: string, now = new Date()) => entries(state, petId).filter((p) => p.why === "share" && p.at.slice(0, 10) === today(now)).length;
 export const sealedPrints = (state: State, petId: string) => state.cards.filter((c) => c.petId === petId && c.sealed).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+// the pool: shared memories (and new versions of old ones) painted in the background, sealed until a pack opens them
+// a painting that started more than 10 minutes ago and never finished is stuck: it is painted again at the next pack
+export const stuckPainting = (c: { painting?: string }) => !!c.painting && !(Date.now() - Date.parse(c.painting) < 10 * 60_000);
+export const poolReady = (state: State, petId: string) => sealedPrints(state, petId).filter((c) => c.art && !c.painting);
+export const poolPainting = (state: State, petId: string) => sealedPrints(state, petId).filter((c) => c.painting && !stuckPainting(c));
+// a pack opens when every memory it would take is painted (no half-painted packs)
+export const packOpenable = (state: State, petId: string) => {
+  const ready = poolReady(state, petId).length;
+  return ready > 0 && ready >= Math.min(PACK_SIZE, ready + poolPainting(state, petId).length);
+};
 
 export type Task = { id: string; tag: string; label: string; hint: string; series: string; colour: string; done: boolean };
 

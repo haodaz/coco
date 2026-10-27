@@ -1,5 +1,6 @@
 import { after, NextResponse } from "next/server";
 import { unlockMoves } from "@/lib/character";
+import { paintInPool, topUpPool } from "@/lib/painter";
 import { refreshLikeness } from "@/lib/likeness";
 import { clarityOf, SENSES } from "@/lib/memory";
 import { readMomentPhoto, writeIn } from "@/lib/meta";
@@ -7,12 +8,12 @@ import { photoBase64, storePhoto, uploadMeta } from "@/lib/photos";
 import { FREE_PER_DAY, SHARE_POINTS, sharesToday, TASK_POINTS, tasksFor } from "@/lib/points";
 import { cardTags } from "@/lib/series";
 import { packFor } from "@/lib/species";
-import { load, newId, save } from "@/lib/store";
+import { load, newId, update } from "@/lib/store";
 import type { Card, Trace } from "@/lib/types";
 import { overLimit } from "@/lib/limits";
 import { currentUserId, isAdmin, runAs, withUser } from "@/lib/session";
 
-export const maxDuration = 60;
+export const maxDuration = 300; // the card is painted after the answer, in the background
 
 // Share one memory: a photo (and, if the owner likes, a few words). The pet's AI reads it and keeps it right away
 // as a Memory Print (sealed: a pack paints it into a card later). Points: +3 when it answers one of today's tasks,
@@ -58,26 +59,33 @@ export const POST = withUser(async (req: Request) => {
     photoId: photo.id,
     createdAt: now,
     sealed: true,
+    painting: now, // painted right away in the background (since when), then it waits in the pool for a pack
   };
+  // points: a task only counts when the moment really fits it
   s.photos.push(photo);
   s.traces.push(...traces);
   s.cards.push(card);
-
-  // points: a task only counts when the moment really fits it
-  let earned = 0;
-  let matched = false;
-  if (task && cardTags(card, s, pet).includes(task.tag)) {
-    matched = true;
-    card.task = task.id;
-    earned = TASK_POINTS;
-    (s.points ??= []).push({ petId: pet.id, at: now, delta: TASK_POINTS, why: "task", ref: task.id });
-  } else if (freeLeft > 0) {
-    earned = SHARE_POINTS;
-    (s.points ??= []).push({ petId: pet.id, at: now, delta: SHARE_POINTS, why: "share", ref: card.id });
-  }
-  await refreshLikeness(s, pet).catch(() => false);
-  await save(s);
+  const matched = !!task && cardTags(card, s, pet).includes(task.tag);
+  if (matched) card.task = task!.id;
+  const earned = matched ? TASK_POINTS : freeLeft > 0 ? SHARE_POINTS : 0;
+  const entry = earned ? { petId: pet.id, at: now, delta: earned, why: (matched ? "task" : "share") as "task" | "share", ref: matched ? task!.id : card.id } : null;
+  // merge into the latest state: other memories may have finished painting in the background meanwhile
+  await update((f) => {
+    f.photos.push(photo);
+    f.traces.push(...traces);
+    f.cards.push(card);
+    if (entry) (f.points ??= []).push(entry);
+  });
   const owner = currentUserId();
-  after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
+  const admin = isAdmin();
+  after(() => runAs(owner, async () => {
+    await paintInPool(pet.id, [card.id]);
+    // the AI's picture of the pet may sharpen with this memory
+    const fresh = await load();
+    const p = fresh.pets.find((x) => x.id === pet.id);
+    if (p && (await refreshLikeness(fresh, p).catch(() => false))) await update((f) => { const q = f.pets.find((x) => x.id === pet.id); if (q) q.likeness = p.likeness; });
+    await unlockMoves(pet.id).catch(() => {});
+    await topUpPool(pet.id, admin);
+  }).catch(() => {}));
   return NextResponse.json({ card, earned, matched, task: task?.label ?? null, levelBefore: before, levelAfter: clarityOf(s, pet).level });
 });

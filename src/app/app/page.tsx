@@ -11,7 +11,7 @@ import PackArt from "@/components/PackArt";
 import { petArt } from "@/components/PetFace";
 import Shell, { Rule } from "@/components/Shell";
 import { finishFor } from "@/lib/finish";
-import { balance, PACK_COST, sealedPrints, tasksFor } from "@/lib/points";
+import { balance, PACK_COST, packOpenable, poolReady, tasksFor } from "@/lib/points";
 import { rhythm } from "@/lib/rhythm";
 
 const greeting = () => {
@@ -31,7 +31,7 @@ export default function Home() {
         const recent = cards.filter((c) => c.kind !== "legendary" && !c.sealed).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
         const threads = (state.threads ?? []).filter((t) => t.petId === pet.id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 3);
         const latest = cards.filter((c) => c.kind === "daily" && !c.sealed).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-        const t = { tasksLeft: tasksFor(state, pet).filter((x) => !x.done).length, points: balance(state, pet.id), canOpen: sealedPrints(state, pet.id).length > 0 && (state.admin || balance(state, pet.id) >= PACK_COST) };
+        const t = { tasksLeft: tasksFor(state, pet).filter((x) => !x.done).length, points: balance(state, pet.id), ready: poolReady(state, pet.id).length, canOpen: packOpenable(state, pet.id) && (state.admin || balance(state, pet.id) >= PACK_COST) };
         const line = t.tasksLeft ? tr("There's a moment of ours I'd love to see today. Will you find it?") : latest ? latest.line : tr("Ask me anything about us.");
         const legends = cards.filter((c) => c.rarity === 3).length;
         const lit = memory?.senses.filter((s) => s.imprints).length ?? 0;
@@ -88,7 +88,7 @@ export default function Home() {
                 <PackArt kind="booster" art={petArt(pet)} className="float-card absolute -right-2 -top-6 w-[46%] rotate-[10deg]" />
                 <div className="relative">
                   <div className="text-[11px] font-bold uppercase tracking-[.2em] opacity-85">{tr("Today")}</div>
-                  <div className="serif mt-1 text-[28px] font-bold leading-tight">{t.tasksLeft ? tr(t.tasksLeft > 1 ? "{n} tasks waiting" : "{n} task waiting", { n: t.tasksLeft }) : tr("Tasks done for today")}</div>
+                  <div className="serif mt-1 text-[28px] font-bold leading-tight">{t.canOpen ? tr(t.ready > 1 ? "{n} cards ready in your pack" : "{n} card ready in your pack", { n: Math.min(t.ready, 3) }) : t.tasksLeft ? tr(t.tasksLeft > 1 ? "{n} tasks waiting" : "{n} task waiting", { n: t.tasksLeft }) : tr("Tasks done for today")}</div>
                   <div className="mt-1 text-[13.5px] opacity-90">{t.points} M pt{t.canOpen ? ` · ${tr("enough for a pack")}` : ""}</div>
                   <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[13.5px] font-semibold text-[#3b2a8f] transition group-hover:gap-2.5">{t.canOpen ? tr("Open a pack") : tr("See today's tasks")} <ArrowRight size={15} /></div>
                 </div>

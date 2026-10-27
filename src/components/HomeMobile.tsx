@@ -31,7 +31,7 @@ export default function HomeMobile({
   greeting: string;
   line: string;
   r: ReturnType<typeof rhythm>;
-  today: { tasksLeft: number; points: number; canOpen: boolean };
+  today: { tasksLeft: number; points: number; ready: number; canOpen: boolean };
   memory?: Memory;
   cardCount: number;
   recent: Card[];
@@ -74,7 +74,7 @@ export default function HomeMobile({
       <Link href="/app/pack" className="pack relative mt-5 flex items-center gap-3 overflow-hidden rounded-[20px] p-4 text-white">
         <div className="min-w-0 flex-1">
           <div className="text-[10.5px] font-bold uppercase tracking-[.2em] opacity-85">{t("Today")}</div>
-          <div className="serif mt-0.5 text-[22px] font-bold leading-tight">{today.tasksLeft ? t(today.tasksLeft > 1 ? "{n} tasks waiting" : "{n} task waiting", { n: today.tasksLeft }) : t("Tasks done for today")}</div>
+          <div className="serif mt-0.5 text-[22px] font-bold leading-tight">{today.canOpen ? t(today.ready > 1 ? "{n} cards ready in your pack" : "{n} card ready in your pack", { n: Math.min(today.ready, 3) }) : today.tasksLeft ? t(today.tasksLeft > 1 ? "{n} tasks waiting" : "{n} task waiting", { n: today.tasksLeft }) : t("Tasks done for today")}</div>
           <div className="mt-0.5 text-[12.5px] opacity-90">{today.points} M pt{today.canOpen ? ` · ${t("enough for a pack")}` : ""}</div>
           <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#3b2a8f]">{today.canOpen ? t("Open a pack") : t("See today's tasks")} <ArrowRight size={14} /></div>
         </div>

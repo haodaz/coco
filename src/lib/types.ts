@@ -77,7 +77,9 @@ export type Card = {
   note?: { text: string; via: "voice" | "text"; at: string } | null; // the owner's words about this moment
   fg?: string | null;
   plate?: string | null; // the painting without the pet, so the pet layer can move over it without leaving a ghost
-  layersV?: number; // 2: the pet layer was cut by what the clean scene took away (only the pet and its things)
+  layersV?: number;
+  painting?: string; // being painted in the background right now
+  versionOf?: string; // another version (another style) of this memory's card: a card, not a new memory // 2: the pet layer was cut by what the clean scene took away (only the pet and its things)
   basis?: string[]; // for the legendary card: the imprints its soul line rests on // the pet alone on a transparent layer the size of the art, for depth (rare cards and up)
   line: string; // in the pet's voice
   observation: string; // what this photo told us
@@ -149,4 +151,5 @@ export type State = {
   settings?: { lang?: string }; // the owner's language: app words and everything the AI writes for them // Memory Points: earned by sharing memories and doing daily tasks, spent on packs
 };
 
-export type PointEntry = { petId: string; at: string; delta: number; why: "share" | "task" | "pack"; ref?: string };
+export type PointEntry = { petId: string; at: string; delta: number; why: "share" | "task" | "pack" | "refund"; ref?: string };
+

@@ -3,7 +3,7 @@
 import { BookHeart, Gift, HeartHandshake, House, Layers, Globe, LogOut, MapPin, Menu, MessageCircle, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import CardModal from "@/components/CardModal";
 import PetFace from "@/components/PetFace";
 import Scene from "@/components/Scene";
@@ -12,7 +12,7 @@ import type { Memory } from "@/components/MemoryPanel";
 import { ConfirmProfile, StartWithOnePhoto } from "@/components/Onboarding";
 import { LANGS } from "@/lib/i18n";
 import { levelName } from "@/lib/memory";
-import { tasksFor } from "@/lib/points";
+import { poolReady, tasksFor } from "@/lib/points";
 import { browserLang, LangProvider, translate } from "@/lib/ui";
 import { rhythm } from "@/lib/rhythm";
 import type { Card, Pet, State } from "@/lib/types";
@@ -51,6 +51,25 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const params = useSearchParams();
   const threadParam = params.get("thread");
   useEffect(() => setMenu(false), [path, threadParam]);
+  // cards painting in the background: check back every few seconds, and say so when they are ready
+  const paintingNow = !!state?.cards.some((c) => c.sealed && c.painting);
+  const readyNow = state?.pets[0] ? poolReady(state, state.pets[0].id).length : 0;
+  const wasPainting = useRef(false);
+  const [painted, setPainted] = useState(0);
+  useEffect(() => {
+    if (!paintingNow) return;
+    const t = setInterval(refresh, 5000);
+    return () => clearInterval(t);
+  }, [paintingNow, refresh]);
+  useEffect(() => {
+    if (wasPainting.current && !paintingNow && readyNow > 0) setPainted(readyNow);
+    wasPainting.current = paintingNow;
+  }, [paintingNow, readyNow]);
+  useEffect(() => {
+    if (!painted) return;
+    const t = setTimeout(() => setPainted(0), 12000);
+    return () => clearTimeout(t);
+  }, [painted]);
   // the owner's language: saved on the account; the first time, the browser's
   const lang = state?.settings?.lang ?? browserLang();
   useEffect(() => {
@@ -91,7 +110,8 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
   const faceSrc = face ? (face.startsWith("/") ? face : `/api/art/${face}?v=${encodeURIComponent(pet.character?.at ?? "")}`) : "";
   const NAV: { href: string; label: string; icon: LucideIcon; badge?: string; on: boolean }[] = [
     { href: "/app", label: t("Home"), icon: House, on: path === "/app" },
-    { href: "/app/pack", label: t("Today"), icon: Gift, badge: tasksLeft ? `${tasksLeft}` : undefined, on: path.startsWith("/app/pack") },
+    // the number on Today: cards painted and waiting in the pack, otherwise tasks left
+    { href: "/app/pack", label: t("Today"), icon: Gift, badge: readyNow ? `${readyNow}` : tasksLeft ? `${tasksLeft}` : undefined, on: path.startsWith("/app/pack") },
     { href: "/app/cards", label: t("Cards"), icon: Layers, badge: `${cards.length}`, on: path.startsWith("/app/cards") },
     { href: "/app/memory", label: t("Memory"), icon: BookHeart, badge: memory ? `Lv ${memory.level}` : undefined, on: path.startsWith("/app/memory") },
     { href: "/app/place", label: t("Around us"), icon: MapPin, badge: state.place ? undefined : t("Set"), on: path.startsWith("/app/place") },
@@ -235,6 +255,16 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
       )}
       {card && <CardModal card={card} state={state} pet={pet} onClose={() => setCard(null)} onChanged={refresh} />}
       <UnlockToast pet={pet} state={state} />
+      {painted > 0 && !path.startsWith("/app/pack") && (
+        <Link href="/app/pack" onClick={() => setPainted(0)} className="fixed inset-x-3 bottom-[calc(84px+env(safe-area-inset-bottom))] z-[56] mx-auto flex max-w-md items-center gap-3 rounded-2xl p-3 pr-4 text-white shadow-[0_18px_40px_-16px_rgba(40,30,90,.6)] md:bottom-6" style={{ background: "linear-gradient(135deg,#2b3a8f,#5b3fb0 50%,#c2418f)" }}>
+          <Gift size={22} className="shrink-0" />
+          <span className="min-w-0 flex-1">
+            <b className="block text-[14.5px]">{t(painted === 1 ? "Your card is painted" : "Your cards are painted")}</b>
+            <span className="block text-[12.5px] opacity-90">{t(painted === 1 ? "{n} card is waiting in your pack." : "{n} cards are waiting in your pack.", { n: painted })}</span>
+          </span>
+          <span className="rounded-full bg-white px-3 py-1 text-[12.5px] font-semibold text-[#3b2a8f]">{t("Open")}</span>
+        </Link>
+      )}
     </div>
     </LangProvider>
   );

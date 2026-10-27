@@ -23,7 +23,7 @@ function age(born: string | null) {
 export function petContext(state: State, pet: Pet) {
   const slots = packFor(pet.species).quest;
   const clarity = clarityOf(state, pet);
-  const cards = state.cards.filter((c) => c.petId === pet.id && c.kind !== "legendary");
+  const cards = state.cards.filter((c) => c.petId === pet.id && c.kind !== "legendary" && !c.versionOf); // versions repeat a memory
   const imprints = cards.map((c) => {
     const photo = state.photos.find((p) => p.id === c.photoId);
     const traces = state.traces.filter((t) => (t.source.type === "photo" && t.source.photoId === c.photoId) || (t.source.type === "note" && t.source.noteId === c.id));
