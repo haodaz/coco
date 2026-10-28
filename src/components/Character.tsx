@@ -13,8 +13,8 @@ const TIMELINE: Record<Mood, [number, number][]> = {
   close: [[0, 1600], [1, 1800]],
   busy: [[0, 650], [1, 650]],
   rest: [[0, 2600], [1, 2600]],
-  // a walk cycle: one step, legs passing, the other step, legs passing
-  walk: [[0, 170], [2, 130], [1, 170], [2, 130]],
+  // a four-legged walk: six frames, one step per side (land, weight over, reach), about two steps a second
+  walk: [[0, 110], [1, 110], [2, 110], [3, 110], [4, 110], [5, 110]],
 };
 
 // The pet as a living character: cut out with no background, the mood's frames loop like a GIF,

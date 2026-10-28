@@ -23,7 +23,7 @@ const MOODS: Record<Exclude<Mood, "idle">, string> = {
   busy: "lying down, carefully pushing through a small pile of photo cards with one paw, focused look",
   rest: "lying flat on its belly, chin resting on its front paws, eyes closed, dozing peacefully",
   // walking: seen from the side, heading right; three frames make a walk cycle (the app turns it to go left)
-  walk: "walking to the right, seen from the side (body turned to the right, head turned a little toward the viewer), mid-stride: the left front paw and the right hind paw are stepping forward, tail relaxed, happy and eager",
+  walk: "walking to the right, seen from the side (body turned to the right, head turned a little toward the viewer), the first moment of a step: the LEFT front paw is just landing far forward, the RIGHT front leg is back, the RIGHT hind leg is forward and the LEFT hind leg is back; tail relaxed, happy and eager",
 };
 
 // Extra frames per mood: one small change each, nothing else moves.
@@ -35,11 +35,23 @@ const FRAMES: Record<Mood, string[]> = {
   close: ["the eyes are fully closed, content"],
   busy: ["the paw has moved a little further, pushing one card aside"],
   rest: ["the ears have twitched slightly and the chest is a little rounder, a slow breath"],
+  // a four-legged walk in six frames, one step per side: the paw lands, the weight goes over it while the other
+  // front paw swings past, then that paw reaches forward; then the same on the other side
   walk: [
-    "the legs swap to the other step: now the RIGHT front leg reaches far forward and the LEFT front leg is pushed back under the body; the LEFT hind leg steps forward and the RIGHT hind leg is back. Same direction, same height, still walking, not sitting",
-    "between two steps: still standing up and walking, NOT sitting and NOT crouching; all four legs straight and nearly vertical under the body, the body level and a touch higher, tail out behind",
+    "the next moment of the walk: the LEFT front paw is now flat on the ground under the shoulder carrying the weight, the RIGHT front paw is lifted and swinging forward past it, the LEFT hind leg is lifting off behind; the body is slightly lower",
+    "the next moment of the walk: the RIGHT front leg reaches forward in the air, the LEFT front leg is straight under the body pushing back, the LEFT hind leg swings forward under the belly; the body is a touch higher",
+    "the mirror step: the RIGHT front paw is just landing far forward, the LEFT front leg is back, the LEFT hind leg is forward and the RIGHT hind leg is back",
+    "the next moment of the walk: the RIGHT front paw is flat on the ground under the shoulder carrying the weight, the LEFT front paw is lifted and swinging forward past it, the RIGHT hind leg is lifting off behind; the body is slightly lower",
+    "the next moment of the walk: the LEFT front leg reaches forward in the air, the RIGHT front leg is straight under the body pushing back, the RIGHT hind leg swings forward under the belly; the body is a touch higher",
   ],
 };
+
+// An extra frame: for most moves one small change and nothing else moves; for walking the legs (and the height of the
+// body) change from frame to frame, everything else stays.
+const framePrompt = (m: Mood, change: string) =>
+  m === "walk"
+    ? `Keep this image the same character: same style, same colours, same size in the frame, same camera, same lighting, same plain white background, still walking to the right. Only the legs and the height of the body change: ${change}. It stays standing and walking; it never sits or crouches.`
+    : `Keep this image exactly the same: same character, same pose, same framing, same camera, same lighting, same background, same size and position. Change only one thing: ${change}. Nothing else moves.`;
 
 // The whole body must be in the picture, with room around it, on a plain white backdrop that is easy to cut away.
 const FRAME = "The entire body is in the picture, from the tips of the ears to the paws and tail, with clear empty space above the head and below the paws; nothing is cropped. Plain pure white background, no floor, no shadow.";
@@ -106,7 +118,7 @@ export async function makeCharacter(state: State, pet: Pet): Promise<NonNullable
       const first = firsts.get(m)!;
       const extra = await Promise.all(
         FRAMES[m].map((change) =>
-          editImage("character-frame", `Keep this image exactly the same: same character, same pose, same framing, same camera, same lighting, same background, same size and position. Change only one thing: ${change}. Nothing else moves.`, [first.toString("base64")]),
+          editImage("character-frame", framePrompt(m, change), [first.toString("base64")]),
         ),
       );
       out[m] = await Promise.all([first, ...extra].map((f) => store(f, samPhrase(pet.species), m === "busy" ? ["photo cards", "toy", "clothing"] : ["toy", "clothing"])));
@@ -130,7 +142,7 @@ export async function addMissingMoods(pet: Pet, only?: string[]): Promise<NonNul
       const first = await editImage("character", `The image is a game character. Draw the exact same character: same style, same proportions, same colours, same size in the frame, now ${MOODS[m]}. ${FRAME} No text, no people.`, [baseB64]);
       const extra = await Promise.all(
         FRAMES[m].map((change) =>
-          editImage("character-frame", `Keep this image exactly the same: same character, same pose, same framing, same camera, same lighting, same background, same size and position. Change only one thing: ${change}. Nothing else moves.`, [first.toString("base64")]),
+          editImage("character-frame", framePrompt(m, change), [first.toString("base64")]),
         ),
       );
       moods[m] = await Promise.all([first, ...extra].map((f) => store(f, samPhrase(pet.species), ["toy", "clothing"])));
