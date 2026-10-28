@@ -37,6 +37,15 @@ const NEXT = [
   { title: "Moments from video", body: "SAM 3.1 follows a pet through a clip, so a short video can become a card." },
 ];
 
+function NamePart({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="rounded-2xl bg-white/80 p-4">
+      <div className="text-[18px] font-bold text-[#5b3fb0]">{k}</div>
+      <div className="mt-1 text-[14px] leading-snug text-[#3d4460]">{v}</div>
+    </div>
+  );
+}
+
 export default function Landing() {
   return (
     <div className="overflow-x-hidden bg-[linear-gradient(180deg,#f1edff_0%,var(--bg)_520px)]">
@@ -53,21 +62,17 @@ export default function Landing() {
             <br />
             <span className="text-[var(--primary)]">Built from the moments you share.</span>
           </h1>
-          <p className="mt-5 max-w-xl text-[16.5px] leading-relaxed text-[#3d4460]">
-            Thousands of photos of your pet sit in your camera roll. coco keeps each moment as a Memory Print, held in a card worth collecting, and grows your pet&apos;s AI only from those prints. The more you keep, the more it becomes your pet: a portrait that sharpens, a character that talks back, a cocoverse that belongs to the two of you.
-          </p>
-          <p className="mt-3 max-w-xl text-[13.5px] leading-relaxed text-[var(--sub)]">
-            <b className="text-[var(--ink)]">Why cocoverse?</b> co- means together, as in <i>companion</i>: from Latin, the one you share your bread with. coco is the two of you, you and them; verse, as in universe, is everything you share. A little one: only the two of you are in it, and it doesn&apos;t need to be big. Say it fast and it sounds like <i>converse</i>: here, your pet talks back.
+          <p className="mt-5 max-w-lg text-[17px] leading-relaxed text-[#3d4460]">
+            Every photo becomes a card. Your pet&apos;s AI grows only from those cards, so it never makes up a memory.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/app" className="rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(109,79,209,.55)]">Start your cocoverse →</Link>
             <a href="#how" className="rounded-xl bg-white px-5 py-3 text-[15px] font-semibold shadow-sm">See how it grows</a>
           </div>
-          <ul className="mt-6 grid gap-2 text-[13.5px] text-[#3d4460] sm:grid-cols-2">
-            <Promise>Nothing invented: every word rests on a real moment</Promise>
+          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[13.5px] text-[#3d4460]">
+            <Promise>Only real moments</Promise>
             <Promise>Faces stay on your device</Promise>
-            <Promise>Any pet: dogs, cats, birds, reptiles, fish</Promise>
-            <Promise>No vet, diet or training advice</Promise>
+            <Promise>Any pet</Promise>
           </ul>
         </div>
         <HeroCompanion moods={manifest.moods} assets={{ cards: manifest.set.map((c) => c.src), levels: manifest.levels, legend: manifest.legend?.art ?? null, said: mp?.said ?? "" }} />
@@ -303,6 +308,20 @@ export default function Landing() {
           ))}
         </div>
         <p className="mt-3 text-[12px] text-[var(--sub)]">US households owning each kind of pet, millions. Source: APPA National Pet Owners Survey, 2025.</p>
+      </section>
+
+      {/* the name, for the curious */}
+      <section className="mx-auto max-w-6xl px-5 pb-20">
+        <div className="grid items-center gap-8 rounded-3xl bg-gradient-to-br from-[#efe9ff] to-[#fde8f2] p-8 md:grid-cols-[auto_1fr] md:p-10">
+          <div className="text-[40px] font-bold leading-none tracking-tight md:text-[52px]">
+            <span className="text-[#5b3fb0]">co</span>·<span className="text-[#c2418f]">co</span>·<span className="text-[var(--ink)]">verse</span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <NamePart k="co-" v="together, as in companion: the one you share your bread with" />
+            <NamePart k="coco" v="the two of you, you and your pet" />
+            <NamePart k="verse" v="a universe, a little one, with only you two in it" />
+          </div>
+        </div>
       </section>
 
       {/* boundaries, models, next */}
