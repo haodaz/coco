@@ -11,7 +11,7 @@ import type { Pet, State } from "./types";
 // The pet as a character: one base design learned from its photos, then a set of moods drawn from that base,
 // each with a few frames that differ in one small thing (a blink, a tail wag) so they loop like a GIF.
 
-export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy" | "rest";
+export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy" | "rest" | "walk";
 
 const STYLE = "a polished 3D animated feature film style, soft studio lighting, slightly stylised proportions";
 
@@ -22,6 +22,8 @@ const MOODS: Record<Exclude<Mood, "idle">, string> = {
   close: "leaning forward toward the viewer with the chin resting low, soft loving half-closed eyes, as if leaning on someone it loves",
   busy: "lying down, carefully pushing through a small pile of photo cards with one paw, focused look",
   rest: "lying flat on its belly, chin resting on its front paws, eyes closed, dozing peacefully",
+  // walking: seen from the side, heading right; three frames make a walk cycle (the app turns it to go left)
+  walk: "walking to the right, seen from the side (body turned to the right, head turned a little toward the viewer), mid-stride: the left front paw and the right hind paw are stepping forward, tail relaxed, happy and eager",
 };
 
 // Extra frames per mood: one small change each, nothing else moves.
@@ -33,6 +35,10 @@ const FRAMES: Record<Mood, string[]> = {
   close: ["the eyes are fully closed, content"],
   busy: ["the paw has moved a little further, pushing one card aside"],
   rest: ["the ears have twitched slightly and the chest is a little rounder, a slow breath"],
+  walk: [
+    "the legs swap to the other step: now the RIGHT front leg reaches far forward and the LEFT front leg is pushed back under the body; the LEFT hind leg steps forward and the RIGHT hind leg is back. Same direction, same height, still walking, not sitting",
+    "between two steps: still standing up and walking, NOT sitting and NOT crouching; all four legs straight and nearly vertical under the body, the body level and a touch higher, tail out behind",
+  ],
 };
 
 // The whole body must be in the picture, with room around it, on a plain white backdrop that is easy to cut away.
@@ -59,7 +65,7 @@ export async function ground(files: string[]) {
   );
 }
 
-const ORDER: Mood[] = ["idle", "happy", "confused", "thinking", "close", "busy", "rest"];
+const ORDER: Mood[] = ["idle", "happy", "confused", "thinking", "close", "busy", "rest", "walk"];
 
 // Each frame is cut out with SAM onto a transparent canvas of the same size for every frame,
 // so the frames stay aligned and the character can stand anywhere on the page.

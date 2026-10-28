@@ -323,3 +323,8 @@ body {
 }
 @keyframes companion-arrive { 0% { scale: 1.05 .94; } 100% { scale: 1 1; } }
 @media (prefers-reduced-motion: reduce) { .companion-walk { animation: none; } }
+/* walking with real stride frames: only a light rise and fall of the body; the legs do the walking */
+.companion-stride { transform-origin: 50% 95%; animation: companion-stride .3s ease-in-out infinite; }
+@keyframes companion-stride { 0%, 100% { translate: 0 0; } 50% { translate: 0 -3px; } }
+.char[data-mood="walk"] { animation: none; }
+@media (prefers-reduced-motion: reduce) { .companion-stride { animation: none; } }

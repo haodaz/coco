@@ -19,7 +19,8 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
   const [asked, setAsked] = useState<string | null>(null);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const [hop, setHop] = useState(0); // bumps on every move, restarting the walk
-  const [walk, setWalk] = useState(0); // ms the current walk takes (0 = standing)
+  const [walk, setWalk] = useState(0); // ms the current trip takes (0 = a short hop)
+  const [travelling, setTravelling] = useState(0); // ms of the trip under way, 0 when standing (no glide while scrolling)
   const [faceLeft, setFaceLeft] = useState(false);
   const last = useRef<{ x: number; y: number } | null>(null);
   const lastSpot = useRef<string | null>(null);
@@ -80,7 +81,9 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
           if (p) setFaceLeft(x < p.x - 4);
           // walk there: the farther, the longer, in little steps; a short move is just a hop
           const dist = p ? Math.hypot(x - p.x, y - p.y) : 0;
-          setWalk(dist > 60 ? Math.round(Math.min(1700, Math.max(550, 420 + dist * 1.6))) : 0);
+          const ms = dist > 60 ? Math.round(Math.min(1700, Math.max(550, 420 + dist * 1.6))) : 0;
+          setWalk(ms);
+          setTravelling(ms || 650);
           setHop((h) => h + 1);
           lastSpot.current = want;
         }
@@ -95,15 +98,23 @@ export default function Companion({ moods, mood, version = "", home }: { moods: 
     return () => cancelAnimationFrame(raf);
   }, [asked, home]);
 
+  // the trip ends: stand still again (and follow the page instantly when it scrolls)
+  useEffect(() => {
+    if (!travelling) return;
+    const t = setTimeout(() => setTravelling(0), travelling + 40);
+    return () => clearTimeout(t);
+  }, [travelling, hop]);
+
   if (!pos) return null;
+  const strides = !!walk && !!travelling && !!moods.walk?.length; // real walking frames, facing the way it goes
   return (
     <div
-      className="pointer-events-none fixed z-[45] transition-[left,top,opacity] ease-[cubic-bezier(.45,.05,.4,1)]"
-      style={{ left: pos.x, top: pos.y, width: W, height: H, opacity: away ? 0 : 1, transitionDuration: `${walk || 650}ms` }}
+      className="pointer-events-none fixed left-0 top-0 z-[45] transition-[transform,opacity] will-change-transform"
+      style={{ transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`, width: W, height: H, opacity: away ? 0 : 1, transitionDuration: `${travelling}ms, 300ms`, transitionTimingFunction: strides ? "linear" : "cubic-bezier(.45,.05,.4,1)" }}
       aria-hidden
     >
-      <div key={hop} className={`h-full w-full ${walk ? "companion-walk" : "companion-hop"}`} style={{ ["--lean" as string]: faceLeft ? -7 : 7, ["--walk" as string]: `${walk}ms`, ["--steps" as string]: Math.max(2, Math.round(walk / 260)) }}>
-        <Character moods={moods} interactive mood={dozing && moods.rest?.length ? "rest" : forced ? forced : asked?.startsWith("card-") || asked?.startsWith("cite-") ? "close" : mood} version={version} className={`h-full w-full ${dozing && moods.rest?.length ? "companion-doze" : ""}`} />
+      <div key={hop} className={`h-full w-full ${strides ? "companion-stride" : walk ? "companion-walk" : "companion-hop"}`} style={{ ["--lean" as string]: faceLeft ? -7 : 7, ["--walk" as string]: `${walk}ms`, ["--steps" as string]: Math.max(2, Math.round(walk / 260)), transform: strides && faceLeft ? "scaleX(-1)" : undefined }}>
+        <Character moods={moods} interactive mood={strides ? "walk" : dozing && moods.rest?.length ? "rest" : forced ? forced : asked?.startsWith("card-") || asked?.startsWith("cite-") ? "close" : mood} version={version} className={`h-full w-full ${dozing && moods.rest?.length && !strides ? "companion-doze" : ""}`} />
       </div>
     </div>
   );

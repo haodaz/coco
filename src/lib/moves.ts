@@ -7,7 +7,7 @@ import type { Pet, State } from "./types";
 // A new pet starts simple; moves unlock as the AI's memory of the pet grows (clarity level), so the more moments
 // the owner shares, the more alive the pet becomes. Shared by the server (what to draw) and the app (what to show).
 
-export type MoveMood = "idle" | "happy" | "thinking" | "busy" | "confused" | "close" | "rest";
+export type MoveMood = "idle" | "happy" | "thinking" | "busy" | "confused" | "close" | "rest" | "walk";
 
 export const MOVES: { mood: MoveMood; name: string; when: string; level: number }[] = [
   { mood: "idle", name: "Being there", when: "Always", level: 0 },
@@ -17,6 +17,8 @@ export const MOVES: { mood: MoveMood; name: string; when: string; level: number 
   { mood: "confused", name: "Head tilt", when: "When I haven't seen something yet", level: 2 },
   { mood: "close", name: "Leaning in", when: "When we talk about us", level: 3 },
   { mood: "rest", name: "Dozing", when: "When you've been quiet for a while", level: 3 },
+  // walking is how the pet gets anywhere: every pet has it from the start, it is not a card
+  { mood: "walk", name: "Trotting over", when: "When I come to see what you're looking at", level: 0 },
 ];
 
 export const unlockedMoods = (level: number) => MOVES.filter((m) => level >= m.level).map((m) => m.mood);
@@ -26,7 +28,7 @@ export const moveOf = (mood: string) => MOVES.find((m) => m.mood === mood);
 // out of a pack. Finishing the Starter Kit always drops the first one (Happy wiggle); after that, every move the pet
 // has learned (as the owner teaches it with more moments and their own words) waits for the next pack.
 // "Being there" is the pet itself, not a card.
-export const MOVE_CARDS = MOVES.filter((m) => m.mood !== "idle");
+export const MOVE_CARDS = MOVES.filter((m) => m.mood !== "idle" && m.mood !== "walk");
 export const STARTER_MOVE: MoveMood = "happy";
 export type MoveCard = { mood: string; at: string; from: "starter" | "pack" };
 

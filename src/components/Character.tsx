@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy" | "rest";
+export type Mood = "idle" | "happy" | "confused" | "thinking" | "close" | "busy" | "rest" | "walk";
 
 // How each mood loops through its frames: [frame index, milliseconds] pairs.
 const TIMELINE: Record<Mood, [number, number][]> = {
@@ -13,6 +13,8 @@ const TIMELINE: Record<Mood, [number, number][]> = {
   close: [[0, 1600], [1, 1800]],
   busy: [[0, 650], [1, 650]],
   rest: [[0, 2600], [1, 2600]],
+  // a walk cycle: one step, legs passing, the other step, legs passing
+  walk: [[0, 170], [2, 130], [1, 170], [2, 130]],
 };
 
 // The pet as a living character: cut out with no background, the mood's frames loop like a GIF,
