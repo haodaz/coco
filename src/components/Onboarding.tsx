@@ -180,6 +180,14 @@ export function ConfirmProfile({ pet, onDone }: { pet: Pet; onDone: () => void }
     } catch {}
     onDone();
   }
+  // the photo was the wrong one (or read wrongly): start again from the photo step, the answers are kept
+  async function retake() {
+    try {
+      localStorage.setItem(ANSWERS, JSON.stringify({ ...told, name, species, born, sex }));
+    } catch {}
+    await fetch(`/api/pets/${pet.id}`, { method: "DELETE" });
+    onDone();
+  }
   const field = "w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2 text-[14px] outline-none focus:border-[var(--gold)]";
   return (
     <>
@@ -216,6 +224,7 @@ export function ConfirmProfile({ pet, onDone }: { pet: Pet; onDone: () => void }
             </select>
           </label>
           <button disabled={!name.trim()} onClick={save} className="mt-2 rounded-xl bg-[var(--ink)] px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-40">This is {name.trim() || "them"} →</button>
+          <button onClick={retake} className="text-[14px] font-medium text-[var(--ink2)]">Use another photo</button>
         </div>
       </div>
     </section>
