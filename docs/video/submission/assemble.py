@@ -14,27 +14,28 @@ here = Path(__file__).parent
 out = here / "out"
 pd_out = here.parent / "playdate" / "out"
 FF = "/Users/aisandbox/Documents/companydata/node_modules/ffmpeg-static/ffmpeg"  # has libass for subtitles
-SRC = {"main": out / "take.mp4", "chat": out / "take_chat.mp4", "sitter": out / "take_sitter.mp4", "zh": out / "take_zh.mp4", "pd": pd_out / "take_web.mp4", "phone": pd_out / "take.mp4"}
+SRC = {"banner": out / "take_banner.mp4", "main": out / "take.mp4", "chat": out / "take_chat.mp4", "sitter": out / "take_sitter.mp4", "zh": out / "take_zh.mp4", "pd": pd_out / "take_web.mp4", "phone": pd_out / "take.mp4"}
 FULL = [0, 0, 3200, 1800]
 SHARE = [600, 700, 2600, 1462]
 REVEAL = [840, 100, 2000, 1125]
 CHAT = [600, 60, 2600, 1462]
 RULES = [620, 260, 2480, 1395]
 
+BANNER = [0, 0, 2560, 1440]
 SECTIONS = [
-    {"n": ["c1"], "lead": 0.4, "shots": [{"card": "cover", "d": 4.6}]},
+    {"n": ["c1"], "lead": 0.6, "shots": [{"src": "banner", "v": [0.3, 5.6], "crop": BANNER}]},
     {"n": ["c2"], "shots": [{"card": "concept", "d": 13.0}]},
-    {"n": ["h1"], "shots": [{"src": "main", "v": [0.2, 3.4], "crop": FULL}, {"src": "main", "v": [4.6, 7.6], "crop": FULL}]},
-    {"n": ["s1"], "shots": [{"src": "main", "v": [21.6, 26.4], "crop": SHARE}]},
-    {"n": ["s2"], "shots": [{"src": "main", "v": [26.4, 31.4], "crop": SHARE}, {"src": "main", "v": [33.0, 36.0], "crop": SHARE}]},
-    {"n": ["p1"], "shots": [{"src": "main", "v": [47.0, 49.6], "crop": FULL}, {"src": "main", "v": [51.6, 58.8], "crop": REVEAL}]},
-    {"n": ["p2"], "shots": [{"src": "main", "v": [58.8, 62.0], "crop": REVEAL}, {"src": "main", "v": [64.2, 67.6], "crop": FULL}]},
-    {"n": ["k1"], "shots": [{"src": "main", "v": [67.6, 76.0], "crop": FULL}]},
-    {"n": ["a1"], "shots": [{"src": "main", "v": [77.6, 80.2], "crop": FULL}, {"src": "main", "v": [93.0, 101.0], "crop": CHAT}]},
-    {"n": ["a2"], "shots": [{"src": "chat", "v": [9.6, 16.0], "crop": FULL}]},
-    {"n": ["m1"], "shots": [{"src": "main", "v": [117.6, 128.0], "crop": FULL}]},
-    {"n": ["l1"], "shots": [{"src": "main", "v": [133.0, 137.4], "crop": FULL}, {"src": "main", "v": [138.0, 145.0], "crop": RULES}]},
-    {"n": ["l2"], "shots": [{"src": "chat", "v": [16.0, 19.4], "crop": FULL}, {"src": "chat", "v": [31.8, 41.0], "crop": FULL}]},
+    {"n": ["h1"], "shots": [{"slide": "home", "d": 6.0}]},
+    {"n": ["s1"], "shots": [{"src": "main", "v": [11.6, 16.0], "crop": SHARE}]},
+    {"n": ["s2"], "shots": [{"src": "main", "v": [16.0, 22.5], "crop": SHARE}, {"src": "main", "v": [31.0, 34.0], "crop": SHARE}]},
+    {"n": ["p1"], "shots": [{"src": "main", "v": [39.0, 42.4], "crop": FULL}, {"src": "main", "v": [42.6, 49.6], "crop": REVEAL}]},
+    {"n": ["p2"], "shots": [{"src": "main", "v": [49.8, 52.95], "crop": REVEAL}, {"slide": "legend", "d": 3.6}]},
+    {"n": ["k1"], "shots": [{"slide": "series", "d": 5.0}, {"slide": "moves", "d": 3.6}]},
+    {"n": ["a1"], "shots": [{"src": "chat", "v": [0.6, 3.4], "crop": FULL}, {"src": "chat", "v": [8.6, 14.0], "crop": CHAT}]},
+    {"n": ["a2"], "shots": [{"src": "chat", "v": [24.4, 30.4], "crop": FULL}]},
+    {"n": ["m1"], "shots": [{"slide": "clarity", "d": 4.4}, {"slide": "learned", "d": 4.4}]},
+    {"n": ["l1"], "shots": [{"slide": "rules", "d": 8.6}]},
+    {"n": ["l2"], "shots": [{"src": "chat", "v": [33.0, 36.0], "crop": FULL}, {"src": "chat", "v": [44.4, 52.0], "crop": FULL}]},
     {"n": ["f1"], "shots": [{"src": "pd", "v": [19.0, 23.0], "crop": [560, 520, 1600, 900]}, {"src": "pd", "v": [27.0, 32.4], "crop": [864, 200, 2336, 1314]}]},
     {"n": ["x1"], "shots": [{"phone": [11.4, 14.6]}, {"src": "zh", "v": [0.6, 3.6], "crop": FULL}, {"src": "sitter", "v": [14.0, 18.5], "crop": [400, 0, 2400, 1350]}]},
     {"n": ["b1"], "shots": [{"card": "built", "d": 8.0}]},
@@ -78,7 +79,11 @@ for si, sec in enumerate(SECTIONS):
         label = f"s{si}_{i}"
         d = length(sh) + (extra if last else 0)
         hold = f",tpad=stop_mode=clone:stop_duration={extra:.2f}" if last and extra else ""
-        if "card" in sh:
+        if "slide" in sh:
+            frames = int(round(d * 30))
+            inputs += ["-loop", "1", "-framerate", "30", "-t", f"{d:.2f}", "-i", str(out / f"slide_{sh['slide']}.png")]
+            vf.append(f"[{n_in() - 1}:v]scale=3840:2160,zoompan=z='1+0.04*on/{frames}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=30,trim=0:{d:.2f},format=yuv420p,setsar=1[{label}]")
+        elif "card" in sh:
             inputs += ["-loop", "1", "-t", f"{d:.2f}", "-i", str(out / f"web_{sh['card']}.png")]
             vf.append(f"[{n_in() - 1}:v]scale=1920:1080,fps=30,format=yuv420p,setsar=1[{label}]")
         elif "phone" in sh:

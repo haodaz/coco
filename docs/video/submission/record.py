@@ -1,5 +1,6 @@
 """Record the submission video's main flow on a laptop-sized screen at 2x (Chrome screencast frames, so parts can be
-enlarged): share a moment, open a pack, the collection, talk with Coco, her memory, and the place she lives.
+enlarged): share a moment, open a pack, ask Coco a question. The collection, her memory and the place she lives
+are shown as single modules (modules.py), not scrolled pages.
 
     cd ~/Documents/hioffer && uv run python ~/Documents/coco/docs/video/submission/record.py http://localhost:3032 ~/Documents/coco/docs/video/submission/out PET_ID
 
@@ -120,23 +121,6 @@ with sync_playwright() as p:
     page.get_by_role("button", name="Add to my collection").filter(visible=True).first.click()
     time.sleep(1.0)
 
-    # 3. the collection: series by who she is, a legendary portrait that steps out of its frame
-    page.get_by_role("link", name="Cards").filter(visible=True).first.click()
-    page.get_by_text("Series follow who Coco is").filter(visible=True).first.wait_for(timeout=20000)
-    time.sleep(1.5)
-    beat("cards")
-    page.mouse.move(380, 520)
-    for k in range(20):  # turn the legendary card in the light
-        page.mouse.move(380 + k * 6, 520 - k * 4)
-        time.sleep(0.05)
-    time.sleep(1.0)
-    glide(page, 700, steps=30)
-    time.sleep(2.5)
-    beat("series")
-    glide(page, 700, steps=30)
-    time.sleep(2.5)
-    beat("series 2")
-
     # 4. talk with Coco: she answers from her cards, and says so when she hasn't seen something
     page.get_by_role("link", name="Talk with Coco").filter(visible=True).first.click()
     q = page.get_by_placeholder("Say something to Coco").filter(visible=True).first
@@ -151,63 +135,7 @@ with sync_playwright() as p:
     time.sleep(0.4)
     beat("answer1")
     time.sleep(6.0)
-    q.click()
-    q.type("Have you ever been to the beach?", delay=45)
-    page.keyboard.press("Enter")
-    beat("sent2")
-    page.wait_for_function("async () => { const s = await fetch('/api/state').then(r => r.json()); return (s.threads || []).some(t => t.turns.length >= 2); }", timeout=180000, polling=1000)
-    page.wait_for_function("() => !document.querySelector('main').innerText.includes('Thinking') && !document.querySelector('main').innerText.includes('Looking through')", timeout=60000)
-    time.sleep(0.6)
-    beat("answer2")
-    time.sleep(7.0)
-
-    # 5. her memory: the picture of Coco sharpens with every moment; the moves she has learned
-    page.get_by_role("link", name="Memory").filter(visible=True).first.click()
-    page.get_by_text("How well I know Coco").filter(visible=True).first.wait_for(timeout=20000)
-    time.sleep(2.5)
-    beat("memory")
-    glide(page, 600, steps=30)
-    time.sleep(3.0)
-    beat("moves")
-    glide(page, 500, steps=24)
-    time.sleep(2.5)
-    beat("levels")
-
-    # 6. around us: the town, today's weather and the rules there, each with its source
-    page.get_by_role("link", name="Around us").filter(visible=True).first.click()
-    box = page.get_by_placeholder("Your town or neighbourhood").filter(visible=True).first
-    box.wait_for(timeout=20000)
-    time.sleep(1.2)
-    beat("place")
-    box.click()
-    box.type("San Francisco", delay=60)
-    page.get_by_role("button", name="San Francisco").filter(visible=True).first.wait_for(timeout=30000)
-    time.sleep(0.8)
-    page.get_by_role("button", name="San Francisco").filter(visible=True).first.click()
-    page.get_by_text("Rules here").filter(visible=True).first.wait_for(timeout=120000)
-    time.sleep(2.5)
-    beat("place facts")
-    glide(page, 450, steps=24)
-    time.sleep(3.0)
-    beat("rules")
-    glide(page, 450, steps=24)
-    time.sleep(3.0)
-    beat("place end")
-
-    # 7. a plan with Coco: she checks the weather and the rules before she says yes
-    page.get_by_role("link", name="Talk with Coco").filter(visible=True).first.click()
-    q = page.get_by_placeholder("Say something to Coco").filter(visible=True).first
-    q.wait_for(timeout=20000)
-    time.sleep(1.2)
-    q.click()
-    q.type("I'm going to the store this afternoon. Want to come?", delay=40)
-    page.keyboard.press("Enter")
-    beat("sent3")
-    page.wait_for_function("async () => { const s = await fetch('/api/state').then(r => r.json()); return (s.threads || []).some(t => t.turns.length >= 3); }", timeout=180000, polling=1000)
-    page.wait_for_function("() => !document.querySelector('main').innerText.includes('Thinking') && !document.querySelector('main').innerText.includes('Looking through')", timeout=60000)
-    time.sleep(0.6)
-    beat("answer3")
-    time.sleep(9.0)  # screencast frames can lag behind the page; leave room at the end
+    time.sleep(3.0)  # screencast frames can lag behind the page; leave room at the end
     beat("end")
 
     cdp.send("Page.stopScreencast")
