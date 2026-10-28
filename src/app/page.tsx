@@ -47,6 +47,35 @@ const NEXT = [
   { title: "Moments from video", body: "SAM 3.1 follows a pet through a clip, so a short video can become a card." },
 ];
 
+// the three layers as rings: general knowledge outside (dashed), the pet's own moments, your words at the heart
+function Rings() {
+  const dot = "absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-white px-3 py-1 text-[13px] font-semibold shadow-[0_6px_16px_-10px_rgba(40,30,90,.45)] md:text-[14px]";
+  return (
+    <div className="relative mx-auto aspect-square w-full max-w-[440px]">
+      <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#c9c1e6] bg-[#fbfaff]" />
+      <div className="absolute inset-[15%] rounded-full bg-gradient-to-br from-[#efe9ff] to-[#fde8f2]" />
+      <div className="absolute inset-[34%] grid place-items-center rounded-full bg-[#fff4d9] text-center text-[12px] font-extrabold uppercase tracking-[.14em] text-[#9a6b00] shadow-[0_10px_30px_-14px_rgba(154,107,0,.5)] md:text-[13px]">Your<br />words</div>
+      <div className="absolute left-1/2 top-[5%] -translate-x-1/2 text-[11.5px] font-extrabold uppercase tracking-[.14em] text-[#8a87a6]">General</div>
+      <div className="absolute left-1/2 top-[19%] -translate-x-1/2 whitespace-nowrap text-[11.5px] font-extrabold uppercase tracking-[.14em] text-[#6d4fd1]">Their own moments</div>
+      <span className={dot} style={{ left: "36%", top: "29%", color: "#5b3fb0" }}>lies on her back</span>
+      <span className={dot} style={{ left: "72%", top: "39%", color: "#b4560f" }}>gray rope toy</span>
+      <span className={dot} style={{ left: "27%", top: "63%", color: "#1f7a6d" }}>floor by the bed</span>
+      <span className={dot} style={{ left: "67%", top: "73%", color: "#c2418f" }}>you, on the bench</span>
+      <span className={`${dot} border-2 border-dashed border-[#c9c1e6] text-[#8a87a6]`} style={{ left: "62%", top: "94%" }}>Labrador</span>
+    </div>
+  );
+}
+
+function Layer({ tone, k, v }: { tone: "general" | "moments" | "words"; k: string; v: string }) {
+  const style = { general: "border-2 border-dashed border-[#c9c1e6] bg-[#fbfaff] text-[#8a87a6]", moments: "bg-gradient-to-br from-[#efe9ff] to-[#fde8f2] text-[#6d4fd1]", words: "bg-[#fff4d9] text-[#9a6b00]" }[tone];
+  return (
+    <div className={`rounded-2xl px-5 py-4 ${style}`}>
+      <div className="text-[12px] font-extrabold uppercase tracking-[.14em]">{k}</div>
+      <div className="mt-1 text-[15.5px] leading-snug text-[#3d3a58]">{v}</div>
+    </div>
+  );
+}
+
 function NamePart({ k, v }: { k: string; v: string }) {
   return (
     <div className="rounded-2xl bg-white/80 p-4">
@@ -272,6 +301,25 @@ export default function Landing() {
           }
         />
       )}
+
+      {/* how the AI knows the pet: one module, three layers, every link with its proof */}
+      <section className="mx-auto max-w-6xl px-5 pt-20">
+        <div className="rounded-[32px] bg-gradient-to-br from-[#f4f0ff] to-[#fdf0f6] p-6 shadow-[0_24px_60px_-36px_rgba(60,40,140,.45)] md:p-12">
+          <div className="text-[12.5px] font-semibold uppercase tracking-[.16em] text-[var(--primary)]">How your pet&apos;s AI knows them</div>
+          <h2 className="mt-2 text-[28px] font-bold leading-tight tracking-tight md:text-[38px]">Three layers, every link with its proof.</h2>
+          <div className="mt-8 grid items-center gap-10 md:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
+            <Rings />
+            <div className="grid gap-3.5">
+              <Layer tone="general" k="General knowledge" v="Their species and breed, the weather and rules where you live. Used with care, always labelled, never taken for a memory." />
+              <Layer tone="moments" k="Their own moments" v="Read from each photo: how they are, the things, people, animals and places in their life." />
+              <Layer tone="words" k="Your words" v="What no photo shows. They outrank anything the AI guessed." />
+              <p className="mt-1 text-[15.5px] leading-relaxed text-[#3d4460]">
+                One photo gives many links at once (when, where, with what, with whom), and each one <b className="text-[var(--primary)]">points back to the photo</b>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* the past, for the future */}
       <section className="mx-auto max-w-6xl px-5 pt-16">
