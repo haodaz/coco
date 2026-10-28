@@ -1,7 +1,7 @@
 import { CocoMark } from "@/components/Brand";
 
 // A sealed booster pack, drawn (no picture of foil): crimped top and bottom, the coco mark printed at the top,
-// a window with the pet itself, and the series along the bottom. Three series, so a pack says what's inside
+// a window with a little crowd of animals (the same on every pack, whoever's pet it is), and the series along the bottom. Three series, so a pack says what's inside
 // before it is opened: the Starter Kit, the Daily Booster, and Special packs (move cards).
 
 export type PackKind = "starter" | "booster" | "special";
@@ -9,14 +9,14 @@ export type PackKind = "starter" | "booster" | "special";
 const SERIES: Record<PackKind, { name: string; bg: string; ink: string; accent: string; window: string }> = {
   starter: {
     name: "Starter Kit",
-    bg: "linear-gradient(165deg, #0d4f57 0%, #137a74 48%, #3fb59a 100%)",
+    bg: "linear-gradient(165deg, #1b8f95 0%, #2fb5a4 50%, #7ad9b0 100%)",
     ink: "#fff",
     accent: "#ffd27a",
     window: "radial-gradient(closest-side, rgba(255,255,255,.95), rgba(214,248,236,.75) 60%, rgba(214,248,236,0))",
   },
   booster: {
     name: "Daily Booster",
-    bg: "linear-gradient(165deg, #2b3a8f 0%, #5b3fb0 48%, #c2418f 100%)",
+    bg: "linear-gradient(165deg, #6f6cf2 0%, #a26cf0 48%, #f287bd 100%)",
     ink: "#fff",
     accent: "#ffd6ec",
     window: "radial-gradient(closest-side, rgba(255,255,255,.95), rgba(236,228,255,.75) 60%, rgba(236,228,255,0))",
@@ -29,6 +29,14 @@ const SERIES: Record<PackKind, { name: string; bg: string; ink: string; accent: 
     window: "radial-gradient(closest-side, rgba(255,240,200,.9), rgba(180,150,255,.45) 60%, rgba(180,150,255,0))",
   },
 };
+
+const CROWD: { src: string; style: React.CSSProperties }[] = [
+  { src: "/ws/assets/parrot.png", style: { height: "40%", left: "8%", top: "2%", transform: "rotate(-8deg)" } },
+  { src: "/ws/assets/cat.png", style: { height: "62%", left: "-2%", bottom: "6%" } },
+  { src: "/ws/assets/rabbit.png", style: { height: "62%", right: "-2%", bottom: "6%" } },
+  { src: "/ws/assets/corgi.png", style: { height: "78%", left: "50%", bottom: "0%", transform: "translateX(-50%)" } },
+  { src: "/ws/assets/turtle.png", style: { height: "22%", right: "6%", bottom: "-2%" } },
+];
 
 // crimped edges: small teeth along the top and bottom
 const TEETH = 18;
@@ -83,14 +91,12 @@ export default function PackArt({
         </div>
         <div className="absolute inset-x-0 top-[19.5%] text-center font-bold uppercase text-white/80" style={{ fontSize: "4.2cqw", letterSpacing: ".32em" }}>verse</div>
 
-        {/* the window with the pet */}
-        <div className="absolute left-1/2 top-[26%] aspect-square w-[78%] -translate-x-1/2 rounded-full" style={{ background: s.window }}>
-          {art ? (
+        {/* the window: a corgi in front, a cat and a rabbit behind, a parrot above, a turtle at their feet */}
+        <div className="absolute left-1/2 top-[26%] aspect-square w-[82%] -translate-x-1/2 rounded-full" style={{ background: s.window }}>
+          {CROWD.map((a) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={art} alt="" draggable={false} className="absolute bottom-[2%] left-1/2 h-[104%] max-w-none -translate-x-1/2 object-contain drop-shadow-[0_8px_10px_rgba(20,10,60,.35)]" />
-          ) : (
-            <div className="absolute inset-0 grid place-items-center font-bold" style={{ fontSize: "26cqw", color: s.accent, fontFamily: "var(--serif)" }}>?</div>
-          )}
+            <img key={a.src} src={a.src} alt="" draggable={false} className="absolute max-w-none drop-shadow-[0_6px_8px_rgba(20,10,60,.3)]" style={a.style} />
+          ))}
         </div>
 
         {/* the series */}

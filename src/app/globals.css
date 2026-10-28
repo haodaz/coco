@@ -132,8 +132,8 @@ body {
 /* ───────── booster pack wrapper ───────── */
 .pack {
   position: relative; overflow: hidden; isolation: isolate;
-  background: linear-gradient(135deg, #2b3a8f 0%, #5b3fb0 45%, #c2418f 100%);
-  box-shadow: 0 14px 34px -10px rgba(60, 40, 140, .55), inset 0 0 0 1px rgba(255,255,255,.25);
+  background: linear-gradient(135deg, #6f6cf2 0%, #a26cf0 48%, #f287bd 100%);
+  box-shadow: 0 14px 34px -12px rgba(120, 90, 220, .5), inset 0 0 0 1px rgba(255,255,255,.3);
 }
 .pack::before { /* foil crimp lines */
   content: ""; position: absolute; inset: 0; z-index: -1; opacity: .35;

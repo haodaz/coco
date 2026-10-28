@@ -66,7 +66,7 @@ export default function Home() {
                     <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full rounded-2xl object-cover" />
                   )}
                 </div>
-                <div className="mt-auto min-w-0 pb-1">
+                <div className="my-auto min-w-0 pt-5 pb-1">
                   <div className="relative rounded-2xl rounded-bl-md bg-white/90 px-4 py-3 shadow-[0_8px_20px_-14px_rgba(40,30,90,.4)]">
                     <div className="serif text-[19px] italic leading-snug">“{line}”</div>
                     <div className="mt-1 text-[12px] text-[var(--ink3)]">— {pet.name}</div>
@@ -98,7 +98,12 @@ export default function Home() {
             <div className="mt-5 grid gap-5 sm:grid-cols-3">
               <section className="ws-card p-5">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-[var(--gold)]"><Flame size={13} /> {tr("Streak")}</div>
-                <div className="serif mt-1 text-[40px] font-bold leading-none">{r.streak}<span className="ml-1 text-[16px] font-medium text-[var(--ink2)]">day{r.streak === 1 ? "" : "s"}</span></div>
+                {r.streak ? (
+                  <div className="serif mt-1 text-[40px] font-bold leading-none">{r.streak}<span className="ml-1 text-[16px] font-medium text-[var(--ink2)]">{tr(r.streak === 1 ? "day" : "days")}</span></div>
+                ) : (
+                  // no streak right now: an invitation, not a zero
+                  <div className="serif mt-2 text-[22px] font-bold leading-tight">{tr("Start a new streak today")}</div>
+                )}
                 <div className="mt-3 flex gap-1.5">
                   {week.map((d) => (
                     <div key={d.key} className="flex flex-1 flex-col items-center gap-1">

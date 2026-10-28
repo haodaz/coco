@@ -85,7 +85,11 @@ export default function HomeMobile({
       <div className="mt-3 grid grid-cols-3 gap-2.5">
         <Link href="/app/pack" className="ws-card p-3">
           <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[.16em] text-[var(--gold)]"><Flame size={12} /> {t("Streak")}</div>
-          <div className="serif mt-1 text-[26px] font-bold leading-none">{r.streak}<span className="ml-1 text-[12px] font-medium text-[var(--ink2)]">{t(r.streak === 1 ? "day" : "days")}</span></div>
+          {r.streak ? (
+            <div className="serif mt-1 text-[26px] font-bold leading-none">{r.streak}<span className="ml-1 text-[12px] font-medium text-[var(--ink2)]">{t(r.streak === 1 ? "day" : "days")}</span></div>
+          ) : (
+            <div className="serif mt-1.5 text-[15px] font-bold leading-tight">{t("Start one today")}</div>
+          )}
         </Link>
         <Link href="/app/memory" className="ws-card p-3">
           <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[.16em] text-[var(--gold)]"><Sparkles size={12} /> {t("Clarity")}</div>

@@ -159,7 +159,7 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
 
       {/* points and the pack */}
       <div className="ws-card flex flex-col items-center gap-5 p-5 sm:flex-row sm:items-center">
-        <div data-coco-spot="pack" data-coco-side="left" className="w-[min(170px,44vw)] shrink-0">
+        <div className="w-[min(170px,44vw)] shrink-0">
           <PackArt kind="booster" art={petArt(pet)} title={painting && !openable ? t("Painting…") : ready ? t(Math.min(ready, 3) === 1 ? "{n} card ready" : "{n} cards ready", { n: Math.min(ready, 3) }) : t("Empty for now")} sub={painting && !openable ? t("you can leave this page") : undefined} badge={`${PACK_COST} M pt`} sealed={(painting > 0 && !openable) || phase === "sealed"} />
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-left">
@@ -173,7 +173,8 @@ export default function DailyPack({ pet, state, onChange, admin = false }: { pet
                 : t("Share a memory below; it's painted into a card right away and waits here for a pack.")}{" "}
             {t("A Daily Booster costs {n} M pt and opens up to three, each in a style you won't know until it turns over. With more M pt than memories, we paint new versions of your memories.", { n: PACK_COST })}
           </p>
-          <button disabled={!canOpen || phase === "sealed"} onClick={open} className="pack mt-3 rounded-xl px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-40">
+          {/* the pet waits beside the button that opens the pack */}
+          <button data-coco-spot="pack" data-coco-side="right" disabled={!canOpen || phase === "sealed"} onClick={open} className="pack mt-3 rounded-xl px-5 py-3 text-[15px] font-semibold text-white disabled:opacity-40">
             {phase === "sealed" ? t("Opening…") : painting && !openable ? t("Painting…") : t("Open a pack · {n} M pt", { n: PACK_COST })}
           </button>
           {!canOpen && phase !== "sealed" && !painting && <div className="mt-1.5 text-[12.5px] text-[var(--ink3)]">{t("{n} more M pt to go.", { n: PACK_COST - points })}</div>}

@@ -365,6 +365,8 @@ export const ZH: Record<string, string> = {
   "Legendary · soul portrait": "传说 · 灵魂肖像",
   "Unlock the soul portrait": "解锁灵魂肖像",
   "note from you": "条你的话",
+  "Start a new streak today": "今天开始新的连续记录",
+  "Start one today": "今天开始",
   "What I can talk about": "我能聊的",
 
   // Around us
