@@ -306,7 +306,7 @@ export async function cutout(imageB64: string, phrase: string): Promise<Buffer |
 // Depth layer for a card: the pet alone on a transparent PNG the same size as the art,
 // so the card can move pet and background apart. Returns the stored file name, or null.
 // what a pet wears or holds moves with it, so it is cut out together with the pet
-const WORN_AND_HELD = ["clothing", "collar", "bandana", "harness", "leash", "toy", "rope", "rope toy", "plush toy", "chew toy", "bone", "ball", "stick", "blanket", "the object in its mouth", "the object in its paws"];
+const WORN_AND_HELD = ["clothing", "collar", "bow", "bow tie", "hat", "scarf", "sweater", "bandana", "harness", "leash", "toy", "rope", "rope toy", "plush toy", "chew toy", "bone", "ball", "stick", "blanket", "the object in its mouth", "the object in its paws"];
 
 export async function depthLayer(artFile: string, phrase: string): Promise<string | null> {
   if (!LIVE) return null;
