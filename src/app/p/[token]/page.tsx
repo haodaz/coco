@@ -25,7 +25,8 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
       const s = await r.json();
       const pet = s.pets?.find((p: { name: string }) => p.name);
       const idle = pet?.character?.moods?.idle?.[0];
-      setMe(pet ? { name: pet.name, face: idle ? `/api/art/${idle}` : null } : null);
+      // your own pet: its character, or its photo until it has one
+      setMe(pet ? { name: pet.name, face: idle ? `/api/art/${idle}` : pet.avatarPhotoId ? `/api/photos/${pet.avatarPhotoId}` : null } : null);
     });
   }, [token]);
 

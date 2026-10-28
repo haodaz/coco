@@ -23,7 +23,9 @@ function playContext(state: State, pet: Pet) {
   return { ...ctx, imprints: ctx.imprints.filter((i) => keep.has(i.id)) };
 }
 
-// Copy the other pet's face into this owner's storage, so each owner's record shows both pets.
+// Copy the other pet's face into this owner's storage, so each owner's record shows both pets: its character, or
+// before it has one, the AI's painting of it (never a photo).
+const faceOf = (p: Pet) => p.character?.moods.idle?.[0] ?? p.likeness?.file;
 async function copyFace(fromOwner: string, frame: string | undefined, toOwner: string) {
   if (!frame) return null;
   try {
@@ -66,8 +68,8 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ toke
   report.reasons = report.reasons.map((r) => ({ ...r, cardIds: r.cardIds.filter((id) => (r.pet === "me" ? A.cards : B.cards).some((c) => c.id === id)) }));
 
   const now = new Date().toISOString();
-  const hostFace = await copyFace(host.ownerId, host.pet.character?.moods.idle?.[0], me);
-  const guestFace = await copyFace(me, guest.character?.moods.idle?.[0], host.ownerId);
+  const hostFace = await copyFace(host.ownerId, faceOf(host.pet), me);
+  const guestFace = await copyFace(me, faceOf(guest), host.ownerId);
   const forGuest: Playdate = {
     id: newId("pd"),
     petId: guest.id,

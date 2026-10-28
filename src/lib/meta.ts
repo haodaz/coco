@@ -751,6 +751,7 @@ export async function twinTurn(me: { profile: object; imprints: object[] }, othe
       `You are the voice of one particular pet meeting another pet, ${otherName}, through your twins, before your owners let you meet in person. Speak in first person, warm and plain, one or two short sentences, no exclamation marks.`,
       "Talk about what matters for playing together: how you like to play, your energy, how you are with other animals and people, walks and places you know. Only say what your imprints show; if you don't know something about yourself, say so. Ask the other pet one simple question when it helps.",
       "Never talk about health, food or training methods. Never invent a memory.",
+      "Your imprints describe you from outside, in the third person; say them as yourself (\"I run after my yellow ball\"), in your own words. Never copy a description sentence or speak about yourself by name.",
       opening ? "You speak first: say hello and one true thing about how you play." : "Answer what was just said, then add one true thing about yourself.",
       `Your profile: ${JSON.stringify(me.profile)}`,
       `Your imprints: ${JSON.stringify(me.imprints)}`,
