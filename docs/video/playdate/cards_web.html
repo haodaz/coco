@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@500;600;700;800&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;font-family:Inter,sans-serif;color:#1f1d33;background:#f6f4fb}
+.glow1{position:absolute;right:-220px;top:-160px;width:760px;height:760px;border-radius:50%;background:rgba(109,79,209,.16);filter:blur(90px)}
+.glow2{position:absolute;left:-200px;bottom:-200px;width:700px;height:700px;border-radius:50%;background:rgba(194,65,143,.10);filter:blur(90px)}
+.page{position:absolute;inset:0;display:none;padding:150px 130px 0;box-sizing:border-box;flex-direction:column}
+.on{display:flex}
+.brand{display:flex;align-items:center;gap:14px;font-family:Fraunces,serif;font-weight:700;font-size:44px}
+.brand svg{width:64px;height:44px}
+.eyebrow{font-size:30px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#6d4fd1;margin-top:40px}
+h1{font-family:Fraunces,serif;font-weight:700;font-size:92px;line-height:1.04;letter-spacing:-2px;margin:26px 0 0}
+h2{font-family:Fraunces,serif;font-weight:700;font-size:78px;line-height:1.06;letter-spacing:-1.5px;margin:22px 0 50px}
+.pet{position:absolute;right:70px;bottom:150px;width:420px;filter:drop-shadow(0 30px 40px rgba(40,30,90,.25))}
+.two{display:grid;gap:30px}
+.box{border-radius:40px;padding:44px 48px;box-shadow:0 18px 40px -22px rgba(40,30,90,.35)}
+.box .k{font-size:30px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.box .v{margin-top:16px;font-size:46px;font-weight:600;line-height:1.25}
+.person{background:#eceaf3;color:#5c5a75}.person .k{color:#8a87a6}
+.pet2{background:linear-gradient(160deg,#efe9ff,#fde8f2);color:#3b2a8f}.pet2 .k{color:#6d4fd1}
+.chips{display:flex;flex-wrap:wrap;gap:14px;margin-top:22px}.chips span{background:#fff;border-radius:999px;padding:12px 24px;font-size:32px;font-weight:600;color:#5b3fb0}
+.saying{white-space:nowrap;font-family:"Noto Serif SC",serif;font-weight:900;font-size:168px;letter-spacing:.02em;line-height:1.1;margin-top:60px;background:linear-gradient(150deg,#2b3a8f,#5b3fb0 50%,#c2418f);-webkit-background-clip:text;color:transparent}
+.pinyin{margin-top:26px;font-size:44px;font-weight:600;color:#9a97b3;letter-spacing:.06em}
+.en{margin-top:44px;font-family:Fraunces,serif;font-style:italic;font-size:64px;line-height:1.15}
+.note{margin-top:60px;font-size:38px;line-height:1.4;color:#5c5a75}
+.end .brand{font-size:110px;gap:24px}.end .brand svg{width:150px;height:104px}
+.sub{font-family:Fraunces,serif;font-style:italic;font-size:54px;color:#3d3a58;margin-top:30px;line-height:1.2}
+.url{display:inline-block;margin-top:56px;border-radius:999px;padding:22px 46px;font-size:46px;font-weight:700;color:#fff;background:linear-gradient(150deg,#2b3a8f,#5b3fb0 50%,#c2418f)}
+.duo{position:absolute;left:0;right:0;bottom:170px;display:flex;justify-content:center;gap:40px;align-items:flex-end}.duo img{width:400px;filter:drop-shadow(0 30px 40px rgba(40,30,90,.25))}.duo img.b{width:380px}
+.flow{display:grid;gap:22px}.arrow{text-align:center;font-size:56px;color:#6d4fd1;line-height:1}
+.demo{position:absolute;left:96px;right:96px;bottom:70px;font-size:28px;color:#8a87a6;line-height:1.4}
+.built{margin-top:70px;font-size:32px;color:#5c5a75;line-height:1.5}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b3a8f"/><stop offset="1" stop-color="#5b3fb0"/></linearGradient>
+<linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8f3fb0"/><stop offset="1" stop-color="#c2418f"/></linearGradient>
+<symbol id="mark" viewBox="0 0 48 32"><circle cx="16" cy="16" r="13" fill="none" stroke="url(#a)" stroke-width="5"/><circle cx="32" cy="16" r="13" fill="none" stroke="url(#b)" stroke-width="5"/><path d="M24 21.2c-.3 0-3.6-2.3-3.6-4.6 0-1.2.9-2.1 2-2.1.7 0 1.3.4 1.6.9.3-.5.9-.9 1.6-.9 1.1 0 2 .9 2 2.1 0 2.3-3.3 4.6-3.6 4.6z" fill="#c2418f"/></symbol>
+</defs></svg>
+<div class="glow1"></div><div class="glow2"></div>
+
+
+<style>
+.row{display:flex;gap:28px;align-items:stretch}.row .box{flex:1}
+.duoR{position:absolute;right:120px;bottom:150px;display:flex;gap:30px;align-items:flex-end}.duoR img{width:360px;filter:drop-shadow(0 30px 40px rgba(40,30,90,.25))}
+.phone{position:absolute;right:220px;top:60px;width:440px;height:952px;border-radius:56px;background:#1f1d33;box-shadow:0 30px 60px -20px rgba(40,30,90,.45)}
+.demoR{margin-top:22px;font-size:26px;color:#8a87a6}
+</style>
+
+<div class="page" id="cover" style="padding-top:300px">
+  <div class="brand"><svg><use href="#mark"/></svg>cocoverse</div>
+  <h1>Before they meet,<br>their twins meet.</h1>
+  <div class="duoR"><img src="out/coco.png"><img src="out/biscuit.png" style="width:340px"></div>
+</div>
+
+<div class="page" id="concept" style="padding-top:330px">
+  <div class="eyebrow">A playdate, twins first</div>
+  <h2>Each twin knows only real moments.</h2>
+  <div class="row">
+    <div class="box pet2"><div class="k">Coco's twin</div><div class="v">built from Coco's own photos</div></div>
+    <div class="box pet2"><div class="k">Biscuit's twin</div><div class="v">built from Biscuit's own photos</div></div>
+    <div class="box person"><div class="k">Both owners get</div><div class="v">one honest note, every reason tied to a card</div></div>
+  </div>
+</div>
+
+<div class="page" id="phone" style="padding-top:330px">
+  <div class="eyebrow">Same app</div>
+  <h2>On your phone, too.</h2>
+  <div class="phone"></div>
+</div>
+
+<div class="page end" id="end" style="padding-top:250px">
+  <div class="brand"><svg><use href="#mark"/></svg>cocoverse</div>
+  <div class="sub">A little universe for you and your pet.</div>
+  <div><span class="url">cocoverse.app</span></div>
+  <div class="built">Built with Meta Muse Spark, Muse Image and SAM 3.1</div>
+  <div class="duoR"><img src="out/coco.png" style="width:300px"><img src="out/biscuit.png" style="width:285px"></div>
+  <div class="demoR">Biscuit is a demo pet: his photos were made with Muse Image. Coco is real.</div>
+</div>
+
+<script>const id=new URLSearchParams(location.search).get('p')||'cover';document.getElementById(id).classList.add('on');</script>
+</body></html>
