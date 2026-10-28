@@ -78,7 +78,7 @@ export default function Landing() {
           <CocoLogo size={20} />
           <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Sign in</Link>
         </nav>
-        <div className="relative mx-auto max-w-3xl px-5 pb-[38vh] pt-[6vh] text-center md:pt-[9vh]">
+        <div className="relative mx-auto max-w-3xl px-5 pb-[36vh] pt-[14vh] text-center md:pt-[17vh]">
           <h1 className="hero-title text-[36px] font-bold leading-[1.08] tracking-tight md:text-[54px]">
             A little universe for you and your pet.
           </h1>
