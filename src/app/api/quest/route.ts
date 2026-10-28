@@ -4,7 +4,7 @@ import { refreshLikeness } from "@/lib/likeness";
 import { depthLayers, paintCard, readQuestPhoto } from "@/lib/meta";
 import { photoBase64, storePhoto, uploadMeta } from "@/lib/photos";
 import { packFor } from "@/lib/species";
-import { load, newId, save } from "@/lib/store";
+import { load, newId, update } from "@/lib/store";
 import type { Card, Trace } from "@/lib/types";
 import { currentUserId, runAs, withUser } from "@/lib/session";
 import { overLimit } from "@/lib/limits";
@@ -66,20 +66,28 @@ export const POST = withUser(async (req: Request) => {
     photoId: photo.id,
     createdAt: new Date().toISOString(),
   };
-  const wasDone = !!starterDoneAt(pet, s);
-  // a slot holds one card: replacing the photo replaces the card
-  s.cards = s.cards.filter((c) => !(c.petId === pet.id && c.slotId === slot.id));
-  s.photos.push(photo);
-  s.traces.push(...traces);
-  s.cards.push(card);
-  // a new imprint may raise clarity; the AI then repaints its picture of the pet
-  await refreshLikeness(s, pet).catch(() => false);
-  // the card that finishes the Starter Kit always brings the first move card out with it
-  const bonus = !wasDone && starterDoneAt(pet, s) ? STARTER_MOVE : null;
-  if (bonus) pet.moveCards = [...(pet.moveCards ?? []), { mood: bonus, at: new Date().toISOString(), from: "starter" }];
-  await save(s);
-  // more memory may have unlocked new moves; draw them after answering (about a minute)
+  // added to whatever the state is by now (several slots can be filled at once); a slot holds one card, so replacing
+  // the photo replaces the card, and the card that finishes the Starter Kit brings the first move card out with it
+  let bonus: string | null = null;
+  await update((f) => {
+    const p = f.pets.find((x) => x.id === pet.id);
+    if (!p) return;
+    const wasDone = !!starterDoneAt(p, f);
+    f.cards = f.cards.filter((c) => !(c.petId === pet.id && c.slotId === slot.id));
+    f.photos.push(photo);
+    f.traces.push(...traces);
+    f.cards.push(card);
+    bonus = !wasDone && starterDoneAt(p, f) ? STARTER_MOVE : null;
+    if (bonus) p.moveCards = [...(p.moveCards ?? []), { mood: bonus, at: new Date().toISOString(), from: "starter" }];
+  });
+  // after answering: a new imprint may raise clarity (the AI repaints its picture of the pet), and more memory may
+  // unlock new moves (about a minute)
   const owner = currentUserId();
-  after(() => runAs(owner, () => unlockMoves(pet.id)).catch(() => {}));
+  after(() => runAs(owner, async () => {
+    const fresh = await load();
+    const p = fresh.pets.find((x) => x.id === pet.id);
+    if (p && (await refreshLikeness(fresh, p).catch(() => false))) await update((f) => { const q = f.pets.find((x) => x.id === pet.id); if (q) q.likeness = p.likeness; });
+    await unlockMoves(pet.id);
+  }).catch(() => {}));
   return NextResponse.json({ card, traces, bonus });
 });
