@@ -13,6 +13,8 @@ import { CocoLogo } from "@/components/Brand";
 
 const PET = manifest.pet.name;
 // the climb from no cards to the full portrait, shown on a light-coated demo pet so each step reads clearly
+// sparks rising from the touch: [sideways drift in vw, delay in s, size in px]
+const SPARKS: [number, number, number][] = [[-6, 0, 12], [4, 0.4, 8], [-2, 0.9, 14], [8, 1.3, 9], [-10, 1.8, 11], [2, 2.2, 7], [6, 2.7, 13], [-4, 3.1, 9], [11, 3.5, 10], [-8, 3.9, 8]];
 const DEMO_LEVELS = [
   { src: "/landing/demo/level-0.png", label: "no cards" },
   { src: "/landing/demo/level-2.png", label: "level 2" },
@@ -58,7 +60,7 @@ export default function Landing() {
   return (
     <div className="overflow-x-hidden bg-[linear-gradient(180deg,#f1edff_0%,var(--bg)_520px)]">
       {/* hero: a hand and a paw meet, and a little universe opens where they touch */}
-      <header className="hero-universe relative isolate overflow-hidden">
+      <header className="hero-universe relative isolate flex min-h-[100svh] flex-col overflow-hidden">
         {/* one picture in two layers that always move together (the scene, then the hand and paw), with the light
             where they touch breathing between them, and stars twinkling */}
         <div className="hero-art absolute inset-0 -z-10" aria-hidden>
@@ -68,12 +70,15 @@ export default function Landing() {
           <div className="hero-glow absolute inset-0" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/landing/hero-fg.webp" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_70%]" />
+          <div className="hero-sparks absolute inset-0">
+            {SPARKS.map(([dx, delay, size], i) => <i key={i} style={{ ["--dx" as string]: `${dx}vw`, animationDelay: `${delay}s`, width: size, height: size }} />)}
+          </div>
         </div>
-        <nav className="relative mx-auto flex max-w-6xl items-center px-5 py-4">
+        <nav className="relative mx-auto flex w-full max-w-6xl items-center px-5 py-4">
           <CocoLogo size={20} />
           <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Sign in</Link>
         </nav>
-        <div className="relative mx-auto max-w-3xl px-5 pb-[34vw] pt-8 text-center md:pb-[300px] md:pt-14">
+        <div className="relative mx-auto max-w-3xl px-5 pb-[38vh] pt-[6vh] text-center md:pt-[9vh]">
           <h1 className="hero-title text-[36px] font-bold leading-[1.08] tracking-tight md:text-[54px]">
             A little universe for you and your pet.
           </h1>
@@ -85,6 +90,11 @@ export default function Landing() {
             <a href="#inside" className="rounded-xl bg-white/90 px-5 py-3 text-[15px] font-semibold shadow-sm">See inside</a>
           </div>
         </div>
+        {/* a nudge to keep going */}
+        <a href="#inside" className="hero-more absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 whitespace-nowrap rounded-full bg-white/70 px-4 py-2 text-[12.5px] font-semibold uppercase tracking-[.16em] text-[#3b2a8f] shadow-sm backdrop-blur">
+          Scroll to explore
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m6 9 6 6 6-6" /></svg>
+        </a>
       </header>
 
       {/* what you do in a cocoverse: the companion turning a photo into a Memory Print */}
