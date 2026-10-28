@@ -40,7 +40,7 @@
       "line": "I always lie on my back like this when I want a belly rub. My gray toy is my favorite right now.",
       "rarity": 2,
       "kind": "quest",
-      "style": "holographic foil",
+      "style": "bright playful cartoon",
       "art": "/landing/card-play.jpg",
       "fg": "/landing/card-play-fg.png"
     },
@@ -120,6 +120,20 @@
     "confused": [
       "/landing/char/confused-0.png",
       "/landing/char/confused-1.png"
+    ],
+    "rest": [
+      "/landing/char/rest-0.png",
+      "/landing/char/rest-1.png"
+    ],
+    "walk": [
+      "/landing/char/walk-0.png",
+      "/landing/char/walk-1.png",
+      "/landing/char/walk-2.png",
+      "/landing/char/walk-3.png",
+      "/landing/char/walk-4.png",
+      "/landing/char/walk-5.png",
+      "/landing/char/walk-6.png",
+      "/landing/char/walk-7.png"
     ]
   },
   "levels": [
@@ -231,7 +245,7 @@
       "line": "I always lie on my back like this when I want a belly rub. My gray toy is my favorite right now.",
       "rarity": 2,
       "kind": "quest",
-      "style": "holographic foil",
+      "style": "bright playful cartoon",
       "art": "/landing/memory-print.jpg",
       "fg": "/landing/memory-print-fg.png"
     },

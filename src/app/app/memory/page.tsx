@@ -24,7 +24,7 @@ export default function MemoryPage() {
             <MemoryPanel pet={pet} memory={memory} />
             <Rule label={t("Moves")} />
             <p className="text-[14px] text-[var(--ink2)]">{t("{name} starts simple. Each clarity level teaches new moves; tap a move to see it.", { name: pet.name })}</p>
-            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7">
+            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4 xl:grid-cols-8">
               {MOVES.map((m) => {
                 const open = memory.level >= m.level;
                 const drawn = !!pet.character?.moods[m.mood]?.length;

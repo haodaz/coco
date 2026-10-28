@@ -362,6 +362,7 @@ export const ZH: Record<string, string> = {
   "days of her life": "天的生活",
   "days of their life": "天的生活",
   "notes from you": "条你的话",
+  "note from you": "条你的话",
   "What I can talk about": "我能聊的",
 
   // Around us
