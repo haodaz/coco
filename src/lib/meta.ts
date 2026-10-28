@@ -7,7 +7,7 @@ import { getMedia, putMedia } from "./media";
 import { currentUserId } from "./session";
 import { newId, UPLOADS } from "./store";
 import { adminClient, HOSTED } from "./supabase";
-import type { Pet, PetAction, PlayReport, Species, TraceKind } from "./types";
+import type { GraphEdge, Pet, PetAction, PlayReport, Species, TraceKind } from "./types";
 import { languageName } from "./i18n";
 
 // The only place that talks to the Meta Model API.
@@ -793,4 +793,41 @@ export async function playReport(a: { name: string; imprints: object[] }, b: { n
       },
     },
   );
+}
+
+
+// The pet's memory as a graph: from its imprints, the relations it has with itself, things, beings (people and
+// animals) and places, each resting on the cards that show it. Only what the imprints show; plain short words.
+export async function memoryGraph(name: string, imprints: { id: string; seen: string; ownerSaid: string | null; traces: string[] }[]): Promise<GraphEdge[]> {
+  const out = await sparkJson<{ edges: GraphEdge[] }>(
+    "memory-graph",
+    [
+      `You turn one pet's memories into a small knowledge graph about ${name}. Each edge is ${name} — relation — object, resting on the memories (imprint ids) that show it.`,
+      "group: self (how it is: a habit, a pose, a mood, how it looks), things (objects, toys, food, furniture), beings (people and other animals; call the owner \"you\"), places (rooms, spots, outdoor places, the car).",
+      "relation: a short present-tense verb phrase from the pet's side (sleeps on, plays with, waits for, sits beside, loves, is calm near). object: two to four plain words, lowercase, no names of people.",
+      "Merge repeats: one edge per relation and object, with every imprint that shows it. owner: true when the edge rests on what the owner said ([owner] traces or ownerSaid).",
+      "Only what the imprints show; never infer from the breed. 12 to 20 edges, the best-supported first; cover all four groups when the imprints allow. Edges stay in short plain English.",
+    ].join("\n"),
+    `Imprints: ${JSON.stringify(imprints)}`,
+    null,
+    "memory_graph",
+    {
+      type: "object",
+      additionalProperties: false,
+      required: ["edges"],
+      properties: {
+        edges: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["group", "relation", "object", "cardIds", "owner"],
+            properties: { group: { type: "string", enum: ["self", "things", "beings", "places"] }, relation: { type: "string" }, object: { type: "string" }, cardIds: { type: "array", items: { type: "string" } }, owner: { type: "boolean" } },
+          },
+        },
+      },
+    },
+    8000,
+  );
+  return out.edges;
 }

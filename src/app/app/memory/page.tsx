@@ -3,6 +3,7 @@
 import { Lock } from "lucide-react";
 import Character, { type Mood } from "@/components/Character";
 import { MOVES } from "@/lib/moves";
+import MemoryGraph from "@/components/MemoryGraph";
 import MemoryPanel from "@/components/MemoryPanel";
 import Shell, { PageHead, Rule } from "@/components/Shell";
 
@@ -10,7 +11,7 @@ import Shell, { PageHead, Rule } from "@/components/Shell";
 export default function MemoryPage() {
   return (
     <Shell>
-      {({ pet, memory, t }) =>
+      {({ pet, memory, state, openCard, t }) =>
         memory && (
           <div>
             <PageHead
@@ -22,6 +23,8 @@ export default function MemoryPage() {
               lead={t("Everything {name}'s AI knows comes from your Memory Prints: more cards, more kinds of moment, more days of {name}'s life and more of your words make the picture sharper.", { name: pet.name })}
             />
             <MemoryPanel pet={pet} memory={memory} />
+            <Rule label={t("What I know, and where it comes from")} />
+            <MemoryGraph pet={pet} state={state} openCard={openCard} />
             <Rule label={t("Moves")} />
             <p className="text-[14px] text-[var(--ink2)]">{t("{name} starts simple. Each clarity level teaches new moves; tap a move to see it.", { name: pet.name })}</p>
             <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4 xl:grid-cols-8">

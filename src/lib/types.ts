@@ -24,6 +24,9 @@ export type Pet = {
   unlocks?: { mood: string; at: string }[]; // moves learned after the first ones, as memories grew
   moveCards?: { mood: string; at: string; from: "starter" | "pack" }[]; // move cards pulled so far (bonus cards from packs)
   likeness?: { file: string; level: number; from: "profile" | "imprints"; at: string } | null;
+  // what the AI knows about the pet as a small graph: the pet, related to things, beings and places, every link
+  // resting on real cards; rebuilt when the cards change (basis = how many cards it was built from)
+  graph?: { edges: GraphEdge[]; at: string; basis: number } | null;
   createdAt: string;
 };
 
@@ -39,6 +42,9 @@ export type Photo = {
 };
 
 // One observation from a photo or a note, always with its source.
+export type GraphGroup = "self" | "things" | "beings" | "places";
+export type GraphEdge = { group: GraphGroup; relation: string; object: string; cardIds: string[]; owner: boolean };
+
 export type TraceKind = "place" | "activity" | "companion" | "object" | "time" | "note";
 export type Trace = {
   id: string;
