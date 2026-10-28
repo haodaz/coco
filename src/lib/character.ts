@@ -129,10 +129,13 @@ export async function makeCharacter(state: State, pet: Pet): Promise<NonNullable
 }
 
 // Characters made before a mood existed get just the missing moods, drawn from their own idle frame.
+// a move is missing when it has no frames, or fewer than its frames now ask for (an older, shorter walk is redrawn)
+const lacks = (moods: Record<string, string[]>, m: Mood) => (moods[m]?.length ?? 0) < (m === "walk" ? FRAMES.walk.length + 1 : 1);
+
 export async function addMissingMoods(pet: Pet, only?: string[]): Promise<NonNullable<Pet["character"]> | null> {
   const c = pet.character;
   if (!c?.moods.idle?.[0]) return null;
-  const missing = ORDER.filter((m) => m !== "idle" && !c.moods[m]?.length && (!only || only.includes(m))) as Exclude<Mood, "idle">[];
+  const missing = ORDER.filter((m) => m !== "idle" && lacks(c.moods, m) && (!only || only.includes(m))) as Exclude<Mood, "idle">[];
   if (!missing.length) return c;
   const base = await sharp(await getMedia(c.moods.idle[0])).flatten({ background: "#ffffff" }).jpeg({ quality: 92 }).toBuffer();
   const baseB64 = base.toString("base64");
@@ -158,7 +161,7 @@ export async function unlockMoves(petId: string) {
   const s = await load();
   const pet = s.pets.find((p) => p.id === petId);
   if (!pet?.character) return;
-  const want = unlockedMoods(clarityOf(s, pet).level).filter((m) => m !== "idle" && !pet.character!.moods[m]?.length);
+  const want = unlockedMoods(clarityOf(s, pet).level).filter((m) => m !== "idle" && lacks(pet.character!.moods, m as Mood));
   if (!want.length) return;
   const c = await addMissingMoods(pet, want);
   if (!c) return;
@@ -167,6 +170,7 @@ export async function unlockMoves(petId: string) {
     const p = f.pets.find((x) => x.id === petId);
     if (!p) return;
     p.character = c;
-    p.unlocks = [...(p.unlocks ?? []), ...want.filter((m) => c.moods[m]?.length).map((mood) => ({ mood, at: now }))];
+    // walking isn't learned, every pet has it: it is never announced as a new move
+    p.unlocks = [...(p.unlocks ?? []), ...want.filter((m) => m !== "walk" && c.moods[m]?.length && !p.unlocks?.some((u) => u.mood === m)).map((mood) => ({ mood, at: now }))];
   });
 }
