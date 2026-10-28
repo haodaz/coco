@@ -13,8 +13,8 @@ const TIMELINE: Record<Mood, [number, number][]> = {
   close: [[0, 1600], [1, 1800]],
   busy: [[0, 650], [1, 650]],
   rest: [[0, 2600], [1, 2600]],
-  // a four-legged walk: six frames, one step per side (land, weight over, reach), about two steps a second
-  walk: [[0, 110], [1, 110], [2, 110], [3, 110], [4, 110], [5, 110]],
+  // a four-legged walk: up to eight frames, one full stride (an older six-frame walk just uses the frames it has)
+  walk: [[0, 140], [1, 140], [2, 140], [3, 140], [4, 140], [5, 140], [6, 140], [7, 140]],
 };
 
 // The pet as a living character: cut out with no background, the mood's frames loop like a GIF,
@@ -66,6 +66,8 @@ export default function Character({ moods, mood: asked, version = "", className 
   // every frame of every mood stays mounted and loaded; switching only changes opacity, and something opaque is
   // always underneath (the mood's first frame, and the frame just left), so the body never turns see-through
   const all = [...new Set(Object.values(moods).flat())];
+  // walking frames differ in the legs, so nothing may show through underneath them: one frame at a time, swapped at once
+  const alone = mood === "walk";
   // a tap on the same mood restarts its movement without remounting anything
   const body = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -87,7 +89,7 @@ export default function Character({ moods, mood: asked, version = "", className 
           // eslint-disable-next-line @next/next/no-img-element
           <img key={f} src={f.startsWith("/") ? f : `/api/art/${f}?v=${encodeURIComponent(version)}`} alt="" draggable={false} decoding="async" className="absolute inset-0 h-full w-full object-contain"
             style={{
-              opacity: f === visible || f === prev || f === base ? 1 : 0,
+              opacity: f === visible || (!alone && (f === prev || f === base)) ? 1 : 0,
               zIndex: f === visible ? 3 : f === prev ? 2 : f === base ? 1 : 0,
               transition: f === visible && !quick ? "opacity 200ms ease-out" : "none",
             }}
