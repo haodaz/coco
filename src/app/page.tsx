@@ -12,6 +12,14 @@ import { CocoLogo } from "@/components/Brand";
 // Every picture and answer here is real, from the app and one real dog (scripts/export-landing.mjs).
 
 const PET = manifest.pet.name;
+// the climb from no cards to the full portrait, shown on a light-coated demo pet so each step reads clearly
+const DEMO_LEVELS = [
+  { src: "/landing/demo/level-0.png", label: "no cards" },
+  { src: "/landing/demo/level-2.png", label: "level 2" },
+  { src: "/landing/demo/level-4.png", label: "level 4" },
+  { src: "/landing/demo/level-6.png", label: "level 6" },
+  { src: "/landing/demo/level-8.jpg", label: "full" },
+];
 const mp = manifest.memoryPrint;
 
 const SPECIES = [
@@ -49,34 +57,45 @@ function NamePart({ k, v }: { k: string; v: string }) {
 export default function Landing() {
   return (
     <div className="overflow-x-hidden bg-[linear-gradient(180deg,#f1edff_0%,var(--bg)_520px)]">
-      <nav className="mx-auto flex max-w-6xl items-center px-5 py-4">
-        <CocoLogo size={20} />
-        <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Sign in</Link>
-      </nav>
-
-      {/* hero */}
-      <header className="mx-auto grid max-w-6xl items-center gap-8 px-5 pb-20 pt-6 md:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] md:pt-12">
-        <div>
-          <h1 className="text-[38px] font-bold leading-[1.08] tracking-tight md:text-[52px]">
+      {/* hero: a hand and a paw meet, and a little universe opens where they touch */}
+      <header className="hero-universe relative isolate overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/landing/hero-bg.webp" alt="" className="hero-bg absolute inset-0 -z-20 h-full w-full object-cover object-[50%_70%]" />
+        <div className="hero-stars absolute inset-0 -z-10" aria-hidden />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/landing/hero-fg.webp" alt="A hand and a dog's paw touching" className="hero-fg pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover object-[50%_70%]" />
+        <nav className="relative mx-auto flex max-w-6xl items-center px-5 py-4">
+          <CocoLogo size={20} />
+          <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Sign in</Link>
+        </nav>
+        <div className="relative mx-auto max-w-3xl px-5 pb-[34vw] pt-8 text-center md:pb-[300px] md:pt-14">
+          <h1 className="hero-title text-[36px] font-bold leading-[1.08] tracking-tight md:text-[54px]">
             A little universe for you and your pet.
-            <br />
-            <span className="text-[var(--primary)]">Built from the moments you share.</span>
           </h1>
-          <p className="mt-5 max-w-lg text-[17px] leading-relaxed text-[#3d4460]">
-            Every photo becomes a card. Your pet&apos;s AI grows only from those cards, so it never makes up a memory.
+          <p className="hero-title mx-auto mt-4 max-w-xl text-[17px] leading-relaxed text-[#3d4460] md:text-[19px]">
+            Built only from the moments you share. Your pet&apos;s AI never makes up a memory.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link href="/app" className="rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(109,79,209,.55)]">Start your cocoverse →</Link>
-            <a href="#how" className="rounded-xl bg-white px-5 py-3 text-[15px] font-semibold shadow-sm">See how it grows</a>
+            <a href="#inside" className="rounded-xl bg-white/90 px-5 py-3 text-[15px] font-semibold shadow-sm">See inside</a>
           </div>
-          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[13.5px] text-[#3d4460]">
-            <Promise>Only real moments</Promise>
-            <Promise>Faces stay on your device</Promise>
-            <Promise>Any pet</Promise>
+        </div>
+      </header>
+
+      {/* what you do in a cocoverse: the companion turning a photo into a Memory Print */}
+      <section id="inside" className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-20 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div>
+          <div className="text-[12px] font-bold uppercase tracking-[.2em] text-[var(--primary)]">Inside your cocoverse</div>
+          <h2 className="mt-2 text-[30px] font-bold leading-tight tracking-tight md:text-[38px]">Share a moment. It becomes a card. Your pet&apos;s AI grows from it.</h2>
+          <ul className="mt-6 grid gap-2.5 text-[15px] text-[#3d4460]">
+            <Promise>Every photo is painted into a card you collect</Promise>
+            <Promise>Your pet&apos;s AI talks back, and names the cards it remembers</Promise>
+            <Promise>People&apos;s faces are blurred on your device</Promise>
+            <Promise>Any pet: dogs, cats, birds, reptiles, fish</Promise>
           </ul>
         </div>
         <HeroCompanion moods={manifest.moods} assets={{ cards: manifest.set.map((c) => c.src), levels: manifest.levels, legend: manifest.legend?.art ?? null, said: mp?.said ?? "" }} />
-      </header>
+      </section>
 
       {/* the four beats */}
       <section id="how" className="mx-auto max-w-6xl px-5">
@@ -154,17 +173,13 @@ export default function Landing() {
           "At first it can only paint a typical breed; about a month in, you see your pet's own face",
         ]}
         panel={
-          <Panel title={`The AI's picture of ${PET}, level by level`}>
+          <Panel title="The AI's picture of a pet, level by level (Biscuit, a demo corgi)">
             <div className="grid grid-cols-5 gap-2">
-              {Array.from({ length: 5 }, (_, l) => (
-                <div key={l} className="text-center">
-                  {manifest.levels[l] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={manifest.levels[l]} alt={`Level ${l}`} className={`aspect-[3/4] w-full rounded-lg object-cover [image-rendering:pixelated] ${l === manifest.levels.length - 1 ? "ring-2 ring-[var(--primary)] ring-offset-2" : ""}`} />
-                  ) : (
-                    <div className="grid aspect-[3/4] w-full place-items-center rounded-lg bg-[#eceef5] text-[11px] text-[#a3a8b8]">locked</div>
-                  )}
-                  <div className="mt-1 text-[10.5px] text-[var(--sub)]">{l === 0 ? "no cards" : l === manifest.levels.length - 1 ? "today" : l === 4 ? "next" : `level ${l}`}</div>
+              {DEMO_LEVELS.map((d, i) => (
+                <div key={d.src} className="text-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={d.src} alt={d.label} className={`aspect-[3/4] w-full rounded-lg object-cover [image-rendering:pixelated] ${i === DEMO_LEVELS.length - 1 ? "ring-2 ring-[var(--primary)] ring-offset-2" : ""}`} />
+                  <div className="mt-1 text-[10.5px] text-[var(--sub)]">{d.label}</div>
                 </div>
               ))}
             </div>
