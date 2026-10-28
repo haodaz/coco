@@ -59,11 +59,16 @@ export default function Landing() {
     <div className="overflow-x-hidden bg-[linear-gradient(180deg,#f1edff_0%,var(--bg)_520px)]">
       {/* hero: a hand and a paw meet, and a little universe opens where they touch */}
       <header className="hero-universe relative isolate overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/landing/hero-bg.webp" alt="" className="hero-bg absolute inset-0 -z-20 h-full w-full object-cover object-[50%_70%]" />
-        <div className="hero-stars absolute inset-0 -z-10" aria-hidden />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/landing/hero-fg.webp" alt="A hand and a dog's paw touching" className="hero-fg pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover object-[50%_70%]" />
+        {/* one picture in two layers that always move together (the scene, then the hand and paw), with the light
+            where they touch breathing between them, and stars twinkling */}
+        <div className="hero-art absolute inset-0 -z-10" aria-hidden>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/landing/hero-bg.webp" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_70%]" />
+          <div className="hero-stars absolute inset-0" />
+          <div className="hero-glow absolute inset-0" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/landing/hero-fg.webp" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_70%]" />
+        </div>
         <nav className="relative mx-auto flex max-w-6xl items-center px-5 py-4">
           <CocoLogo size={20} />
           <Link href="/app" className="ml-auto rounded-full bg-[var(--primary)] px-4 py-2 text-[14px] font-semibold text-white">Sign in</Link>

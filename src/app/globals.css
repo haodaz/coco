@@ -329,12 +329,13 @@ body {
 .char[data-mood="walk"] { animation: none; }
 @media (prefers-reduced-motion: reduce) { .companion-stride { animation: none; } }
 
-/* landing hero: the universe drifts closer, stars twinkle, the hand and paw float gently */
+/* landing hero: the whole picture drifts closer as one, the light where hand and paw touch breathes, stars twinkle */
 .hero-universe { min-height: 560px; }
-.hero-bg { animation: hero-drift 28s ease-in-out infinite alternate; transform-origin: 50% 72%; }
-.hero-fg { animation: hero-float 7s ease-in-out infinite; }
-@keyframes hero-drift { from { transform: scale(1); } to { transform: scale(1.08); } }
-@keyframes hero-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.hero-art { animation: hero-drift 30s ease-in-out infinite alternate; transform-origin: 50% 72%; }
+@keyframes hero-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
+.hero-glow { background: radial-gradient(circle at 50.5% 74%, rgba(255,246,214,.95) 0, rgba(255,226,190,.55) 4%, rgba(255,214,230,0) 14%);
+  mix-blend-mode: screen; animation: hero-breathe 3.2s ease-in-out infinite; }
+@keyframes hero-breathe { 0%, 100% { opacity: .35; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.06); } }
 .hero-stars { background-image:
   radial-gradient(1.6px 1.6px at 12% 22%, #fff, transparent), radial-gradient(1.2px 1.2px at 28% 12%, #fff, transparent),
   radial-gradient(1.8px 1.8px at 44% 30%, #fff, transparent), radial-gradient(1.2px 1.2px at 62% 16%, #fff, transparent),
@@ -344,4 +345,4 @@ body {
   animation: hero-twinkle 3.6s ease-in-out infinite alternate; }
 @keyframes hero-twinkle { from { opacity: .35; } to { opacity: 1; } }
 .hero-title { text-shadow: 0 1px 18px rgba(255,255,255,.85), 0 0 2px rgba(255,255,255,.6); }
-@media (prefers-reduced-motion: reduce) { .hero-bg, .hero-fg, .hero-stars { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-art, .hero-glow, .hero-stars { animation: none; } }
