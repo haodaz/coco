@@ -57,6 +57,23 @@ h2{font-family:Fraunces,serif;font-weight:700;font-size:78px;line-height:1.06;le
 .petR{position:absolute;right:150px;bottom:120px;width:420px;filter:drop-shadow(0 30px 40px rgba(40,30,90,.25))}
 </style>
 
+<style>
+.pr{display:grid;grid-template-columns:560px 1fr;gap:70px;align-items:center;margin-top:10px}
+.rings{position:relative;width:560px;height:560px}
+.ring{position:absolute;border-radius:50%;display:flex;justify-content:center;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:20px}
+.r1{inset:0;border:3px dashed #c9c1e6;background:#fbfaff;color:#8a87a6;padding-top:26px}
+.r2{inset:80px;background:linear-gradient(160deg,#efe9ff,#fde8f2);color:#6d4fd1;padding-top:26px}
+.r3{inset:190px;background:#fff4d9;color:#9a6b00;align-items:center;text-align:center;font-size:18px;box-shadow:0 10px 30px -14px rgba(154,107,0,.5)}
+.dot{position:absolute;padding:8px 16px;border-radius:999px;font-size:20px;font-weight:600;background:#fff;box-shadow:0 6px 16px -10px rgba(40,30,90,.4)}
+.layer{border-radius:26px;padding:24px 30px;margin-bottom:18px;box-shadow:0 16px 36px -22px rgba(40,30,90,.35)}
+.layer .k{font-size:22px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.layer .v{margin-top:8px;font-size:26px;line-height:1.35;color:#3d3a58}
+.lg{background:#fbfaff;border:3px dashed #c9c1e6}.lg .k{color:#8a87a6}
+.lp{background:linear-gradient(160deg,#efe9ff,#fde8f2)}.lp .k{color:#6d4fd1}
+.lo{background:#fff4d9}.lo .k{color:#9a6b00}
+.foot{margin-top:26px;font-size:26px;color:#3d3a58;line-height:1.4}
+.foot b{color:#6d4fd1}
+</style>
 <div class="page" id="cover" style="padding-top:320px">
   <div class="brand"><svg><use href="#mark"/></svg>cocoverse</div>
   <h1>Your pet will never<br>tell you who they are.</h1>
@@ -97,6 +114,30 @@ h2{font-family:Fraunces,serif;font-weight:700;font-size:78px;line-height:1.06;le
   <div><span class="url">cocoverse.app</span></div>
   <div class="built">Built with Meta Muse Spark, Muse Image, SAM 3.1 and Muse Voice<br>github.com/haodaz/coco</div>
   <img class="petR" src="out/coco.png" style="width:360px">
+</div>
+
+
+<div class="page" id="principle" style="padding-top:110px">
+  <div class="eyebrow">How Coco's AI knows her</div>
+  <h2 style="margin-bottom:34px">Three layers, every link with its proof.</h2>
+  <div class="pr">
+    <div class="rings">
+      <div class="ring r1">General</div>
+      <div class="ring r2">Her own moments</div>
+      <div class="ring r3">Your<br>words</div>
+      <span class="dot" style="left:150px;top:175px;color:#5b3fb0">lies on her back</span>
+      <span class="dot" style="left:350px;top:200px;color:#b4560f">gray rope toy</span>
+      <span class="dot" style="left:330px;top:380px;color:#c2418f">you, on the bench</span>
+      <span class="dot" style="left:60px;top:330px;color:#1f7a6d">floor by the bed</span>
+      <span class="dot" style="left:300px;top:500px;color:#8a87a6;border:2px dashed #c9c1e6">Labrador</span>
+    </div>
+    <div>
+      <div class="layer lg"><div class="k">General knowledge</div><div class="v">her species and breed, the weather and rules where she lives. Used with care, always labelled, never taken for a memory.</div></div>
+      <div class="layer lp"><div class="k">Her own moments</div><div class="v">read from each photo: how she is, the things, people and animals, and places in her life.</div></div>
+      <div class="layer lo"><div class="k">Your words</div><div class="v">what no photo shows. They outrank anything the AI guessed.</div></div>
+      <div class="foot">One photo gives many links at once (when, where, with what, with whom), and each one <b>points back to the photo</b>.</div>
+    </div>
+  </div>
 </div>
 
 <script>const id=new URLSearchParams(location.search).get('p')||'cover';document.getElementById(id).classList.add('on');</script>
