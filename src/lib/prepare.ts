@@ -2,9 +2,11 @@
 
 // Every photo is prepared in the browser before it is uploaded: its capture time is read, HEIC becomes JPEG,
 // it is turned upright and made smaller, and every human face is blurred. Only that copy leaves the device.
-// Face detection is MediaPipe's BlazeFace, served from this site (public/mediapipe, public/models).
+// Face detection is MediaPipe's BlazeFace, served from this site (public/mediapipe, public/models). BlazeFace also
+// fires on some pets' faces (a corgi looking at the camera), so when it finds a face, an object detector checks
+// what it is on: a face on an animal and on no person is the pet, and stays sharp.
 
-import type { FaceDetector } from "@mediapipe/tasks-vision";
+import type { FaceDetector, ObjectDetector } from "@mediapipe/tasks-vision";
 
 const MAX = 1600;
 let detector: Promise<FaceDetector> | null = null;
@@ -20,6 +22,39 @@ function faceDetector() {
     });
   })();
   return detector;
+}
+
+let objects: Promise<ObjectDetector> | null = null;
+function objectDetector() {
+  objects ??= (async () => {
+    const { ObjectDetector, FilesetResolver } = await import("@mediapipe/tasks-vision");
+    const vision = await FilesetResolver.forVisionTasks("/mediapipe");
+    return ObjectDetector.createFromOptions(vision, {
+      baseOptions: { modelAssetPath: "/models/efficientdet_lite0.tflite" },
+      runningMode: "IMAGE",
+      scoreThreshold: 0.3,
+    });
+  })();
+  return objects;
+}
+const ANIMALS = new Set(["dog", "cat", "bird", "horse", "sheep", "cow", "bear", "teddy bear"]);
+type Box = { originX: number; originY: number; width: number; height: number };
+const holds = (o: Box, x: number, y: number) => x >= o.originX && x <= o.originX + o.width && y >= o.originY && y <= o.originY + o.height;
+
+// the faces that belong to people: drop any whose centre is on an animal and on no person
+async function peoplesFaces(canvas: HTMLCanvasElement, faces: Box[]): Promise<Box[]> {
+  if (!faces.length) return faces;
+  try {
+    const found = (await objectDetector()).detect(canvas).detections;
+    const boxes = (names: (n: string) => boolean) => found.filter((d) => d.boundingBox && names(d.categories[0]?.categoryName ?? "")).map((d) => d.boundingBox!);
+    const people = boxes((n) => n === "person"), animals = boxes((n) => ANIMALS.has(n));
+    return faces.filter((f) => {
+      const x = f.originX + f.width / 2, y = f.originY + f.height / 2;
+      return people.some((o) => holds(o, x, y)) || !animals.some((o) => holds(o, x, y));
+    });
+  } catch {
+    return faces; // when in doubt, blur
+  }
 }
 
 const isHeic = (f: File) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
@@ -56,7 +91,7 @@ export async function preparePhoto(input: File): Promise<Prepared> {
   bitmap.close();
 
   // find faces, then blur each in a soft oval with room for hair, ears and chin
-  const found = (await faceDetector()).detect(canvas).detections.map((d) => d.boundingBox).filter((b) => !!b);
+  const found = await peoplesFaces(canvas, (await faceDetector()).detect(canvas).detections.map((d) => d.boundingBox).filter((b) => !!b));
   if (found.length) {
     const copy = document.createElement("canvas");
     copy.width = w;
