@@ -8,19 +8,20 @@ import { CocoLoader } from "@/components/Loading";
 type Row = { calls: number; tokens: number };
 type Usage = { days: Record<string, Row>; features: Record<string, Row>; people: Record<string, Row>; paintingsToday: number; paintingCap: number; accounts: number };
 
-// Old layered cards: give them a clean scene behind the pet, a few at a time.
-function FixLayers() {
+// Old cards brought up to date, a few at a time: layered cards get a clean scene behind the pet (Fix card layers),
+// cards painted in a retired style are painted again (Repaint retired styles).
+function FixCards({ api, what, button }: { api: string; what: string; button: string }) {
   const [left, setLeft] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    fetch("/api/admin/plates").then((r) => r.json()).then((j) => setLeft(j.left ?? 0));
+    fetch(api).then((r) => r.json()).then((j) => setLeft(j.left ?? 0));
   }, []);
   if (!left) return null;
   async function run() {
     setBusy(true);
     let n = left ?? 0;
     while (n > 0) {
-      const r = await fetch("/api/admin/plates", { method: "POST" }).then((x) => x.json());
+      const r = await fetch(api, { method: "POST" }).then((x) => x.json());
       if (!r.fixed) break;
       n = r.left;
       setLeft(n);
@@ -30,8 +31,8 @@ function FixLayers() {
   }
   return (
     <section className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
-      <div className="min-w-0 flex-1 text-[14px]"><b>{left} layered card{left === 1 ? "" : "s"}</b> need their layers redone: a clean scene behind the pet (one painting, only if missing) and a pet layer with only the pet and what it wears and holds.</div>
-      <button disabled={busy} onClick={run} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white disabled:opacity-50">{busy ? "Painting…" : "Fix card layers"}</button>
+      <div className="min-w-0 flex-1 text-[14px]"><b>{left} card{left === 1 ? "" : "s"}</b> {what}</div>
+      <button disabled={busy} onClick={run} className="rounded-xl bg-[var(--ink)] px-4 py-2 text-[13.5px] font-semibold text-white disabled:opacity-50">{busy ? "Painting…" : button}</button>
     </section>
   );
 }
@@ -89,7 +90,8 @@ function Admin() {
           <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3.5 py-1.5 text-[14px] font-medium capitalize ${tab === t ? "bg-white shadow-sm" : "text-[var(--sub)]"}`}>{t}</button>
         ))}
       </div>
-      <FixLayers />
+      <FixCards api="/api/admin/plates" what="need their layers redone: a clean scene behind the pet (one painting, only if missing) and a pet layer with only the pet and what it wears and holds." button="Fix card layers" />
+      <FixCards api="/api/admin/restyle" what="still painted in a retired style (a shine painted onto the pet): painted again in their slot's style, one painting each." button="Repaint retired styles" />
       {tab === "usage" ? <UsageView /> : <AdminAccounts />}
     </div>
   );
