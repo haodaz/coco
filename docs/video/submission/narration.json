@@ -1,0 +1,19 @@
+[
+ {"id": "c1", "text": "Your dog will never tell you who she is. Your cat won't either."},
+ {"id": "c2", "text": "So cocoverse builds your pet's AI twin the only honest way: from what they actually do. Every photo becomes a card, a Memory Print. The twin grows only from those cards, and never makes up a memory."},
+ {"id": "h1", "text": "This is Coco's cocoverse. Each day, she asks her owner for one more moment from their life together."},
+ {"id": "s1", "text": "Her owner shares a photo. Muse Spark reads it, and says what Coco learned."},
+ {"id": "s2", "text": "Then the owner adds the story no photo can show. Those words outrank anything the AI guessed."},
+ {"id": "p1", "text": "Each memory earns points, and points open a pack. Muse Image has already painted the memories in the background, each in a style you don't know until the card turns over."},
+ {"id": "p2", "text": "On rare cards, SAM 3.1 cuts Coco out of the painting, so she moves in front of the scene."},
+ {"id": "k1", "text": "Cards fill series that follow who Coco is: her favourite things, her friends, her places, the seasons of a year."},
+ {"id": "a1", "text": "Now ask her something. Coco answers in her own voice, and names the cards her answer comes from."},
+ {"id": "a2", "text": "Ask about something she has never been shown, and she says so, instead of making it up."},
+ {"id": "m1", "text": "Her picture of herself starts as a blur. With every moment and every word from you, it sharpens, and she learns new moves."},
+ {"id": "l1", "text": "Coco also knows where she lives: the weather today, and the local rules, each with its source and when it was checked."},
+ {"id": "l2", "text": "So when you ask her along to the store, she checks first, before she says yes."},
+ {"id": "f1", "text": "Before Coco meets a new friend, their twins meet first. Each one speaks only from its own photos, and both owners get one honest note."},
+ {"id": "x1", "text": "It works on your phone, in your language, and a sitter can talk to Coco's twin through a link."},
+ {"id": "b1", "text": "Under the hood, four Meta models, and one rule in code: only what really happened counts."},
+ {"id": "e1", "text": "cocoverse. A little universe for you and your pet."}
+]

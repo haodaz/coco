@@ -59,7 +59,14 @@ export default function ActionPanel({ action, facts = [], pet, state, memory, ad
   } else if (action.type === "open_pack") body = <DailyPack pet={pet} state={state} onChange={async () => refresh()} admin={admin} />;
   else if (action.type === "add_photo") {
     const slot = slots.find((s) => s.id === action.slotId);
-    body = slot ? <SlotUpload pet={pet} slotId={slot.id} title={slot.title} why={slot.why} pattern={slot.pattern} onDone={refresh} /> : <DailyPack pet={pet} state={state} onChange={async () => refresh()} admin={admin} />;
+    // an empty Starter Kit slot is filled right here; once it holds a card, or when no slot is named, the photo is
+    // shared as a new moment (a card in the slot stays)
+    const filled = !!slot && state.cards.some((c) => c.petId === pet.id && c.slotId === slot.id);
+    body = slot ? (
+      <SlotUpload pet={pet} slotId={filled ? null : slot.id} title={slot.title} why={slot.why} pattern={slot.pattern} onDone={refresh} />
+    ) : (
+      <SlotUpload pet={pet} slotId={null} title="A new moment" why="something I haven't seen yet" pattern="mystery" onDone={refresh} />
+    );
   } else if (action.type === "show_memory" && memory) {
     body = (
       <div>
@@ -100,8 +107,9 @@ export default function ActionPanel({ action, facts = [], pet, state, memory, ad
   );
 }
 
-// One empty starter slot: the photo the pet asked for, turned into a card right here.
-function SlotUpload({ pet, slotId, title, why, pattern, onDone }: { pet: Pet; slotId: string; title: string; why: string; pattern: Pattern; onDone: () => void }) {
+// The photo the pet asked for, turned into a card right here: into its empty Starter Kit slot, or shared as a new
+// moment when that slot already holds a card (slotId null).
+function SlotUpload({ pet, slotId, title, why, pattern, onDone }: { pet: Pet; slotId: string | null; title: string; why: string; pattern: Pattern; onDone: () => void }) {
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -110,8 +118,8 @@ function SlotUpload({ pet, slotId, title, why, pattern, onDone }: { pet: Pet; sl
     const fd = new FormData();
     await appendPhoto(fd, "photo", f);
     fd.append("petId", pet.id);
-    fd.append("slotId", slotId);
-    const r = await call("/api/quest", { method: "POST", body: fd });
+    if (slotId) fd.append("slotId", slotId);
+    const r = await call(slotId ? "/api/quest" : "/api/share", { method: "POST", body: fd });
     setBusy(false);
     if (r) {
       setDone(true);
