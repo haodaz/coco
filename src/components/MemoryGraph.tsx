@@ -17,12 +17,28 @@ const GROUPS: Record<GraphGroup, { label: string; angle: number; color: string; 
 };
 const PER_GROUP = 6;
 
+// one node per thing: the relations to the same object in a group are joined, their cards pooled
+function merge(edges: GraphEdge[]): GraphEdge[] {
+  const by = new Map<string, GraphEdge>();
+  for (const e of edges) {
+    const k = `${e.group}|${e.object}`;
+    const m = by.get(k);
+    if (!m) by.set(k, { ...e, cardIds: [...e.cardIds] });
+    else {
+      if (!m.relation.split(" · ").includes(e.relation)) m.relation = `${m.relation} · ${e.relation}`;
+      m.cardIds = [...new Set([...m.cardIds, ...e.cardIds])];
+      m.owner = m.owner || e.owner;
+    }
+  }
+  return [...by.values()];
+}
+
 function layout(edges: GraphEdge[]) {
   const out: { e: GraphEdge; x: number; y: number }[] = [];
   for (const g of Object.keys(GROUPS) as GraphGroup[]) {
     const mine = edges.filter((e) => e.group === g).sort((a, b) => b.cardIds.length - a.cardIds.length).slice(0, PER_GROUP);
     mine.forEach((e, i) => {
-      const spread = Math.min(84, 18 * mine.length); // degrees the group fans out over: wider when it has more
+      const spread = Math.min(72, 16 * mine.length); // degrees the group fans out over: wider when it has more
       const a = ((GROUPS[g].angle + (mine.length === 1 ? 0 : -spread / 2 + (spread * i) / (mine.length - 1))) * Math.PI) / 180;
       const far = i % 2 ? 1.08 : 0.7;
       out.push({ e, x: 50 + Math.cos(a) * 39 * far, y: 50 + Math.sin(a) * 39 * far });
@@ -44,7 +60,8 @@ export default function MemoryGraph({ pet, state, openCard }: { pet: Pet; state:
   }, [pet.id, cardCount, graph]);
 
   const face = petArt(pet);
-  const nodes = graph ? layout(graph.edges) : [];
+  const edges = graph ? merge(graph.edges) : [];
+  const nodes = layout(edges);
   const general = [pet.breed && { label: pet.breed, kind: t("breed") }, state.place?.name && { label: state.place.name, kind: t("local rules") }].filter(Boolean) as { label: string; kind: string }[];
   const cards = picked ? picked.cardIds.map((id) => state.cards.find((c) => c.id === id)).filter((c): c is Card => !!c) : [];
 
@@ -110,7 +127,7 @@ export default function MemoryGraph({ pet, state, openCard }: { pet: Pet; state:
           </div>
         </div>
         {(Object.keys(GROUPS) as GraphGroup[]).map((g) => {
-          const mine = (graph?.edges ?? []).filter((e) => e.group === g);
+          const mine = edges.filter((e) => e.group === g);
           if (!mine.length) return null;
           return (
             <div key={g} className="mt-3">

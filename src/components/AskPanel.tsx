@@ -118,6 +118,7 @@ export default function AskPanel({
   const last = turns[turns.length - 1];
   const mood: Mood = pending ? waiting : recording ? "close" : ((last?.mood as Mood) ?? "idle");
   const cardOf = (id: string) => state.cards.find((c) => c.id === id);
+  const moments = state.cards.filter((c) => c.petId === pet.id && c.kind !== "legendary" && !c.versionOf && !c.sealed).length;
 
   const LABEL: Record<PetAction["type"], string> = { show_cards: tr("the cards"), open_card: tr("the card"), open_pack: tr("today's tasks"), add_photo: tr("a place to add a photo"), show_memory: tr("how well I know myself"), make_link: tr("a link"), show_place: tr("what I checked") };
   const character = (cls: string) =>
@@ -156,6 +157,18 @@ export default function AskPanel({
                   <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#ebe5fb] px-4 py-2 text-left text-[14.5px]">{t.question}</span></div>
                   <div className="mt-2 max-w-[92%] rounded-2xl rounded-bl-md border border-[var(--line)] bg-white px-4 py-3 text-[16px] leading-relaxed">
                     {t.answer}
+                    {/* what the pet did for this answer: its small agent loop, in plain words */}
+                    <div className="mt-2 text-[11.5px] text-[var(--ink3)]">
+                      <span className="font-bold uppercase tracking-[.12em]">{tr("What I did")}</span>{" · "}
+                      {[
+                        tr("looked through {n} moments", { n: moments }),
+                        t.facts?.length ? tr("checked {n} facts about {place}", { n: t.facts.length, place: state.place?.name ?? tr("where we live") }) : null,
+                        t.basis.length ? tr("cited {n} cards", { n: t.basis.length }) : null,
+                        t.general.length ? tr("labelled general knowledge") : null,
+                        t.gap ? tr("found a gap") : null,
+                        t.action ? tr("opened {what}", { what: LABEL[t.action.type] }) : null,
+                      ].filter(Boolean).join(" · ")}
+                    </div>
                     {t.basis.length > 0 && (
                       <div className="mt-3 border-t border-[var(--line)] pt-2.5">
                         <div className="text-[10.5px] font-bold uppercase tracking-[.14em] text-[var(--ink3)]">{tr("I remember this from")}</div>
