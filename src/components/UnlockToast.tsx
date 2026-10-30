@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Character, { type Mood } from "@/components/Character";
 import MoveCard from "@/components/MoveCard";
-import { waitingMoves, type MoveCard as Owned } from "@/lib/moves";
+import { MOVES, waitingMoves, type MoveCard as Owned } from "@/lib/moves";
 import type { Pet, State } from "@/lib/types";
 import { useT } from "@/lib/ui";
 
@@ -31,15 +31,24 @@ export default function UnlockToast({ pet, state }: { pet: Pet; state: State }) 
     } catch {}
     setTold(all);
   };
-  const m = fresh[0];
+  return <Note key={fresh[0].mood} pet={pet} m={fresh[0]} more={fresh.length - 1} t={t} close={close} />;
+}
+
+// the note stays a little while, then goes by itself; either way the move counts as told
+function Note({ pet, m, more, t, close }: { pet: Pet; m: (typeof MOVES)[number]; more: number; t: (s: string, v?: Record<string, string | number>) => string; close: () => void }) {
+  useEffect(() => {
+    const id = setTimeout(close, 12000);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className="fixed inset-x-3 bottom-[calc(84px+env(safe-area-inset-bottom))] z-[55] mx-auto max-w-md md:bottom-6">
       <div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white p-3 pr-2 shadow-[0_18px_40px_-16px_rgba(40,30,90,.45)]">
-        <div className="relative h-16 w-12 shrink-0"><Character moods={pet.character.moods} mood={m.mood as Mood} version={pet.character.at} className="h-full w-full" /></div>
+        <div className="relative h-16 w-12 shrink-0"><Character moods={pet.character!.moods} mood={m.mood as Mood} version={pet.character!.at} className="h-full w-full" /></div>
         <div className="min-w-0 flex-1">
           <div className="text-[10.5px] font-bold uppercase tracking-[.18em] text-[var(--gold)]">{t("{name} learned a move", { name: pet.name })}</div>
           <div className="text-[14px] leading-snug">
-            <b>{t(m.name)}</b>{fresh.length > 1 ? t(" and {n} more", { n: fresh.length - 1 }) : ""}{t(". ")}{t("The move card drops from one of your next packs.")}
+            <b>{t(m.name)}</b>{more > 0 ? t(" and {n} more", { n: more }) : ""}{t(". ")}{t("The move card drops from one of your next packs.")}
           </div>
           <Link href="/app/pack" onClick={close} className="mt-1 inline-block text-[13px] font-semibold text-[var(--gold)]">{t("Open a pack")} →</Link>
         </div>
