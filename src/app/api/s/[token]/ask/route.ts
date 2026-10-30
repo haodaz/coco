@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ask } from "@/lib/ask";
-import { transcribe } from "@/lib/meta";
+import { transcribe, withProviders } from "@/lib/meta";
 import { runAs } from "@/lib/session";
 import { openShare, sharedContext } from "@/lib/shares";
 import { newId, update } from "@/lib/store";
@@ -25,7 +25,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
     const question = typed || (audio instanceof File ? await transcribe(Buffer.from(await audio.arrayBuffer())) : "");
     if (!question) return NextResponse.json({ error: "no question" }, { status: 400 });
 
-    const result = await ask(o.state, o.pet, question, { context: sharedContext(o), audience: "sitter" });
+    const { result, open } = await withProviders(() => ask(o.state, o.pet, question, { context: sharedContext(o), audience: "sitter" }));
     const now = new Date().toISOString();
     // one conversation per link per day in the owner's Recent
     await update((s) => {
@@ -39,6 +39,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
       t.updatedAt = now;
     });
     const media = (f: string | null) => (f ? `/api/s/${token}/media/${f.replace("/api/art/", "").replace(/\?.*$/, "")}` : null);
-    return NextResponse.json({ question, ...result, cards: result.cards.map((c) => ({ ...c, art: media(c.art), photoId: null })) });
+    return NextResponse.json({ question, ...result, cards: result.cards.map((c) => ({ ...c, art: media(c.art), photoId: null })), openWeights: open });
   });
 }

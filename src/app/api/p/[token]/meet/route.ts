@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { petContext } from "@/lib/ask";
 import { overLimit } from "@/lib/limits";
 import { getMedia, putMedia } from "@/lib/media";
-import { LIVE, playReport, twinTurn } from "@/lib/meta";
+import { LIVE, playReport, twinTurn, withProviders } from "@/lib/meta";
 import { currentUserId, runAs, withUser } from "@/lib/session";
 import { openShare, sharedContext } from "@/lib/shares";
 import { packFor, type Pattern } from "@/lib/species";
@@ -56,14 +56,16 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ toke
   const B = playContext(mine, guest);
   const transcript: { who: "host" | "guest"; line: string; mood: string }[] = [];
   const named = () => transcript.map((t) => ({ who: t.who === "host" ? host.pet.name : guest.name, line: t.line }));
-  for (let i = 0; i < 4; i++) {
-    const hostTurn = i % 2 === 0;
-    const t = hostTurn
-      ? await runAs(host.ownerId, () => twinTurn({ profile: A.profile, imprints: A.imprints }, guest.name, named(), i === 0))
-      : await twinTurn({ profile: B.profile, imprints: B.imprints }, host.pet.name, named(), false);
-    transcript.push({ who: hostTurn ? "host" : "guest", line: t.line, mood: t.mood });
-  }
-  const report = await playReport({ name: host.pet.name, imprints: A.imprints }, { name: guest.name, imprints: B.imprints }, named());
+  const { result: report, open } = await withProviders(async () => {
+    for (let i = 0; i < 4; i++) {
+      const hostTurn = i % 2 === 0;
+      const t = hostTurn
+        ? await runAs(host.ownerId, () => twinTurn({ profile: A.profile, imprints: A.imprints }, guest.name, named(), i === 0))
+        : await twinTurn({ profile: B.profile, imprints: B.imprints }, host.pet.name, named(), false);
+      transcript.push({ who: hostTurn ? "host" : "guest", line: t.line, mood: t.mood });
+    }
+    return playReport({ name: host.pet.name, imprints: A.imprints }, { name: guest.name, imprints: B.imprints }, named());
+  });
   // only real cards count as evidence, each checked against its own pet
   report.reasons = report.reasons.map((r) => ({ ...r, cardIds: r.cardIds.filter((id) => (r.pet === "me" ? A.cards : B.cards).some((c) => c.id === id)) }));
 
@@ -77,6 +79,7 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ toke
     transcript: transcript.map((t) => ({ who: t.who === "guest" ? "me" : "them", line: t.line, mood: t.mood })),
     report: flip(report),
     at: now,
+    openWeights: open,
   };
   const forHost: Playdate = {
     id: newId("pd"),
@@ -85,6 +88,7 @@ export const POST = withUser(async (_req: Request, ctx: { params: Promise<{ toke
     transcript: transcript.map((t) => ({ who: t.who === "host" ? "me" : "them", line: t.line, mood: t.mood })),
     report,
     at: now,
+    openWeights: open,
   };
   await update((s) => {
     s.playdates ??= [];

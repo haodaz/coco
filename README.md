@@ -49,7 +49,7 @@ The evidence rule is enforced in code, not just in prompts: an answer can only c
 | **Muse Spark 1.3** | [`src/lib/meta.ts`](src/lib/meta.ts) | Identifies the animal from one photo; reads each photo into traces, a card name and a line in the pet's voice; reads the owner's words; answers as the pet with cited cards, a gap when it has none, and the action to open; writes the soul portrait; builds the memory graph |
 | **Muse Image 1.0** | `paintCard`, `paintLikeness`, [`src/lib/character.ts`](src/lib/character.ts) | A new painting for every card (nine styles), the AI's portrait of the pet at each clarity level, the 3D character, its moods and walk frames, the clean scene behind rare cards |
 | **SAM 3.1** | `petLayer`, `depthLayers` in `src/lib/meta.ts` | Cuts the pet, with what it wears and holds, out of each painting for card depth, and out of every character frame |
-| **Muse Spark Open** (open weights, on Baseten) | `sparkJson` in `src/lib/meta.ts` | Answers sitters and runs the twin-to-twin playdates (text-only features); either Spark takes over if the other fails |
+| **Muse Spark Open** (open weights, on Baseten) | `sparkJson` in `src/lib/meta.ts` | Answers sitters, runs the twin-to-twin playdates and builds the memory graph (the text-only features); the page says so when it did; either Spark takes over if the other fails |
 | **Muse Voice Transcribe 1.0** | `transcribe` in `src/lib/meta.ts` | Spoken questions to the pet and spoken stories about a card |
 
 Every live call's token use is logged (`data/usage.jsonl` locally, a `usage_log` table hosted) and shown on the admin page. [`modal/sam.py`](modal/sam.py) runs SAM 3 (open weights) on Modal as a self-hosted alternative for the cut-outs; it is tested but not wired in.

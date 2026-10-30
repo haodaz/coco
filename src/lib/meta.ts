@@ -58,10 +58,17 @@ const OPEN_BASE = "https://inference.baseten.co/v1";
 const OPEN_MODEL = "meta-models/muse-spark-open-1026";
 // the owner's own conversation, notes and the soul portrait stay on the hosted API (most polished answers);
 // the social features that run many turns (sitters, playdates) use the open model
-const OPEN_FEATURES = new Set(["ask-sitter", "playdate-turn", "playdate-report"]);
+const OPEN_FEATURES = new Set(["ask-sitter", "playdate-turn", "playdate-report", "memory-graph"]);
 const forced = new AsyncLocalStorage<Provider>();
 // for side-by-side checks: run a piece of work on one provider
 export const onProvider = <T>(p: Provider, fn: () => Promise<T>) => forced.run(p, fn);
+// which homes answered during a stretch of work, so a page can say when the open-weights model did
+const served = new AsyncLocalStorage<Set<Provider>>();
+export async function withProviders<T>(fn: () => Promise<T>): Promise<{ result: T; open: boolean }> {
+  const used = new Set<Provider>();
+  const result = await served.run(used, fn);
+  return { result, open: used.has("open") };
+}
 
 async function chat(provider: Provider, body: object) {
   const open = provider === "open";
@@ -95,9 +102,11 @@ async function sparkJson<T>(feature: string, system: string, prompt: string, ima
     if (forced.getStore() || (other === "open" && !OPEN_KEY)) throw e;
     console.warn(`[${feature}] ${p} failed, trying ${other}:`, (e as Error).message); // shows in the server logs
     j = await chat(other, body); // the other home answers instead
+    served.getStore()?.add(other);
     await logUsage(feature, other === "open" ? OPEN_MODEL : SPARK, Date.now() - t0, j.usage);
     return parseAnswer<T>(j, feature);
   }
+  served.getStore()?.add(p);
   await logUsage(feature, p === "open" ? OPEN_MODEL : SPARK, Date.now() - t0, j.usage);
   // the model thought too long and the answer was cut off: once more with a bigger budget
   if (j.choices?.[0]?.finish_reason === "length" && budget < 16000) return sparkJson<T>(feature, system, prompt, imageB64, name, schema, 16000, p);

@@ -26,7 +26,7 @@ export type Pet = {
   likeness?: { file: string; level: number; from: "profile" | "imprints"; at: string } | null;
   // what the AI knows about the pet as a small graph: the pet, related to things, beings and places, every link
   // resting on real cards; rebuilt when the cards change (basis = how many cards it was built from)
-  graph?: { edges: GraphEdge[]; at: string; basis: number } | null;
+  graph?: { edges: GraphEdge[]; at: string; basis: number; by?: "open" | "meta" } | null;
   createdAt: string;
 };
 
@@ -134,6 +134,7 @@ export type Playdate = {
   transcript: { who: "me" | "them"; line: string; mood: string }[];
   report: PlayReport;
   at: string;
+  openWeights?: boolean; // the twins talked on Muse Spark Open
 };
 export type PlayReport = {
   verdict: "good match" | "worth a try" | "not yet" | "not enough to tell";

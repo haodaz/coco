@@ -6,7 +6,7 @@ import { PageLoading } from "@/components/Loading";
 import { CocoLogo } from "@/components/Brand";
 
 type Info = { pet: { name: string; species: string; breed: string | null; sex: string | null }; label: string; topics: string[]; moods: Record<string, string[]>; cards: { id: string; name: string; line: string; art: string | null }[] };
-type Turn = { question: string; answer: string; mood: Mood; cards: { id: string; name: string; art: string | null }[]; basis: { cardId: string; how: string }[]; gap: { topic: string } | null };
+type Turn = { question: string; answer: string; mood: Mood; cards: { id: string; name: string; art: string | null }[]; basis: { cardId: string; how: string }[]; gap: { topic: string } | null; openWeights?: boolean };
 
 // For someone looking after the pet (no sign-in): its twin, limited to what the owner shared.
 export default function SitterPage({ params }: { params: Promise<{ token: string }> }) {
@@ -79,6 +79,7 @@ export default function SitterPage({ params }: { params: Promise<{ token: string
                   <div className="text-right"><span className="inline-block max-w-[85%] rounded-2xl rounded-br-md bg-[#ebe5fb] px-4 py-2 text-left text-[14.5px]">{t.question}</span></div>
                   <div className="mt-2 max-w-[92%] rounded-2xl rounded-bl-md border border-[var(--line)] bg-white px-4 py-3 text-[16px] leading-relaxed">
                     {t.answer}
+                    {t.openWeights && <div className="mt-2 text-[11px] text-[var(--ink3)]">Answered by Muse Spark Open · open weights</div>}
                     {t.cards.length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--line)] pt-2.5">
                         {t.cards.map((c, k) => (

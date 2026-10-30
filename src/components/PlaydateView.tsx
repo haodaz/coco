@@ -58,7 +58,7 @@ export default function PlaydateView({ p, petName, myFace, otherFace, cards = []
             <b>{tr("For a first meeting (general advice):")}</b> {p.report.firstMeeting.join(" ")}
           </div>
         )}
-        <p className="mt-3 text-[11.5px] text-[var(--ink3)]">{tr("Advice from the twins, not a promise. You decide in person.")}</p>
+        <p className="mt-3 text-[11.5px] text-[var(--ink3)]">{tr("Advice from the twins, not a promise. You decide in person.")}{p.openWeights ? ` · ${tr("The twins talked on Muse Spark Open (open weights).")}` : ""}</p>
       </div>
     </div>
   );

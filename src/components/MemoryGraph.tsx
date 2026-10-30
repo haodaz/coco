@@ -148,6 +148,7 @@ export default function MemoryGraph({ pet, state, openCard }: { pet: Pet; state:
         ) : (
           <p className="text-[13px] text-[var(--ink2)]">
             {t("Every link rests on real cards. Tap one to see them. Dashed: general knowledge I may use, never a memory.")}
+            {graph?.by === "open" && <span className="mt-1 block text-[11px] text-[var(--ink3)]">{t("Drawn by Muse Spark Open (open weights).")}</span>}
           </p>
         )}
       </div>

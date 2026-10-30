@@ -369,6 +369,8 @@ export const ZH: Record<string, string> = {
   "Unlock the soul portrait": "解锁灵魂肖像",
   "note from you": "条你的话",
   "Start a new streak today": "今天开始新的连续记录",
+  "The twins talked on Muse Spark Open (open weights).": "两个分身的对话由开源权重模型 Muse Spark Open 完成。",
+  "Drawn by Muse Spark Open (open weights).": "由开源权重模型 Muse Spark Open 整理。",
   "Bring {name} to life →": "让{name}活起来 →",
   "What I know, and where it comes from": "我知道什么，从哪里知道的",
   "How I am": "我的样子",

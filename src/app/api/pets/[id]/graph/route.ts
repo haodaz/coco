@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { petContext } from "@/lib/ask";
-import { LIVE, memoryGraph } from "@/lib/meta";
+import { LIVE, memoryGraph, withProviders } from "@/lib/meta";
 import { load, update } from "@/lib/store";
 import { withUser } from "@/lib/session";
 import type { GraphEdge } from "@/lib/types";
@@ -18,11 +18,11 @@ export const GET = withUser(async (_req: Request, ctx: { params: Promise<{ id: s
   if (pet.graph && pet.graph.basis === cards.length) return NextResponse.json({ graph: pet.graph });
   if (!LIVE || !imprints.length) return NextResponse.json({ graph: pet.graph ?? null });
   const real = new Set(cards.map((c) => c.id));
-  const raw = await memoryGraph(pet.name, imprints.map(({ id, seen, ownerSaid, traces }) => ({ id, seen, ownerSaid, traces })));
+  const { result: raw, open } = await withProviders(() => memoryGraph(pet.name, imprints.map(({ id, seen, ownerSaid, traces }) => ({ id, seen, ownerSaid, traces }))));
   const edges: GraphEdge[] = raw
     .map((e) => ({ ...e, relation: e.relation.trim().toLowerCase(), object: e.object.trim().toLowerCase(), cardIds: [...new Set(e.cardIds.filter((c) => real.has(c)))] }))
     .filter((e) => e.cardIds.length && e.object);
-  const graph = { edges, at: new Date().toISOString(), basis: cards.length };
+  const graph = { edges, at: new Date().toISOString(), basis: cards.length, by: open ? ("open" as const) : ("meta" as const) };
   await update((f) => {
     const p = f.pets.find((x) => x.id === id);
     if (p) p.graph = graph;
