@@ -35,6 +35,14 @@ export default function Cards() {
             />
             <Legend pet={pet} state={state} onChange={refresh} openCard={openCard} />
 
+            {/* until the Starter Kit is full it comes first: it is what a new owner is here to do */}
+            {!starterDone && (
+              <>
+                <Rule label={t("Getting started · Starter Kit")} />
+                <div id="starter" className="scroll-mt-20"><StarterPack pet={pet} state={state} onChange={refresh} openCard={openCard} /></div>
+              </>
+            )}
+
             <Rule label={t("Series · {a}/{b} complete", { a: complete, b: series.length })} />
             <p className="-mt-1 mb-4 text-[14px] text-[var(--ink2)]">
               {t("Series follow who {name} is: favourite things, food, games, friends, places, the seasons and the hours of a day. A card can count in more than one. Keep sharing moments and they fill up; the seasons take a whole year.", { name: pet.name })}
@@ -52,8 +60,12 @@ export default function Cards() {
             <Rule label={t("All my cards")} />
             <MyCards pet={pet} cards={memories} openCard={openCard} onChange={refresh} />
 
-            <Rule label={t(starterDone ? "Starter Kit · complete" : "Getting started · Starter Kit")} />
-            <div id="starter" className="scroll-mt-20"><StarterPack pet={pet} state={state} onChange={refresh} openCard={openCard} /></div>
+            {starterDone && (
+              <>
+                <Rule label={t("Starter Kit · complete")} />
+                <div id="starter" className="scroll-mt-20"><StarterPack pet={pet} state={state} onChange={refresh} openCard={openCard} /></div>
+              </>
+            )}
           </>
         );
       }}

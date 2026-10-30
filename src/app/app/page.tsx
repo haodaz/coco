@@ -57,15 +57,19 @@ export default function Home() {
                   <h1 className="serif mt-1 text-[38px] font-bold leading-[1.05] tracking-tight">{tr(greeting())}</h1>
                   <div className="serif mt-0.5 text-[16px] italic text-[var(--ink2)]">{tr("Your cocoverse with {name}", { name: pet.name })}</div>
                 </div>
-                {/* the pet stands on the card's floor and breaks out of its top edge */}
-                <div className="pointer-events-none absolute -bottom-[26px] -left-2 aspect-[768/1057] w-[310px] [&>*]:pointer-events-auto">
-                  {pet.character ? (
+                {/* the pet stands on the card's floor and breaks out of its top edge; before it has a character, its
+                    photo sits inside the card as a portrait, with a way to bring it to life */}
+                {pet.character ? (
+                  <div className="pointer-events-none absolute -bottom-[26px] -left-2 aspect-[768/1057] w-[310px] [&>*]:pointer-events-auto">
                     <HomePet moods={pet.character.moods} version={pet.character.at} eager={t.tasksLeft > 0} className="h-full w-full" />
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="h-full w-full rounded-2xl object-cover" />
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <Link href="/app/chat" className="absolute bottom-5 left-6 w-[214px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/api/photos/${pet.avatarPhotoId}`} alt="" className="aspect-[3/4] w-full rounded-[18px] object-cover shadow-[0_14px_30px_-16px_rgba(40,30,90,.5)]" />
+                    <span className="absolute inset-x-2 bottom-2 rounded-full bg-white/90 px-3 py-1.5 text-center text-[12px] font-semibold text-[var(--ink)] shadow-sm">{tr("Bring {name} to life →", { name: pet.name })}</span>
+                  </Link>
+                )}
                 <div className="my-auto min-w-0 pt-5 pb-1">
                   <div className="relative rounded-2xl rounded-bl-md bg-white/90 px-4 py-3 shadow-[0_8px_20px_-14px_rgba(40,30,90,.4)]">
                     <div className="serif text-[19px] italic leading-snug">“{line}”</div>

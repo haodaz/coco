@@ -804,7 +804,7 @@ export async function memoryGraph(name: string, imprints: { id: string; seen: st
     [
       `You turn one pet's memories into a small knowledge graph about ${name}. Each edge is ${name} — relation — object, resting on the memories (imprint ids) that show it.`,
       "group: self (how it is: a habit, a pose, a mood, how it looks), things (objects, toys, food, furniture), beings (people and other animals; call the owner \"you\"), places (rooms, spots, outdoor places, the car).",
-      "relation: a short present-tense verb phrase from the pet's side (sleeps on, plays with, waits for, sits beside, loves, is calm near). object: two to four plain words, lowercase, no names of people.",
+      "relation: a short present-tense verb phrase from the pet's side (sleeps on, plays with, waits for, sits beside, loves, is calm near). object: one to four plain words, lowercase, no names of people; for the owner the object is just \"you\" (never their clothes or body parts). In group self the object is the habit or pose itself (lying on its back, a belly rub), not a body part.",
       "Merge repeats: one edge per relation and object, with every imprint that shows it. owner: true when the edge rests on what the owner said ([owner] traces or ownerSaid).",
       "Only what the imprints show; never infer from the breed. 12 to 20 edges, the best-supported first; cover all four groups when the imprints allow. Edges stay in short plain English.",
     ].join("\n"),

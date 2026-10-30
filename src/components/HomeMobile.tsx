@@ -127,7 +127,7 @@ export default function HomeMobile({
             {threads.map((t) => (
               <Link key={t.id} href={`/app/chat?thread=${t.id}`} className="flex items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[14.5px] font-semibold">{t.title}</div>
+                  <div className="truncate text-[14.5px] font-semibold">{t.turns[t.turns.length - 1]?.question ?? t.title}</div>
                   <div className="truncate text-[13px] text-[var(--ink2)]">{t.turns[t.turns.length - 1]?.answer}</div>
                 </div>
                 <ChevronRight size={16} className="shrink-0 text-[var(--ink3)]" />
