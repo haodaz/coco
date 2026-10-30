@@ -1,6 +1,6 @@
 # cocoverse
 
-**A little universe for you and your pet.** Live at [cocoverse.app](https://www.cocoverse.app).
+**A little universe for you and your pet.** Live at [cocoverse.app](https://www.cocoverse.app) · [3-minute demo](https://youtu.be/m3XgR4j48NY).
 
 Your pet will never tell you who they are. So cocoverse builds your pet's AI twin the only honest way: from what they actually do. Every photo you share becomes a collectible card, a **Memory Print**; the twin grows only from those cards, answers in your pet's voice, names the cards each answer rests on, and says plainly when it has no memory of something. It never makes a memory up.
 

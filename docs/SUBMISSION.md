@@ -48,7 +48,11 @@ https://github.com/haodaz/coco
 
 ## 3-Minute Demo Video
 
-The unlisted YouTube link of `cocoverse_submission_v1.mp4` (2:57).
+```
+https://youtu.be/m3XgR4j48NY
+```
+
+(`cocoverse_submission_v1.mp4`, 2:57, unlisted; make it public once the submission is in.)
 
 ## Describe your use of Meta products to build the submitted project
 
