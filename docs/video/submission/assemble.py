@@ -25,6 +25,7 @@ BANNER = [0, 0, 2560, 1440]
 SECTIONS = [
     {"n": ["c1"], "lead": 0.6, "shots": [{"src": "banner", "v": [0.3, 5.6], "crop": BANNER}]},
     {"n": ["c2"], "shots": [{"card": "concept", "d": 13.0}]},
+    {"n": ["c3"], "shots": [{"card": "principle", "d": 12.0}]},
     {"n": ["h1"], "shots": [{"slide": "home", "d": 6.0}]},
     {"n": ["s1"], "shots": [{"src": "main", "v": [11.6, 16.0], "crop": SHARE}]},
     {"n": ["s2"], "shots": [{"src": "main", "v": [16.0, 22.5], "crop": SHARE}, {"src": "main", "v": [31.0, 34.0], "crop": SHARE}]},
@@ -34,6 +35,7 @@ SECTIONS = [
     {"n": ["a1"], "shots": [{"src": "chat", "v": [0.6, 3.4], "crop": FULL}, {"src": "chat", "v": [8.6, 14.0], "crop": CHAT}]},
     {"n": ["a2"], "shots": [{"src": "chat", "v": [24.4, 30.4], "crop": FULL}]},
     {"n": ["m1"], "shots": [{"slide": "clarity", "d": 4.4}, {"slide": "learned", "d": 4.4}]},
+    {"n": ["g1"], "shots": [{"slide": "graph", "d": 10.0}]},
     {"n": ["l1"], "shots": [{"slide": "rules", "d": 8.6}]},
     {"n": ["l2"], "shots": [{"src": "chat", "v": [33.0, 36.0], "crop": FULL}, {"src": "chat", "v": [44.4, 52.0], "crop": FULL}]},
     {"n": ["f1"], "shots": [{"src": "pd", "v": [19.0, 23.0], "crop": [560, 520, 1600, 900]}, {"src": "pd", "v": [27.0, 32.4], "crop": [864, 200, 2336, 1314]}]},

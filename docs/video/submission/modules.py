@@ -107,6 +107,9 @@ with sync_playwright() as p:
     time.sleep(3.0)
     panel = page.locator("main section.ws-card").filter(visible=True).first.bounding_box()
     shot(page, "clarity", {"x": panel["x"] - 20, "y": panel["y"] - 20, "width": panel["width"] + 40, "height": panel["height"] + 40})
+    page.wait_for_function("() => !document.body.innerText.includes('Drawing what I know')", timeout=180000)
+    time.sleep(1.5)
+    shot(page, "graph", page.evaluate(BETWEEN, ["What I know, and where it comes from", "Moves", 0]))
     shot(page, "learned", page.evaluate(BETWEEN, ["Moves", "How the picture sharpens", 0]))
     shot(page, "levels", page.evaluate(BETWEEN, ["How the picture sharpens", None, 420]))
 
