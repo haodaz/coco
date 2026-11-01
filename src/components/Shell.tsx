@@ -1,6 +1,6 @@
 "use client";
 
-import { BookHeart, Gift, HeartHandshake, House, Layers, Globe, LogOut, MapPin, Menu, MessageCircle, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
+import { BookHeart, Coffee, Gift, HeartHandshake, House, Layers, Globe, LogOut, MapPin, Menu, MessageCircle, X, Shield, Sparkles, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -207,6 +207,12 @@ function Workspace({ children }: { children: (ctx: Ctx) => ReactNode }) {
               <Sparkles size={14} />
               <span>{t(r.streak > 1 ? "{n} days in a row with a new memory" : "{n} day in a row with a new memory", { n: r.streak })}</span>
             </div>
+          )}
+          {process.env.NEXT_PUBLIC_KOFI_URL && (
+            <a href={process.env.NEXT_PUBLIC_KOFI_URL} target="_blank" rel="noreferrer" className="mb-2 flex items-center gap-2 rounded-xl px-3 py-2 text-[12.5px] font-semibold text-[var(--primary)] hover:bg-[rgba(35,32,27,.06)]">
+              <Coffee size={14} />
+              <span>{t("Support coco")}</span>
+            </a>
           )}
           <div className="flex items-center gap-2 px-1 text-[12.5px] text-[var(--ink2)]">
             <span className="min-w-0 flex-1 truncate">{state.email ?? t("Local mode")}</span>

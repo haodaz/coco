@@ -20,6 +20,7 @@ export const ZH: Record<string, string> = {
   "Local mode": "本地模式",
   Language: "语言",
   "Sign out": "退出登录",
+  "Support coco": "请 coco 吃点好的",
   "Practice mode: the AI answers are samples. No request goes to the Meta API until live mode is on.": "练习模式：AI 的回答是示例，打开正式模式前不会调用 Meta API。",
 
   // Home
