@@ -124,7 +124,9 @@ export type Thread = { id: string; petId: string; title: string; createdAt: stri
 
 // A link the owner hands out. "sitter": someone looking after the pet talks with its twin before and during the stay.
 // "playdate": another owner brings their pet, the two twins meet first. The owner chooses which kinds of moment it shares.
-export type Share = { token: string; kind: "sitter" | "playdate"; petId: string; topics: Pattern[]; label: string; createdAt: string; revokedAt?: string | null };
+// "card": one card shown to anyone with the link; "pet": the pet's universe (its character and best cards). Both
+// are read-only pages with no AI, made to be passed around; only paintings and the character, never a photo.
+export type Share = { token: string; kind: "sitter" | "playdate" | "card" | "pet"; petId: string; topics: Pattern[]; label: string; createdAt: string; revokedAt?: string | null; cardId?: string | null };
 
 // Two twins met (agent to agent) before their pets do; both owners keep the result.
 export type Playdate = {

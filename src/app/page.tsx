@@ -435,6 +435,11 @@ export default function Landing() {
 
       <footer className="py-16 text-center">
         <h2 className="text-[28px] font-bold tracking-tight">Every pet deserves a cocoverse.</h2>
+        {process.env.NEXT_PUBLIC_KOFI_URL && (
+          <p className="mt-3 text-[13.5px] text-[var(--sub)]">
+            Made by one person and a dog. <a href={process.env.NEXT_PUBLIC_KOFI_URL} target="_blank" rel="noreferrer" className="font-semibold text-[var(--primary)]">Support cocoverse on Ko-fi ☕</a>
+          </p>
+        )}
         <Link href="/app" className="mt-5 inline-block rounded-xl bg-[var(--primary)] px-5 py-3 text-[15px] font-semibold text-white">Start your cocoverse →</Link>
         <p className="mt-8 text-[12.5px] text-[var(--sub)]">Built for the Meta Global AI Developer Hackathon, 2026 · <a href="https://github.com/haodaz/coco" className="underline">github.com/haodaz/coco</a></p>
       </footer>

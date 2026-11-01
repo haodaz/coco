@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import HoloCard from "@/components/HoloCard";
 import NoteBox from "@/components/NoteBox";
+import ShareBox from "@/components/ShareBox";
 import { finishFor } from "@/lib/finish";
 import { SENSES } from "@/lib/memory";
 import { packFor } from "@/lib/species";
@@ -30,6 +31,9 @@ export function CardDetail({ card, state, pet, onClose, onChanged, compact = fal
         <div className={`mx-auto w-full ${compact ? "max-w-[260px]" : "max-w-[340px]"} ${live.kind === "legendary" ? "pt-10" : ""}`}>
           <HoloCard art={live.art ?? `/api/photos/${live.photoId}`} fg={live.fg} plate={live.plate} finish={finishFor(live)} name={live.name} line={live.line} stars={live.rarity} label={`${pet.name} · ${live.style}`} idle={false} />
           <div className="mt-3 text-center text-[12px] text-[var(--ink3)]"><span className="hidden md:inline">{tr("Move over the card to turn it in the light")}</span><span className="md:hidden">{tr("Drag across the card to turn it in the light")}</span></div>
+          {live.art && !live.sealed && (
+            <div className="mt-4 flex justify-center text-left"><ShareBox pet={pet} kind="card" cardId={live.id} label={tr("Share this card")} onMade={onChanged} /></div>
+          )}
         </div>
         <div className="min-w-0">
           <div className="flex items-start gap-3">

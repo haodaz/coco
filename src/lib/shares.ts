@@ -53,3 +53,18 @@ export function sharedFiles(o: Opened) {
   for (const c of sharedCards(o.state, o.pet, o.share)) for (const u of [c.art, c.fg]) if (u) files.add(u.replace("/api/art/", "").replace(/\?.*$/, ""));
   return files;
 }
+
+// The cards a public link shows: the one card, or the pet's best (the legend first, then starred, then rarest).
+export function publicCards(o: Opened): Card[] {
+  const mine = o.state.cards.filter((c) => c.petId === o.pet.id && !c.sealed && !c.versionOf && c.art);
+  if (o.share.kind === "card") return mine.filter((c) => c.id === o.share.cardId);
+  return [...mine].sort((a, b) => Number(b.kind === "legendary") - Number(a.kind === "legendary") || Number(!!b.starred) - Number(!!a.starred) || b.rarity - a.rarity || b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
+}
+
+// Files a public link may serve: those cards' paintings and layers, and the character's idle frame.
+export function publicFiles(o: Opened) {
+  const files = new Set<string>();
+  for (const f of o.pet.character?.moods.idle ?? []) files.add(f);
+  for (const c of publicCards(o)) for (const u of [c.art, c.fg, c.plate]) if (u) files.add(u.replace("/api/art/", "").replace(/\?.*$/, ""));
+  return files;
+}

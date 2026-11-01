@@ -4,6 +4,7 @@ import { Copy, ExternalLink, X } from "lucide-react";
 import { useState } from "react";
 import LinkMaker from "@/components/LinkMaker";
 import PlaydateView from "@/components/PlaydateView";
+import ShareBox from "@/components/ShareBox";
 import Shell, { PageHead, Rule } from "@/components/Shell";
 import { call } from "@/lib/api";
 import { SENSES } from "@/lib/memory";
@@ -34,6 +35,15 @@ export default function FriendsPage() {
               <LinkMaker kind="sitter" pet={pet} onMade={refresh} title={t("For a sitter")} blurb={t("A link to {name}'s twin for whoever looks after {name}: routines, favourite spots, how {name} reacts to things. No sign-in needed. Food amounts, medicine and house rules always go back to you.", { name: pet.name })} />
               <LinkMaker kind="playdate" pet={pet} onMade={refresh} title={t("Find a playmate")} blurb={t("Send an invite to another pet's owner. When they open it with their pet, the two twins talk first and leave you both an honest note on whether they'd get on.")} />
             </div>
+
+            <Rule label={t("Show them off")} />
+            <section className="ws-card flex flex-wrap items-center gap-4 p-5">
+              <div className="min-w-0 flex-1">
+                <div className="serif text-[22px] font-bold">{t("Share {name}'s universe", { name: pet.name })}</div>
+                <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--ink2)]">{t("A page anyone can open: {name}'s character and best cards, with a way in for them. Paintings only, never a photo. Any single card can be shared from the card itself.", { name: pet.name })}</p>
+              </div>
+              <ShareBox pet={pet} kind="pet" label={t("Share {name}'s universe", { name: pet.name })} onMade={refresh} />
+            </section>
 
             <Rule label={t("Your links")} />
             {shares.length ? (
@@ -68,15 +78,16 @@ export default function FriendsPage() {
 
 function LinkRow({ s, pet, state, onChange }: { s: Share; pet: Pet; state: State; onChange: () => void }) {
   const { t: tr } = useT();
-  const url = typeof window === "undefined" ? "" : `${location.origin}/${s.kind === "sitter" ? "s" : "p"}/${s.token}`;
+  const path = { sitter: "s", playdate: "p", card: "c", pet: "w" }[s.kind];
+  const url = typeof window === "undefined" ? "" : `${location.origin}/${path}/${s.token}`;
   const asked = (state.threads ?? []).filter((t) => t.via?.token === s.token).reduce((n, t) => n + t.turns.length, 0);
   const [copied, setCopied] = useState(false);
   return (
     <div className="ws-card flex flex-wrap items-center gap-3 px-4 py-3">
-      <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[.1em] ${s.kind === "sitter" ? "bg-[#e9f2e1] text-[#3f6b1f]" : "bg-[#efe6fb] text-[#5b3fb0]"}`}>{s.kind === "sitter" ? tr("Sitter") : tr("Playdate")}</span>
+      <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[.1em] ${s.kind === "sitter" ? "bg-[#e9f2e1] text-[#3f6b1f]" : s.kind === "playdate" ? "bg-[#efe6fb] text-[#5b3fb0]" : "bg-[#fff1e3] text-[#b4560f]"}`}>{s.kind === "sitter" ? tr("Sitter") : s.kind === "playdate" ? tr("Playdate") : s.kind === "card" ? tr("Card") : tr("Universe")}</span>
       <div className="min-w-0 flex-1">
         <div className="truncate text-[14px] font-semibold">{s.label}</div>
-        <div className="truncate text-[12px] text-[var(--ink3)]">{s.topics.map((t) => tIn(tr, SENSES[t], "kind of moment")).join(" · ")}{s.kind === "sitter" ? ` · ${tr(asked === 1 ? "{n} question asked" : "{n} questions asked", { n: asked })}` : ""}</div>
+        <div className="truncate text-[12px] text-[var(--ink3)]">{s.kind === "card" || s.kind === "pet" ? tr("Public page, paintings only") : s.topics.map((t) => tIn(tr, SENSES[t], "kind of moment")).join(" · ")}{s.kind === "sitter" ? ` · ${tr(asked === 1 ? "{n} question asked" : "{n} questions asked", { n: asked })}` : ""}</div>
       </div>
       <button onClick={async () => { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[13px] text-[var(--ink2)] hover:bg-[rgba(35,32,27,.05)]"><Copy size={14} />{copied ? tr("Copied") : tr("Copy link")}</button>
       <a href={url} target="_blank" rel="noreferrer" className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[13px] text-[var(--ink2)] hover:bg-[rgba(35,32,27,.05)]"><ExternalLink size={14} />{tr("Open")}</a>
