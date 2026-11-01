@@ -14,7 +14,7 @@ const out = [];
 for (const s of segs) {
   const f = `tts/${s.id}.wav`;
   if (!fs.existsSync(f)) {
-    const r = await fetch('https://api.openai.com/v1/audio/speech', { method: 'POST', headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gpt-4o-mini-tts', voice: VOICE, input: s.text, response_format: 'wav', speed: 0.95, instructions: 'A calm, warm narrator for a short product video about a pet app. Medium-slow pace, natural and plain, like telling a friend; not a broadcaster, no hype.' }) });
+    const r = await fetch('https://api.openai.com/v1/audio/speech', { method: 'POST', headers: { Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gpt-4o-mini-tts', voice: VOICE, input: s.text, response_format: 'wav', speed: 1.0, instructions: 'A calm, warm narrator for a short product video about a pet app. Medium-slow pace, natural and plain, like telling a friend; not a broadcaster, no hype.' }) });
     if (!r.ok) { console.log('fail', s.id, r.status, (await r.text()).slice(0, 200)); continue; }
     fs.writeFileSync(f, Buffer.from(await r.arrayBuffer()));
   }

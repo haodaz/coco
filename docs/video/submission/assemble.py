@@ -14,7 +14,7 @@ here = Path(__file__).parent
 out = here / "out"
 pd_out = here.parent / "playdate" / "out"
 FF = "/Users/aisandbox/Documents/companydata/node_modules/ffmpeg-static/ffmpeg"  # has libass for subtitles
-SRC = {"banner": out / "take_banner.mp4", "main": out / "take.mp4", "chat": out / "take_chat.mp4", "sitter": out / "take_sitter.mp4", "zh": out / "take_zh.mp4", "pd": pd_out / "take_web.mp4", "phone": pd_out / "take.mp4"}
+SRC = {"banner": out / "take_banner.mp4", "share": out / "take_share.mp4", "main": out / "take.mp4", "chat": out / "take_chat.mp4", "sitter": out / "take_sitter.mp4", "zh": out / "take_zh.mp4", "pd": pd_out / "take_web.mp4", "phone": pd_out / "take.mp4"}
 FULL = [0, 0, 3200, 1800]
 SHARE = [600, 700, 2600, 1462]
 REVEAL = [840, 100, 2000, 1125]
@@ -39,7 +39,8 @@ SECTIONS = [
     {"n": ["l1"], "shots": [{"slide": "rules", "d": 8.6}]},
     {"n": ["l2"], "shots": [{"src": "chat", "v": [33.0, 36.0], "crop": FULL}, {"src": "chat", "v": [44.4, 52.0], "crop": FULL}]},
     {"n": ["f1"], "shots": [{"src": "pd", "v": [19.0, 23.0], "crop": [560, 520, 1600, 900]}, {"src": "pd", "v": [27.0, 32.4], "crop": [864, 200, 2336, 1314]}]},
-    {"n": ["x1"], "shots": [{"phone": [11.4, 14.6]}, {"src": "zh", "v": [0.6, 3.6], "crop": FULL}, {"src": "sitter", "v": [14.0, 18.5], "crop": [400, 0, 2400, 1350]}]},
+    {"n": ["x1"], "shots": [{"phone": [11.4, 13.6]}, {"src": "zh", "v": [0.6, 3.0], "crop": FULL}]},
+    {"n": ["sh1"], "shots": [{"src": "share", "v": [0.8, 4.2], "crop": [640, 60, 1600, 900]}, {"slide": "sharecard", "d": 2.6}, {"slide": "shareworld", "d": 3.2}]},
     {"n": ["b1"], "shots": [{"card": "built", "d": 8.0}]},
     {"n": ["e1"], "shots": [{"card": "end", "d": 5.0}]},
 ]
