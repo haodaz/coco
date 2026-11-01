@@ -22,10 +22,10 @@ Build for Your World
 
 ## Most Viral Track: X post link
 
-The pinned post on X (the hero banner post):
+The pinned post on X ("This is Coco", the universe page post):
 
 ```
-https://x.com/vibedding/status/2115737987954676160
+https://x.com/vibedding/status/2116872055316770976
 ```
 
 ## Project Description
