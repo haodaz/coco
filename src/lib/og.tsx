@@ -6,7 +6,8 @@ import { openShare, publicCards } from "./shares";
 // The picture social apps show for a public link (and the one a reader can save): the card, or the pet and its
 // best cards, on the cocoverse sky. Built from the same files the link may serve, nothing else.
 
-const SIZE = { width: 1200, height: 630 };
+// cached at the edge for a day: social crawlers give up on slow images, and a link's picture rarely changes
+const SIZE = { width: 1200, height: 630, headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" } };
 const SKY = "linear-gradient(135deg, #e9e2ff 0%, #f6e4f3 55%, #fdf0e3 100%)";
 
 async function dataUrl(ownerId: string, file: string | null | undefined) {
