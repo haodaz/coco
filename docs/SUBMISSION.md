@@ -22,7 +22,11 @@ Build for Your World
 
 ## Most Viral Track: X post link
 
-The pinned post on X (the hero banner post). Paste its URL.
+The pinned post on X (the hero banner post):
+
+```
+https://x.com/vibedding/status/2115737987954676160
+```
 
 ## Project Description
 
