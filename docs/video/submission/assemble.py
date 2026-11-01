@@ -32,16 +32,16 @@ SECTIONS = [
     {"n": ["p1"], "shots": [{"src": "main", "v": [39.0, 42.4], "crop": FULL}, {"src": "main", "v": [42.6, 49.6], "crop": REVEAL}]},
     {"n": ["p2"], "shots": [{"src": "main", "v": [49.8, 52.95], "crop": REVEAL}, {"slide": "legend", "d": 3.6}]},
     {"n": ["k1"], "shots": [{"slide": "series", "d": 5.0}, {"slide": "moves", "d": 3.6}]},
-    {"n": ["a1"], "shots": [{"src": "chat", "v": [0.6, 3.4], "crop": FULL}, {"src": "chat", "v": [8.6, 14.0], "crop": CHAT}]},
+    {"n": ["a1"], "shots": [{"src": "chat", "v": [0.6, 3.4], "crop": FULL}, {"src": "chat", "v": [8.6, 12.6], "crop": CHAT}]},
     {"n": ["a2"], "shots": [{"src": "chat", "v": [24.4, 30.4], "crop": FULL}]},
     {"n": ["m1"], "shots": [{"slide": "clarity", "d": 4.4}, {"slide": "learned", "d": 4.4}]},
     {"n": ["g1"], "shots": [{"slide": "graph", "d": 10.0}]},
     {"n": ["l1"], "shots": [{"slide": "rules", "d": 8.6}]},
-    {"n": ["l2"], "shots": [{"src": "chat", "v": [33.0, 36.0], "crop": FULL}, {"src": "chat", "v": [44.4, 52.0], "crop": FULL}]},
+    {"n": ["l2"], "shots": [{"src": "chat", "v": [33.0, 36.0], "crop": FULL}, {"src": "chat", "v": [44.4, 51.4], "crop": FULL}]},
     {"n": ["f1"], "shots": [{"src": "pd", "v": [19.0, 23.0], "crop": [560, 520, 1600, 900]}, {"src": "pd", "v": [27.0, 32.4], "crop": [864, 200, 2336, 1314]}]},
     {"n": ["x1"], "shots": [{"phone": [11.4, 13.6]}, {"src": "zh", "v": [0.6, 3.0], "crop": FULL}]},
     {"n": ["sh1"], "shots": [{"src": "share", "v": [0.8, 4.2], "crop": [640, 60, 1600, 900]}, {"slide": "sharecard", "d": 2.6}, {"slide": "shareworld", "d": 3.2}]},
-    {"n": ["b1"], "shots": [{"card": "built", "d": 8.0}]},
+    {"n": ["b1"], "shots": [{"card": "built", "d": 6.5}]},
     {"n": ["e1"], "shots": [{"card": "end", "d": 5.0}]},
 ]
 lines = {s["id"]: s["text"] for s in json.loads((here / "narration.json").read_text())}
@@ -63,9 +63,9 @@ n_in = lambda: inputs.count("-i")  # noqa: E731
 parts, vf, cues, voice = [], [], [], []
 t = 0.0
 for si, sec in enumerate(SECTIONS):
-    lead = sec.get("lead", 0.25)
+    lead = sec.get("lead", 0.2)
     talk = sum(durs[n] for n in sec["n"]) + GAP * (len(sec["n"]) - 1)
-    extra = max(0.0, lead + talk + 0.45 - sum(length(sh) for sh in sec["shots"]))
+    extra = max(0.0, lead + talk + 0.35 - sum(length(sh) for sh in sec["shots"]))
     c = t + lead
     for n in sec["n"]:
         voice.append((n, c))
