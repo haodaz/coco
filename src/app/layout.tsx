@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.cocoverse.app"),
   title: "cocoverse — a little universe for you and your pet",
   description: "Every moment with your pet becomes a Memory Print kept in a card; your pet's AI grows only from them. A little universe for the two of you.",
 };
