@@ -43,7 +43,7 @@ const MODELS = [
 const NEXT = [
   { title: "Knowledge with a safety check", body: "Real rules (service animals, pet policies, hot cars) and today's weather, checked outside the model before your pet speaks up about a plan." },
   { title: "Care in your pet's own voice", body: "Reminders for any species, with dates taken only from your records. Never a vaccine, drug or dose recommended by the AI." },
-  { title: "Memories that are true for now", body: "Favourites change. Prints that carry a time span fade, and your pet asks you whether it still loves the gray toy." },
+  { title: "Memories that are true for now", body: "Favourites change. Prints that carry a time span will fade, and your pet will ask you whether it still loves the gray toy." },
   { title: "Moments from video", body: "SAM 3.1 follows a pet through a clip, so a short video can become a card." },
 ];
 

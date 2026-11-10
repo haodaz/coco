@@ -6,6 +6,8 @@ tags: ai, llm, design, showdev
 cover_image: https://www.cocoverse.app/landing/legend.jpg
 ---
 
+> **A black Labrador, a counting horse, four old ideas, and the rules I wrote so an AI would stop making things up about my dog.**
+
 My dog Coco, a black Labrador, likes to lie on the sofa by the window in the afternoon. I would love to know what she is thinking there. Is she guarding the house? Waiting for someone? Just warm?
 
 Any chatbot will tell me. Ask one "what is my dog thinking?" and you get a confident little paragraph: she feels safe, she is watching over her family, she loves you very much. It sounds lovely, and none of it rests on anything.
